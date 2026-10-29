@@ -14,3 +14,11 @@ This project supports both **Kilo Code** (`.kilo/`) and **opencode** (`.opencode
 ## Project Info
 
 All agents must read the [Project Info Instructions](.agent/project-info/instructions.md) at the beginning of each task. This ensures that the agent has a complete understanding of the project's context, architecture, and technical specifications.
+
+Core files:
+
+- [Project Brief](.agent/project-info/brief.md)
+- [Product](.agent/project-info/product.md)
+- [Context](.agent/project-info/context.md)
+- [Architecture](.agent/project-info/architecture.md)
+- [Tech](.agent/project-info/tech.md)

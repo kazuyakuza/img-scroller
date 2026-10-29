@@ -1,171 +1,68 @@
-# Base Project for AI Agent Driven Development
+# img-scroller
+*The repository name `img-scroller` is a provisional working name, used until a final product name is chosen; it is not the final product name.*
 
-This project serves as a foundational template for future AI-agent driven development. It is pre-configured with essential rules, workflows, and structures optimized for collaboration between human developers and AI agents (specifically Kilo Code and opencode).
+## Overview
 
-**Attention AI Agents:** Before making any changes, you **must** read and adhere to the guidelines outlined in [`AGENTS.md`](AGENTS.md). This file contains critical information about the project's workflow, rules, and architectural standards.
+`img-scroller` is a Windows desktop image viewer built in Rust. It recreates the behavior of the classic Windows "gallery"-era image viewer: open one image and navigate horizontally across the sibling images in the same folder, and vertically across the sibling folders under the same parent folder. Both axes are driven by arrow keys and by on-screen UI buttons. Opening any image — from Explorer, a file manager, or the in-app open dialog — immediately enables this navigation in its location, with no folder pre-registration or setup of any kind.
 
-## Table of Contents
+## Problem Statement
 
-- [Compatibility](#compatibility)
-- [Prerequisites](#prerequisites)
-- [About this Project](#about-this-project)
-- [Project Structure](#project-structure)
-- [The Critical Workflow](#the-critical-workflow)
-- [Agent Models](#agent-models)
-- [Getting Started (New Project Setup)](#getting-started-new-project-setup)
-- [How to Start a Task](#how-to-start-a-task)
-  - [Option 1: Using a TODO File (Recommended)](#option-1-using-a-todo-file-recommended)
-  - [Option 2: Direct Chat Request](#option-2-direct-chat-request)
-- [AI Agent Plans](#ai-agent-plans)
-- [Troubleshooting](#troubleshooting)
+Modern Windows image viewers lack the classic gallery-style scrolling behavior: after opening an image, the user cannot move to the next/previous image or jump to sibling folders with simple arrow keys in the intended way. Existing alternative viewers that attempt this behavior require the user to pre-register or pre-add the folder to the application before browsing — added friction.
 
-## Compatibility
+The consequence is that browsing a library of image folders (for example, a photo archive organized as `parent\folder1`, `parent\folder2`, ...) requires manual navigation or a file manager instead of direct in-viewer scrolling.
 
-This template is **used on a daily basis with the Kilo Code VSCode plugin**, always running on its latest version (Kilo Code tested version > **7.4.22**).
+Therefore, this project provides a viewer that treats any opened image as the entry point into its folder tree, with zero folder setup.
 
-Currently, the template is also **being tested with opencode**. For that purpose, opencode-specific settings were added to the project in [`.opencode/`](.opencode/), mainly the [`opencode.json`](.opencode/opencode.json) configuration file plus its own agent and command definitions. The rules are shared from `.kilo/rules/` — no duplication.
+## v1 Features
 
-The project is developed with an [**opencode Go**](https://opencode.ai/go?ref=ZHA0GMN860) subscription (see the list below). In addition to the opencode Go models, the agent setup has also been tested with other model providers, such as **Grok**, **Gemini**, and **custom models hosted on vast.ai**.
+The v1 scope is exactly the seven features below, as defined in the project brief ([.agent/project-info/brief.md](.agent/project-info/brief.md)); the brief holds the full detail for each one.
 
-This project should also work with:
+1. **Open Image with System-Registered Formats** — opens any image whose format is registered as a codec in the Windows system (e.g. jpg, png, bmp, gif, webp, and heic when a system codec is installed); the image opens in a regular resizable viewer window.
+2. **Horizontal Scroll (Sibling Images)** — left/right arrow keys and left/right UI buttons navigate to the previous/next sibling image in the same folder; the scope is strictly the current folder (not recursive) and the order is alphanumeric.
+3. **Vertical Scroll (Sibling Folders)** — up/down arrow keys and up/down UI buttons navigate to the previous/next sibling folder under the same parent folder; when moving to a sibling folder, the file matching the currently viewed image's name is preferred (same-filename rule), otherwise the target folder's first image is opened; the app also remembers the last viewed image per visited folder for the current session (RAM-only, destroyed on app close — no persistence to disk in v1).
+4. **Fullscreen Mode** — toggles fullscreen on/off via a keyboard shortcut and a UI control.
+5. **Zoom In/Out and Fit Modes** — zoom in/out via keyboard shortcut and UI controls, plus "fit width" and "fit height" modes.
+6. **Pan and Navigate at Image Edges While Zoomed** — when the zoomed image overflows the window, the arrow keys pan the image first, and navigation (images horizontally, folders vertically) triggers only when panning reaches the image's edge; when the image fits entirely, the arrows navigate directly.
+7. **Fast "Open with..." Menu** — a menu entry lists the programs the Windows system has registered for the currently viewed file's type, and selecting one opens the current file with it; the list is built from system registration data at runtime.
 
-- Kilo Code previous versions
-- **Kilo Code CLI** (command-line interface)
-- [**opencode Go**](https://opencode.ai/go?ref=ZHA0GMN860) — the premium opencode subscription this project is developed with
-- Any AI agent manager or similar tool that supports custom sub-agent definitions, rule files, and workflow commands via markdown-based configuration
+Additional scope notes:
 
-The project uses standard Markdown-based configuration (`.kilo/`, `.opencode/`, `.agent/`) and does not depend on any proprietary format, making it adaptable to other AI-driven development tools.
+- v1 sorting is alphanumeric for both folders and files; a future settings feature will let the user change it.
+- Features explicitly deferred from v1 (for example rotation, slideshow, image editing, printing, persistence of the last-viewed memory across sessions, and a sort-order settings UI) are listed in the brief's out-of-scope section ([.agent/project-info/brief.md](.agent/project-info/brief.md)).
 
-## Prerequisites
+## Technology Stack (Planned)
 
-The only hard requirement is **Git**. On top of it, you need an AI agent handler tool to drive the project — **Kilo Code** and **opencode** are the two tools this template is tested with, but any similar app should work:
+The choices below are confirmed decisions but not yet implemented — the project is greenfield, with no code.
 
-- **Git** — Required. Ensure your environment is configured for the workflow. See [`how-to-set-up-git.md`](docs/how-to-set-up-git.md).
-- **Kilo Code** or **opencode** — the tested AI agent tools (VSCode plugin/CLI for Kilo Code; CLI for opencode). See the [Compatibility](#compatibility) section for details.
-- **Any other AI agent handler app/software** — as long as it supports custom sub-agent definitions, rule files, and workflow commands via markdown-based configuration.
+| Component | Choice (planned) | Notes |
+| --- | --- | --- |
+| Language | Rust | Confirmed decision in the brief; not yet implemented. |
+| GUI | egui/eframe | Pure Rust, lightweight; suitable for zoom/pan/fullscreen/keyboard shortcuts. |
+| Image decoding | Windows Imaging Component (WIC) system codecs | The app accepts any image format registered in the system instead of bundling its own decoders. |
+| Target platform | Windows 10 and Windows 11 | Planned (not yet implemented). |
+| Target architectures | x64 and x86 builds | Planned (not yet implemented). |
 
-## About this Project
+- Formats are supported when a system codec exists; formats not registered in the system are not supported in v1 — the accepted constraint of relying on system codecs.
 
-The primary goal of this repository is to provide a clean, structured starting point for new projects with built-in "AI-Readiness."
+## Distribution (Planned)
 
-### Design Principles
+- Zip-style portable installer: the user picks a destination folder; the package unzips the application binary AND its config file into that destination.
+- The package includes a helper and/or guidance for registering the app as the default image viewer (file associations) in Windows.
+- The helper's implementation details (script vs. executable, exact mechanism) are deferred to implementation.
 
-- **Foundation**: A structured baseline for new repositories.
-- **AI-Readiness**: Integrated configurations (like `.kilo`, `.agent`, and `.kilocodeignore`) to enable immediate and effective AI agent participation.
-- **Standardization**: Established coding standards, workflows, and documentation practices.
-- **Project Info**: A persistent context and knowledge management system for agents.
+## Project Status
 
-## Project Structure
+This project is greenfield and in the planning phase: the intended v1 product is fully defined, but no application code exists yet (as of 2026-10-29) — there is no `Cargo.toml` and no source code. The full requirements, decisions, and scope boundaries live in the project brief: [.agent/project-info/brief.md](.agent/project-info/brief.md).
 
-Understanding the purpose of the configuration directories is key to effective development:
+## Build and Run (Not Yet Implemented)
 
-- [`.agent/`](.agent/): Stores project-specific agent context. Includes [`.agent/project-info/`](.agent/project-info/) for persistent project knowledge, the [`.agent/todos/`](.agent/todos/) directory for task tracking, and the [`project-structure.md`](.agent/project-structure.md) map. The core knowledge files (`brief.md`, `product.md`, `context.md`, `architecture.md`, `tech.md`) plus the behavior guide `instructions.md` live here; the project-specific ones are created during Project Info initialization (see below).
-- [`.kilo/`](.kilo/): The operational core of the Kilo Code AI integration. Contains custom [`.kilo/agents/`](.kilo/agents/) (Planner, Architector, Implementer, Code Reviewer, Code Simplifier, Docs Specialist, Frontend Specialist, etc.), global [`.kilo/rules/`](.kilo/rules/) (22 rule files), standardized [`.kilo/commands/`](.kilo/commands/) (workflows like the Critical Workflow), and the [`.kilo/plans/`](.kilo/plans/) directory where agents store detailed implementation plans.
-- [`.opencode/`](.opencode/): The operational core for **opencode** users. Contains [`.opencode/agents/`](.opencode/agents/) and [`.opencode/commands/`](.opencode/commands/) (the same agent/command definitions as `.kilo/`), configured via [`opencode.json`](.opencode/opencode.json). Rules are shared from `.kilo/rules/` — no duplication.
-- [`.ignore`](.ignore): The opencode equivalent of `.kilocodeignore` — the same patterns (lock files, build outputs, media, etc.). It is the block list for the [`opencode-ignore`](https://github.com/lgladysz/opencode-ignore) plugin (registered in [`.opencode/opencode.json`](.opencode/opencode.json)), which blocks `read`/`edit`/`write`/`glob`/`grep`/`list` on matching files, and is also honored natively by opencode's search tools. `.env` reads are denied by default by opencode.
-- [`.kilocodeignore`](.kilocodeignore): Controls which files are excluded from codebase indexing, skipping lock files, dependency directories, build outputs, and binary assets.
+This section is a placeholder: nothing is implemented yet and no build system exists, so there is nothing to build or run at the moment. Once the first implementation wave creates the Rust crate, a standard Cargo workflow will apply once `Cargo.toml` exists, and the steps will be documented here and in [.agent/project-info/tech.md](.agent/project-info/tech.md). No runnable commands are provided until then.
 
-## The Critical Workflow
+## Note for AI Agents
 
-The project follows a standardized process for task execution, ensuring systematic progress from analysis to deployment. Each step is handled by a dedicated sub-agent:
+- AI agents working on this project must read and adhere to [AGENTS.md](AGENTS.md) and follow the procedures defined in [.agent/WORKFLOWS.md](.agent/WORKFLOWS.md).
+- The source of truth for requirements and scope is [.agent/project-info/brief.md](.agent/project-info/brief.md); agents must read it before starting any task.
 
-```mermaid
-graph TD
-    Start((Start)) --> Origin{1. Task Origin}
-    Origin -- Chat --> CreateTodo[Create TODO file]
-    Origin -- TODO File --> GitSetup["2. Git Feature Branch Setup<br/><small>[Implementer]</small>"]
-    CreateTodo --> GitSetup
-    GitSetup --> VersionUpdate["3. Version Update<br/><small>[Implementer]</small>"]
-    VersionUpdate --> Execution[Task Execution Loop]
-    subgraph ExecutionProcess [4. Task Execution]
-        Execution --> FECheck1{Front-end task?}
-        FECheck1 -- Yes --> FESpec["4.1a Front-end Spec<br/><small>[Frontend Specialist]</small>"]
-        FECheck1 -- No --> ImplPlan
-        FESpec --> ImplPlan["4.1b Implementation Plan<br/><small>[Architector]</small>"]
-        ImplPlan --> Implementation["4.2 Implementation<br/><small>[Implementer]</small>"]
-        Implementation --> CodeReview["4.3 Code Review<br/><small>[Code Reviewer & Simplifier]</small>"]
-        CodeReview -- Fixes Needed --> Fixes["4.3-fix Apply Fixes<br/><small>[Implementer]</small>"]
-        Fixes -- Re-review --> CodeReview
-        CodeReview -- Approved --> Documentation["4.4 Documentation<br/><small>[Docs Specialist]</small>"]
-        Documentation --> FECheck2{Front-end task?}
-        FECheck2 -- Yes --> FEVerify["4.5a Front-end Verify<br/><small>[Frontend Specialist]</small>"]
-        FECheck2 -- No --> OverallCheck
-        FEVerify --> OverallCheck["4.5b Overall Adherence<br/><small>[Architector]</small>"]
-        OverallCheck --> TaskCompletion["4.6 Task Completion<br/><small>[Implementer]</small>"]
-    end
-    TaskCompletion -- More Items --> Execution
-    TaskCompletion -- All Items Done --> TodoCompletion["5. TODO File Completion<br/><small>[Implementer]</small>"]
-```
+## License
 
-For full details, see [`critical-workflow.md`](.kilo/commands/critical-workflow.md).
-
-## Agent Models
-
-The sub-agents in this project are **model-agnostic**: you can assign a different AI model to each agent in your tool's UI. Using different models per agent produces noticeably better results than running every role on a single model, because each agent can be matched to the strengths its task demands.
-
-A recommended starting point, balancing quality and cost:
-
-- **Reasoning-heavy roles** — [Planner](.kilo/agents/planner.md), [Architector](.kilo/agents/architector.md), [Code Reviewer](.kilo/agents/code-reviewer.md), [Frontend Specialist](.kilo/agents/frontend-specialist.md): use the strongest available model (e.g., a Claude Sonnet/Opus-class model) for analysis, planning, and quality judgment.
-- **Execution roles** — [Implementer](.kilo/agents/implementer.md), [Code Simplifier](.kilo/agents/code-simplifier.md), [Docs Specialist](.kilo/agents/docs-specialist.md): use a fast, capable model (e.g., a Claude Haiku-class model) for the well-defined steps coming from the plan.
-
-The workflow and sub-agent prompts are model-independent, so you can tune each agent's model freely to your preferences and budget.
-
-## Getting Started (New Project Setup)
-
-1. **Write the project brief** — Define the project's core requirements and scope in `.agent/project-info/brief.md`. AI agents rely on it for context across sessions; if it's not defined, agents may produce work that does not align with your goals.
-2. **Set up Git** — Configure Git for the workflow and store your credentials. See [`how-to-set-up-git.md`](docs/how-to-set-up-git.md).
-3. **Initialize project info** — Ask the planner agent to read the brief and initialize the project info, either by creating a TODO file as described in [Option 1: Using a TODO File (Recommended)](#option-1-using-a-todo-file-recommended), or by typing the request directly in the chat as described in [Option 2: Direct Chat Request](#option-2-direct-chat-request).
-
-4. **Work with the planner** — From now on, just ask the planner agent to work through TODO files, or include tasks directly in the chat. See [How to Start a Task](#how-to-start-a-task).
-
-> **Note on Project Info:** When cloning this template for a new project, the Project Info initialization workflow triggers automatically (it detects the `.agent/project-info/.initialized` marker file). The file `.agent/project-info/brief.md` defines the project's core requirements and scope — AI agents rely on it for context across sessions. To initialize, run `/critical-workflow` and ask to "initialize project info". See [`.kilo/commands/project-info-init.md`](.kilo/commands/project-info-init.md) for details. If the project brief is not defined, agents may produce work that does not align with your goals.
-
-## How to Start a Task
-
-To initiate work with an AI agent, use one of the following copy-paste friendly commands in the chat.
-
-> **Note:** The same chat templates below work in both Kilo Code and opencode. opencode loads the `/critical-workflow`, `/project-info-init`, and `/project-structure` commands from `.opencode/commands/`.
-
-### Option 1: Using a TODO File (Recommended)
-
-1. Create a new file named `YYYYMMDD-todo-X.md` inside a date-specific subdirectory under `.agent/todos/` (e.g., `.agent/todos/20260602/20260602-todo-1.md`).
-2. Populate it using one of the [recommended TODO file formats](docs/how-to-write-todo-files.md).
-3. Paste the following into the chat:
-
-```text
-full read @AGENTS.md & follow /critical-workflow
-do @/.agent/todos/<YYYYMMDD>/<YYYYMMDD>-todo-<number>.md
-```
-
-### Option 2: Direct Chat Request
-
-If you have a quick request, use this template:
-
-```text
-full read @AGENTS.md & follow /critical-workflow
-do [Your specific task or request here]
-```
-
-## AI Agent Plans
-
-The critical workflow requires the AI to generate detailed implementation plans for each task. The [Architector sub-agent](.kilo/agents/architector.md) handles analysis and planning (step 4.1b), while the [Implementer sub-agent](.kilo/agents/implementer.md) executes the plan (step 4.2). A [Code Reviewer](.kilo/agents/code-reviewer.md) and [Code Simplifier](.kilo/agents/code-simplifier.md) validate quality, a [Docs Specialist](.kilo/agents/docs-specialist.md) maintains documentation, and a [Frontend Specialist](.kilo/agents/frontend-specialist.md) produces front-end specs (4.1a) and verifies front-end implementations (4.5a) for front-end related tasks.
-
-The AI agent will ask for your approval before proceeding with plans. To skip approval prompts, include in the TODO file or chat request:
-
-```text
-"Don't request me to approve plans"
-```
-
-> **Note:** Agents generate many plan and/or report files (e.g., under `.kilo/plans/`) during the workflow. In addition to the TODO files, the amount of these "type" of files grows fast. You may delete, archive, or zip them at any time if they bother you.
-
-## Troubleshooting
-
-### MCP Tools (Bifrost, vscode-mcp-server)
-
-Some project files reference MCP tools such as `Bifrost_*` and `vscode-mcp-server_*` (e.g., in [`.kilo/rules/tool-selection-priority.md`](.kilo/rules/tool-selection-priority.md)). These are **MCP plugin types**: they are not bundled with this project — you must install and configure the corresponding MCP servers in **VSCode** for them to be available to the agents.
-
-This should not generate problems, because the mentioned rule is environment-adaptive: when those MCP tools are not exposed in the current environment, agents fall back to the built-in tools. However, if you do find issues caused by these declarations, you can simply edit or remove them in [`.kilo/rules/tool-selection-priority.md`](.kilo/rules/tool-selection-priority.md).
-
----
-
-*Note: This workflow is actively maintained and updated to improve stability and introduce new features.*
+No LICENSE file exists in this repository, and the project's license has not been determined yet. Until a license is added, treat the project as all-rights-implicitly-reserved by the author and do not assume redistribution rights.
