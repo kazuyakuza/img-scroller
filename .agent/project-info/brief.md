@@ -47,12 +47,14 @@ Therefore: a viewer is needed that treats any opened image as the entry point in
 
 - Up arrow key and an up UI button navigate to the previous sibling folder; down arrow key and a down UI button navigate to the next sibling folder.
 - Navigation is restricted to sibling folders under the SAME parent folder: viewing `parent\folder2\img1` and pressing up/down moves to an image in `parent\folder1` or `parent\folder3` — never to folders of `parent` (no grandparent-level jumping), and never recursively deeper.
-- Same-filename rule: when moving to a sibling folder, the app tries to show the image with the SAME filename as the currently viewed one; if that filename does not exist in the target folder, the app opens the target folder's FIRST image (per the alphanumeric sort order in `## Sorting Order`).
-- Last-viewed memory rule (per session): while navigating folders during one app session, the app remembers the last viewed image of each visited folder; revisiting a folder in the SAME session reopens that last viewed image, and this takes priority over the same-filename rule and the first-image rule when the folder was already visited in the session; the memory lives only in RAM for the current session and is destroyed when the application closes — there is NO persistence to disk in v1.
+- Target image priority: (a) if the target folder was already visited this session, the app reopens its session last-viewed image (RAM-only); (b) otherwise, the app ALWAYS opens the target folder's FIRST image in alphanumeric order (per `## Sorting Order`). No other fallback.
+- Last-viewed memory rule (per session): while navigating folders during one app session, the app remembers the last viewed image of each visited folder; revisiting a folder in the SAME session reopens that last viewed image (this is priority (a) above); the memory lives only in RAM for the current session and is destroyed when the application closes — there is NO persistence to disk in v1.
 
 ### Fullscreen Mode
 
-- Toggle fullscreen on/off.
+- Default fullscreen state at launch: OFF — the window opens normal or maximized at the user's own placement/size.
+- Fullscreen OFF: the UI controls are visible (UI layout details are deferred to a later definition by the user) and the image takes almost all of the central space.
+- Fullscreen ON: the window header and ALL UI controls are hidden; only the image is shown.
 - Both a keyboard shortcut and a UI control toggle it; exact bindings to be decided during implementation.
 
 ### Zoom In/Out and Fit Modes
@@ -76,7 +78,7 @@ Therefore: a viewer is needed that treats any opened image as the entry point in
 
 ## Sorting Order
 
-- v1 sorting: alphanumeric for BOTH folders and files. All navigation (horizontal image order, vertical folder order, "first image" fallback, last-viewed revisit) follows this single order.
+- v1 sorting: alphanumeric for BOTH folders and files. All navigation (horizontal image order, vertical folder order, "first image" rule, last-viewed revisit) follows this single order.
 - A future settings feature will let the user change the sort order; v1 ships with alphanumeric fixed and no setting UI.
 
 ## Distribution and Default App Registration
