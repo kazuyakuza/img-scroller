@@ -65,4 +65,8 @@ This section is a placeholder: nothing is implemented yet and no build system ex
 
 ## License
 
-No LICENSE file exists in this repository, and the project's license has not been determined yet. Until a license is added, treat the project as all-rights-implicitly-reserved by the author and do not assume redistribution rights.
+Images Scroller is released under the MIT License; the full text is in the [LICENSE](LICENSE) file, and its copyright notice embeds the GitHub project URL.
+
+- The app can be used 100% free of charge by anyone.
+- Forking the project, changing the code, and using a modified version are allowed.
+- Anyone sharing the app outside the GitHub **Releases** section of the GitHub project (https://github.com/kazuyakuza/img-scroller) must add a reference to that GitHub project (attribution).

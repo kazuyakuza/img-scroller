@@ -87,6 +87,7 @@ Therefore: a viewer is needed that treats any opened image as the entry point in
 - Installer flow: the user picks a destination folder; the package unzips the application binary AND its config file into that destination.
 - Default image viewer registration: the package includes a helper and/or guidance that helps the user register the app as the default image viewer (file associations) in Windows.
 - Implementation details of the helper (script vs. executable, exact mechanism) are deferred to implementation and are not decided in this brief.
+- License: MIT (the full text is in the repository root `LICENSE` file). Anyone can use the app 100% free; forks and modified versions are allowed; anyone sharing the app outside the future GitHub "Releases" section must add a reference to the GitHub project — the project URL is embedded in the LICENSE copyright notice.
 
 ## Technology Stack
 
