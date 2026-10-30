@@ -58,6 +58,8 @@ This project is greenfield and in the planning phase: the intended v1 product is
 
 This section is a placeholder: nothing is implemented yet and no build system exists, so there is nothing to build or run at the moment. Once the first implementation wave creates the Rust crate, a standard Cargo workflow will apply once `Cargo.toml` exists, and the steps will be documented here and in [.agent/project-info/tech.md](.agent/project-info/tech.md). No runnable commands are provided until then.
 
+One build decision is already recorded (2026-10-30): all cargo/build commands will run INSIDE a Linux container on the Alpine VM (accessed through the `alpine-vm` MCP) — the host machine needs no Rust or Cargo installed. The dedicated build documentation (dev-checks through the container and the Windows `.exe` cross-build) arrives with the first implementation wave: `docs/build.md` and `docs/build-windows.md` (both to be created in Wave 1).
+
 ## Note for AI Agents
 
 - AI agents working on this project must read and adhere to [AGENTS.md](AGENTS.md) and follow the procedures defined in [.agent/WORKFLOWS.md](.agent/WORKFLOWS.md).
