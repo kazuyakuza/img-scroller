@@ -4,7 +4,7 @@
 
 Project-info rules for AI agents (full rules: [instructions.md](instructions.md)):
 
-- **Automatic Read**: at the start of EVERY task, agents MUST automatically read this file to understand the current project state. The first response MUST open with `[Project Info: Active]` plus a confirmation phrase aligned to the current focus, e.g. "[Project Info: Active] I understand we're building `img-scroller` (provisional name). Currently working on <current focus>."
+- **Automatic Read**: at the start of EVERY task, agents MUST automatically read this file to understand the current project state. The first response MUST open with `[Project Info: Active]` plus a confirmation phrase aligned to the current focus, e.g. "[Project Info: Active] I understand we're building **Images Scroller** (repository directory name `img-scroller` unchanged). Currently working on <current focus>."
 - **Critical Closing Step**: before emitting the final completion signal or stopping execution, agents MUST update this file: recent changes, then current state, then immediate next steps.
 - **Context window overflow**: if the context window fills during an extended session, write the current session state into this file, then recommend the user start a fresh chat — the new session resumes from this file.
 - **On-demand reads**: `architecture.md`, `tech.md`, and `product.md` are read when a task directly impacts them.

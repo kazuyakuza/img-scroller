@@ -2,7 +2,7 @@
 
 ## Product Summary
 
-- Provisional working name: `img-scroller` — this is the repository name, used until a product name is chosen; it is **not** the final product name.
+- Product name: **Images Scroller** (final). The repository directory name `img-scroller` remains unchanged — it is the repository name only, not the app name.
 - Windows desktop application for viewing images, built in Rust.
 - Recreates the behavior of the classic Windows "gallery"-era image viewer: open one image and easily navigate between sibling **images** in the same folder and sibling **folders** under the same parent folder.
 - Status: greenfield — planning phase; **no application code exists yet** (as of 2026-10-29).
