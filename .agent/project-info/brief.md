@@ -98,6 +98,7 @@ These choices are confirmed decisions but not yet implemented (planned decisions
 - Image decoding: Windows Imaging Component (WIC) system codecs — the app accepts any image format registered in the system instead of bundling its own decoders.
 - Target platform: Windows 10 and Windows 11.
 - Target architectures: x64 and x86 builds.
+- Build environment: builds and checks run inside a Linux container on the Alpine VM via Docker (Docker exists only on the VM; the host needs no Rust/Cargo); the release Windows `.exe` is cross-compiled from that container (x86_64-pc-windows-gnu); Windows targets confirmed x64 AND x86 (x86 realized in Wave 7 packaging) — decision date 2026-10-30.
 
 ## Out of Scope for v1 (Deferred)
 

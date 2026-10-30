@@ -30,6 +30,21 @@ Planned stack for a greenfield project; **nothing is implemented yet** — no ap
 - Planned toolchain: Rust via the standard Rust toolchain installer (`rustup`) and `cargo`. Nothing is installed or verified yet; no toolchain requirements are recorded anywhere — this section expands during the first implementation wave.
 - Never install tools globally — in-project installs only (rule: [`.kilo/rules/never-global-installs.md`](../../.kilo/rules/never-global-installs.md)).
 
+## Build Environment (Container on the Alpine VM)
+
+Build-environment decision recorded 2026-10-30 (source: [`.agent/todos/20261030/20261030-todo-1.md`](../todos/20261030/20261030-todo-1.md) → "Build Environment Definition"; user decisions bound in the container-harness plan). Nothing below is implemented yet — all harness files land in Wave 1.
+
+- Container/VM model: ALL Rust/Cargo commands (builds, checks, tests) execute inside a Linux container on the Alpine VM. The host machine that runs the AI agents does NOT need Rust or Cargo installed — the Rust toolchain exists only inside the container image, so the toolchain notes in `## Development Environment and Setup (Placeholder)` above describe the toolchain shipped inside the container image, not a host install.
+- Project share: the project is shared on the VM at `/img-scroller`; the container working directory is `/img-scroller`.
+- Docker prerequisites: Docker with the Compose plugin is available ONLY on the VM — never on the host.
+- Access pattern for AI agents: the VM is reached through the `alpine-vm` MCP — call `vm_status` first, then run commands; the command's exit code is the authoritative success evidence; cargo stderr may be absent in the MCP captured output (an absent stderr is NOT a failure signal). If the VM or the `/img-scroller` share is unavailable, STOP the task and return a question to the caller/user.
+- Cargo invocations across all waves run through the container harness (`docker compose -f /img-scroller/docker-compose.yml …` usage is documented by the Wave-1 build docs — see below).
+- Base-image pin policy: the exact pinned official Rust base image is decided by Wave 1's architector step — the reference project (`kazuyakuza/rust-youtube-streamer`) pinned `rust:1.82`; this is cited as the reference's exemplar ONLY, and no version is adopted or recorded here.
+- Lock/artifact policy: `Cargo.lock` is tracked in git; every harness cargo invocation uses `--locked`; produced artifacts stay in the gitignored `dist/` (release `.exe`) and check logs in the gitignored `logs/`/`logs/checks/` — the repo root `.gitignore` already contains `dist/`, `logs/`, and `*.log` (Wave 1 adds `target/` defensively).
+- Validation stance: validation is container-only — agent-side Windows GUI/runtime execution is impossible from the Linux container; runtime/GUI validation is OPERATOR-RUN on the real Windows 10/11 machine.
+- Harness landing: all harness files (Dockerfile, `docker-compose.yml`, `scripts/dev-checks.sh`, `scripts/build-windows.sh`) and the build docs (`docs/build.md`, `docs/build-windows.md`) are created in Wave 1 (Task 1 of [`.agent/todos/20261029/20261029-todo-3.md`](../todos/20261029/20261029-todo-3.md)) — until then NO harness files exist.
+- Reference pattern attribution: the pattern is adapted from the `kazuyakuza/rust-youtube-streamer` project (README build sections, `docs/build.md`, `docs/build-windows.md`, Dockerfile, `docker-compose.yml`, scripts) — verified mutually consistent on 2026-10-30, with project-specific adaptations (NO FFmpeg; own volume/artifact/naming decisions deferred to Wave 1's architector; never inherited reference names).
+
 ## Build and Run (Placeholder)
 
 - No build system exists yet. Once `Cargo.toml` exists, the standard workflow will apply (planned): `cargo build` (debug), `cargo build --release` (release), `cargo run` (dev launch).

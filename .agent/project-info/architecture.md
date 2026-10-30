@@ -35,6 +35,15 @@ This is a logical decomposition derived from the v1 features; it lists responsib
 - **On disk**: an application **config file** shipped by the installer alongside the binary (brief distribution flow). Its contents/format are **not defined anywhere yet** — only its existence is recorded here; contents are an implementation decision.
 - No other persistent state in v1; explicitly no persistence of the last-viewed memory.
 
+## Build and Release Pipeline (Planned)
+
+Decision recorded 2026-10-30: all build/check activity runs inside a Linux container on the Alpine VM (details: [tech.md](tech.md) → `## Build Environment (Container on the Alpine VM)`); the pipeline exists only as a plan — no pipeline is implemented yet — and its files land in Wave 1.
+
+- Dev checks (planned): a `scripts/dev-checks.sh` harness script runs inside the container — in order `cargo fmt --check`, `cargo check --locked`, `cargo test --locked`, `cargo clippy --locked -- -D warnings` — emitting per-check PASS/FAIL lines and a final `ALL CHECKS PASSED` summary, with a UTC-timestamped log under the gitignored `logs/` (`logs/checks/`).
+- Windows release cross-build (planned): a `scripts/build-windows.sh` harness script runs `cargo build --release --locked --target x86_64-pc-windows-gnu` inside the container and copies the final `.exe` into the gitignored `dist/`; the x86 release matrix is realized in Wave 7 (consuming/extending this script and adding the i686 MinGW toolchain when the x86 target is added).
+- Validation stance: container-only — all agent-side build/check validation happens inside the container; Windows runtime/GUI validation is OPERATOR-RUN on the real Windows 10/11 machine (the Linux container cannot execute the Windows GUI application).
+- Not implemented: Dockerfile, `docker-compose.yml`, both scripts, and the build docs are created in Wave 1; until then no build system exists.
+
 ## Project Paths
 
 - All source code must live in `src/` (project structure rule; folder map: [`.agent/project-structure.md`](../project-structure.md)).
