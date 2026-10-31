@@ -1,0 +1,16 @@
+services:
+  rust:
+    image: img-scroller-rust:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /img-scroller
+    volumes:
+      - /img-scroller:/img-scroller
+      - cargo-target:/cargo-target
+    environment:
+      CARGO_TARGET_DIR: /cargo-target
+
+volumes:
+  cargo-target:
+    name: img-scroller-cargo-target

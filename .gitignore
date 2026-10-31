@@ -29,6 +29,7 @@ logs/
 # Build artifacts (generic)
 build/
 dist/
+target/
 
 # Tokens and secrets
 .git-credentials
