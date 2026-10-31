@@ -1,8 +1,10 @@
 //! Entry point of the Images Scroller viewer.
 
 mod app;
+mod app_display;
 mod image_loading;
 mod platform;
+mod scaling;
 
 use std::path::PathBuf;
 

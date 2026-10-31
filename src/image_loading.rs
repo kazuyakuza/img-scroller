@@ -8,7 +8,6 @@ use crate::platform;
 pub(crate) const UNSUPPORTED_FILE_MESSAGE: &str =
     "This file's format is not supported: no Windows image codec is registered for it.";
 
-#[allow(dead_code)]
 pub(crate) struct DecodedImage {
     pub width: u32,
     pub height: u32,

@@ -10,9 +10,9 @@ use windows::Win32::Foundation::{
     GENERIC_READ, HWND, RPC_E_CHANGED_MODE, S_FALSE, S_OK, WINCODEC_ERR_COMPONENTNOTFOUND,
 };
 use windows::Win32::Graphics::Imaging::{
-    CLSID_WICImagingFactory, GUID_WICPixelFormat32bppRGBA, IWICBitmapDecoder, IWICBitmapFrameDecode,
-    IWICFormatConverter, IWICImagingFactory, IWICPalette, WICBitmapDitherTypeNone,
-    WICBitmapPaletteTypeCustom, WICDecodeMetadataCacheOnDemand,
+    CLSID_WICImagingFactory, GUID_WICPixelFormat32bppRGBA, IWICBitmapDecoder,
+    IWICBitmapFrameDecode, IWICFormatConverter, IWICImagingFactory, IWICPalette,
+    WICBitmapDitherTypeNone, WICBitmapPaletteTypeCustom, WICDecodeMetadataCacheOnDemand,
 };
 use windows::Win32::System::Com::{
     CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx, CoTaskMemFree,

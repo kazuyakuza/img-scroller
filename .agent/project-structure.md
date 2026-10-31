@@ -3,8 +3,10 @@
 # Files in src/
 
 - app.rs - eframe application shell: viewer window options, open-flow state, top Open… button, bottom message bar, window-title constant
+- app_display.rs - central image display: texture lifecycle wrapper (one upload per decode), fit-scaled paint, pending-upload flag
 - image_loading.rs - open-image seam: load_image entry, DecodedImage payload shape, failure classification, unsupported-file message constant
 - main.rs - entry point: CLI image-path intake, starts the eframe native app
+- scaling.rs - pure fit-scaling math: largest uniform factor for the available area (no egui painting)
 
 # Folders in src/
 

@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use eframe::egui;
 
+use crate::app_display::CurrentImageDisplay;
 use crate::image_loading::{self, DecodedImage, ImageLoadFailure};
 use crate::platform;
 
@@ -11,13 +12,14 @@ use crate::platform;
 pub const APP_WINDOW_TITLE: &str = "Images Scroller";
 
 pub struct ImagesScrollerApp {
-    /// Path of the last successfully decoded image (read again from Task 4's display code).
+    /// Path of the last successfully decoded image (read again by Wave 2's navigation code).
     #[allow(dead_code)]
     opened_image_path: Option<PathBuf>,
-    /// Decoded pixels of the last successfully opened image (read again from Task 4's display code).
-    #[allow(dead_code)]
+    /// Decoded pixels of the last successfully opened image (read by the display surface).
     decoded_image: Option<DecodedImage>,
     message_text: Option<&'static str>,
+    /// Texture state of the central image display (spec §4 "small wrapper" clause).
+    current_display: CurrentImageDisplay,
 }
 
 impl ImagesScrollerApp {
@@ -30,6 +32,7 @@ impl ImagesScrollerApp {
             opened_image_path: None,
             decoded_image: None,
             message_text: None,
+            current_display: CurrentImageDisplay::initial(),
         }
     }
 
@@ -50,6 +53,7 @@ impl ImagesScrollerApp {
                 self.opened_image_path = Some(path);
                 self.decoded_image = Some(decoded_image);
                 self.message_text = None;
+                self.current_display.accept_decoded_image();
             }
             Err(_failure) => {
                 self.message_text = Some(image_loading::UNSUPPORTED_FILE_MESSAGE);
@@ -84,7 +88,11 @@ impl eframe::App for ImagesScrollerApp {
             });
         }
 
-        egui::CentralPanel::default().show(ui, |_ui| {});
+        egui::CentralPanel::default().show(ui, |panel_ui| {
+            if let Some(decoded_image) = self.decoded_image.as_ref() {
+                self.current_display.paint(panel_ui, decoded_image);
+            }
+        });
     }
 }
 
