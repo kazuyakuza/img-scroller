@@ -30,17 +30,17 @@ Additional scope notes:
 - v1 sorting is alphanumeric for both folders and files; a future settings feature will let the user change it.
 - Features explicitly deferred from v1 (for example rotation, slideshow, image editing, printing, persistence of the last-viewed memory across sessions, and a sort-order settings UI) are listed in the brief's out-of-scope section ([.agent/project-info/brief.md](.agent/project-info/brief.md)).
 
-## Technology Stack (Planned)
+## Technology Stack
 
-The choices below are confirmed decisions but not yet implemented — the project is greenfield, with no code.
+The choices below are confirmed and implemented for the Wave-1 open-image slice; the remaining v1 features (navigation, fullscreen, zoom, "Open with...") are still open — see [Project Status](#project-status) and [.agent/project-info/architecture.md](.agent/project-info/architecture.md).
 
-| Component | Choice (planned) | Notes |
+| Component | Choice | Notes |
 | --- | --- | --- |
-| Language | Rust | Confirmed decision in the brief; not yet implemented. |
-| GUI | egui/eframe | Pure Rust, lightweight; suitable for zoom/pan/fullscreen/keyboard shortcuts. |
-| Image decoding | Windows Imaging Component (WIC) system codecs | The app accepts any image format registered in the system instead of bundling its own decoders. |
-| Target platform | Windows 10 and Windows 11 | Planned (not yet implemented). |
-| Target architectures | x64 and x86 builds | Planned (not yet implemented). |
+| Language | Rust | Implemented: Cargo package `img-scroller` 0.1.0, edition 2024. |
+| GUI | egui/eframe | Implemented: `eframe` =0.37.0 (glow renderer); pure Rust, lightweight. |
+| Image decoding | Windows Imaging Component (WIC) system codecs | Implemented via the `windows` crate =0.62.2 (Windows-target-scoped); no bundled decoders. |
+| Target platform | Windows 10 and Windows 11 | Runtime/GUI validation is operator-run on a real Windows machine. |
+| Target architectures | x64 and x86 builds | x64 cross-build landed (Wave 1); x86 belongs to Wave 7. |
 
 - Formats are supported when a system codec exists; formats not registered in the system are not supported in v1 — the accepted constraint of relying on system codecs.
 
@@ -52,13 +52,28 @@ The choices below are confirmed decisions but not yet implemented — the projec
 
 ## Project Status
 
-This project is greenfield and in the planning phase: the intended v1 product is fully defined, but no application code exists yet (as of 2026-10-29) — there is no `Cargo.toml` and no source code. The full requirements, decisions, and scope boundaries live in the project brief: [.agent/project-info/brief.md](.agent/project-info/brief.md).
+Wave 1 landed (2026-10-31, branch `feat/wave-1-skeleton-open-image`): the Cargo project exists, and the viewer opens images via a CLI argument or the in-app open dialog, decodes them through the WIC system codecs, and displays them fit-scaled in the regular resizable window. Verification so far: container dev checks (`ALL CHECKS PASSED`), Windows x64 release cross-build (exit 0), import audit; running the `.exe` on Windows is operator-run. The remaining v1 features (horizontal/vertical navigation, fullscreen, zoom, "Open with...") are open. The full requirements, decisions, and scope boundaries live in the project brief: [.agent/project-info/brief.md](.agent/project-info/brief.md).
 
-## Build and Run (Not Yet Implemented)
+## Build and Run
 
-This section is a placeholder: nothing is implemented yet and no build system exists, so there is nothing to build or run at the moment. Once the first implementation wave creates the Rust crate, a standard Cargo workflow will apply once `Cargo.toml` exists, and the steps will be documented here and in [.agent/project-info/tech.md](.agent/project-info/tech.md). No runnable commands are provided until then.
+Images Scroller is a Windows desktop image viewer built in Rust with egui/eframe; image decoding uses the Windows Imaging Component (WIC) system codecs. All Rust/Cargo commands run inside a Linux Docker container on the Alpine VM — the host machine needs no Rust or Cargo installed.
 
-One build decision is already recorded (2026-10-30): all cargo/build commands will run INSIDE a Linux container on the Alpine VM (accessed through the `alpine-vm` MCP) — the host machine needs no Rust or Cargo installed. The dedicated build documentation (dev-checks through the container and the Windows `.exe` cross-build) arrives with the first implementation wave: `docs/build.md` and `docs/build-windows.md` (both to be created in Wave 1).
+v1 format constraint: the app opens any image whose format is registered as a codec in the Windows system (via WIC — e.g. jpg, png, bmp, gif, webp, and heic when a system codec is installed); formats not registered in the system are not supported in v1.
+
+### Container dev checks (no host Rust/Cargo)
+
+Build the container image once, then run the dev-check harness:
+
+    docker compose -f /img-scroller/docker-compose.yml build rust
+    docker compose -f /img-scroller/docker-compose.yml run --rm rust sh scripts/dev-checks.sh
+
+The harness runs `cargo fmt --check`, `cargo check --locked`, `cargo test --locked`, and `cargo clippy --locked -- -D warnings`, then prints `ALL CHECKS PASSED` (exit 0) or `N CHECK(S) FAILED` (exit 1). Full semantics — per-check fallback commands, the `FORCE_FAIL` fault-injection hook, the UTC log under `logs/checks/`, and the `alpine-vm` MCP usage notes — are documented in [docs/build.md](docs/build.md); this README does not duplicate them.
+
+### Windows x64 release cross-build
+
+    docker compose -f /img-scroller/docker-compose.yml run --rm rust sh scripts/build-windows.sh
+
+A successful run leaves the release executable at `dist/windows-x64/img-scroller.exe` (the `dist/` tree is gitignored). Running the produced `.exe` — GUI behavior and image-format handling — is validated by the operator on a real Windows 10/11 machine; the Linux container cannot run the Windows GUI. Typed failures, overwrite/rebuild behavior, toolchain notes, and the static-linking import audit are documented in [docs/build-windows.md](docs/build-windows.md).
 
 ## Note for AI Agents
 
