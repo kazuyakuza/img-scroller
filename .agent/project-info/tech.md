@@ -50,7 +50,7 @@ Implemented in `src/platform/windows.rs` via the windows-rs COM projection (`win
 
 - COM initialization: `CoInitializeEx(None, COINIT_APARTMENTTHREADED)`; `S_OK`, `S_FALSE`, and `RPC_E_CHANGED_MODE` all count as initialized.
 - Open dialog: `CoCreateInstance(&FileOpenDialog)` → `IFileOpenDialog` with options `FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST | FOS_FILEMUSTEXIST`; `Show` receives the owner HWND resolved from the eframe frame through `raw-window-handle` (Win32 handle); the result is read via `GetResult` → `IShellItem::GetDisplayName(SIGDN_FILESYSPATH)` and freed with `CoTaskMemFree`.
-- WIC decode chain: `CoCreateInstance(&CLSID_WICImagingFactory)` → `IWICImagingFactory::CreateDecoderFromFilename` (`GENERIC_READ`, `WICDecodeMetadataCacheOnDemand`) → `GetFrame(0)` → `GetSize` → `CreateFormatConverter` → `Initialize` to `GUID_WICPixelFormat32bppRGBA` (dither `WICBitmapDitherTypeNone`, palette `WICBitmapPaletteTypeCustom`) → `CopyPixels` into an RGBA8 byte buffer.
+- WIC decode chain: `CoCreateInstance(&CLSID_WICImagingFactory)` → `IWICImagingFactory::CreateDecoderFromFilename` (`GENERIC_READ`, `WICDecodeMetadataCacheOnDemand`) → `GetFrame(0)` → `GetSize` → `CreateFormatConverter` → `Initialize` to `GUID_WICPixelFormat32bppRGBA` (dither `WICBitmapDitherTypeNone`, palette `WICBitmapPaletteTypeCustom`) → `CopyPixels` read from the initialized converter (the conversion to straight RGBA materializes during this copy) into an RGBA8 byte buffer.
 - Failure classification: `WINCODEC_ERR_COMPONENTNOTFOUND` → `Unsupported`; every other error → `Unloadable`; both surface the single unsupported-file message (constant in `src/image_loading.rs`) in the window's bottom message bar.
 
 ## Development Environment and Setup

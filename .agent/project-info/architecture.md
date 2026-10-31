@@ -49,7 +49,7 @@ All source lives in `src/` (folder map: [`.agent/project-structure.md`](../proje
 ## Open-Image and Display Flow (Implemented)
 
 1. Launch: CLI argument present → `open_image(path)` runs before the first frame; absent → the user clicks "Open…" → native `IFileOpenDialog` (owner HWND via `raw-window-handle`).
-2. Decode: `platform::decode_image` → WIC factory → decoder from filename → frame → format-convert to 32bppRGBA → `CopyPixels` (mechanism detail: [tech.md](tech.md)).
+2. Decode: `platform::decode_image` → WIC factory → decoder from filename → frame → format converter initialized to 32bppRGBA → `CopyPixels` copies from the converter (mechanism detail: [tech.md](tech.md)).
 3. Success: state stores path + `DecodedImage`, clears the message, and flags a pending texture upload; the next frame's central-panel paint uploads exactly once and paints the image fit-scaled and centered (per-frame fit recomputation via `scaling::fitted_size`, so window resizes keep the display sane).
 4. Failure: `Unsupported`/`Unloadable` → the bottom message bar shows the unsupported-file message; a previously loaded image and the rest of the state stay untouched.
 
