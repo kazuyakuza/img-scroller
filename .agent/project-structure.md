@@ -2,10 +2,13 @@
 
 # Files in src/
 
-- app.rs - eframe application shell: viewer window options, app struct, window-title constant
-- main.rs - entry point: starts the eframe native app
+- app.rs - eframe application shell: viewer window options, open-flow state, top Open… button, bottom message bar, window-title constant
+- image_loading.rs - open-image seam: load_image entry, DecodedImage payload shape, failure classification, unsupported-file message constant
+- main.rs - entry point: CLI image-path intake, starts the eframe native app
 
-(no folders in src/)
+# Folders in src/
+
+- platform/ - OS-bound facade for the native open dialog and WIC decode: mod.rs (facade re-exports), windows.rs (Windows implementation), stub.rs (non-Windows fallback)
 
 # Other folders
 
