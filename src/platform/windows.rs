@@ -131,7 +131,7 @@ unsafe fn decoded_image(
             .map_err(classify_failure)?;
         let mut pixels = vec![0u8; byte_length];
         let row_stride = width.checked_mul(4).ok_or(ImageLoadFailure::Unloadable)?;
-        frame
+        converter
             .CopyPixels(std::ptr::null(), row_stride, &mut pixels)
             .map_err(classify_failure)?;
         Ok(DecodedImage {
