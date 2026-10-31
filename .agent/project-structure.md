@@ -1,8 +1,11 @@
 # Project Structure
 
-# Folders in src/
+# Files in src/
 
-# (no folders yet)
+- app.rs - eframe application shell: viewer window options, app struct, window-title constant
+- main.rs - entry point: starts the eframe native app
+
+(no folders in src/)
 
 # Other folders
 
