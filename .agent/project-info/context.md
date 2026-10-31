@@ -12,7 +12,15 @@ Project-info rules for AI agents (full rules: [instructions.md](instructions.md)
 
 ## Current Work Focus
 
-Dated 2026-10-30. The **container-build-harness planning update** (TODO [`.agent/todos/20261030/20261030-todo-1.md`](../todos/20261030/20261030-todo-1.md), completed on `feat/container-build-harness`; renamed `-DONE` at workflow Step 5; global plan [`.kilo/plans/20261030-container-build-harness.md`](../../.kilo/plans/20261030-container-build-harness.md), both tasks `[DONE]`) is **complete**: all 7 wave TODO files and the project docs now encode the Alpine-VM container build environment. Still NO application code (planning-only session).
+Dated 2026-10-30. The **frontend-specialist agent-definition realignment** (TODO [`.agent/todos/20261030/20261030-todo-2.md`](../todos/20261030/20261030-todo-2.md), one-task mini-plan [`.kilo/plans/20261030-frontend-specialist-realignment.md`](../../.kilo/plans/20261030-frontend-specialist-realignment.md)) is **confirmed and committed on `main`**: the agent definition is now scoped to egui/eframe immediate-mode desktop GUI in Rust in BOTH copies (`.opencode/agents/frontend-specialist.md` and `.kilo/agents/frontend-specialist.md`; frontmatter untouched; identical body edits; min plan approved, changes user-confirmed, committed, TODO renamed `-DONE`).
+
+**SESSION PAUSED — user restarts opencode to load the new definition (config is not hot-reloaded).** The Wave-1 implementation ([`.agent/todos/20261029/20261029-todo-3.md`](../todos/20261029/20261029-todo-3.md)) was NOT started in this session (global plan approved; per-task plans auto-approved; NO 4.x cycle executed yet, NO feature branch created yet). Wave-1 continues in a NEW chat session.
+
+Wave-1 session state snapshot (for the next session's Planner):
+
+- Approved global plan: [`.kilo/plans/20261030-wave1-skeleton-open-image.md`](../../.kilo/plans/20261030-wave1-skeleton-open-image.md) — still in force.
+- Front-end marking decision (user-updated): **Tasks 2, 3, 4 ARE front-end related** once the realigned definition is active → 4.1a (frontend-specialist, egui/eframe spec) + 4.5a (frontend-specialist, static verification; agent runs NO cargo/docker) + 4.1b/4.5b (architector) for those tasks. Task 1 (harness) and Task 5/6 non-front-end.
+- Workflow start point in the next session: Step 2 (feature branch `feat/wave-1-skeleton-open-image` from `main`) → Step 3 N/A → Task 1 4.1b cycle onward. Git state at pause: on `main`, definition-alignment commit landed; working tree clean; nothing pushed beyond previous `origin` state.
 
 ## Recent Changes
 
@@ -30,5 +38,5 @@ Dated 2026-10-30. The **container-build-harness planning update** (TODO [`.agent
 
 ## Immediate Next Steps
 
-1. Step 5 wrap-up (this session): commit this context-log update, rename the build-harness TODO with the `-DONE` suffix, merge `feat/container-build-harness` into `main`, delete the branch, push `main` to `origin` only.
-2. **Implementation starts** in a NEW session: process [`.agent/todos/20261029/20261029-todo-3.md`](../todos/20261029/20261029-todo-3.md) (Wave 1 — container harness + project skeleton + open image) via the Critical Workflow. One wave file per session, in order (todo-3 → todo-9; MVP checkpoint at the end of Wave 7).
+1. **User restarts opencode** to load the realigned frontend-specialist definition (config-only change; takes effect on startup).
+2. **Next session (NEW chat)**: process [`.agent/todos/20261029/20261029-todo-3.md`](../todos/20261029/20261029-todo-3.md) (Wave 1 — container harness + project skeleton + open image) via the Critical Workflow using the approved global plan `.kilo/plans/20261030-wave1-skeleton-open-image.md` (Tasks 2–4 front-end related; start at Step 2 branch creation). One wave file per session, in order (todo-3 → todo-9; MVP checkpoint at the end of Wave 7).
