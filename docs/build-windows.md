@@ -57,7 +57,9 @@ never copied from any reference project.
 
 Observed DLL import list:
 
-    PENDING — recorded during Wave 1 verification (first produced exe, audited with x86_64-w64-mingw32-objdump).
+    advapi32.dll, api-ms-win-core-path-l1-1-0.dll, api-ms-win-core-synch-l1-2-0.dll, api-ms-win-core-winrt-error-l1-1-0.dll, bcryptprimitives.dll, combase.dll, dwmapi.dll, gdi32.dll, imm32.dll, kernel32.dll, msvcrt.dll, ntdll.dll, ole32.dll, oleaut32.dll, opengl32.dll, rpcrt4.dll, shell32.dll, shlwapi.dll, user32.dll, userenv.dll, uxtheme.dll, ws2_32.dll
+
+    Audited 2026-10-31 with `x86_64-w64-mingw32-objdump -x dist/windows-x64/img-scroller.exe` inside the container (Wave 1 verification; first produced exe). List is deduplicated and lowercase.
 
 ## Validation stance
 

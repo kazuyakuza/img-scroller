@@ -12,7 +12,7 @@ readonly RELEASE_SUBDIR="release"
 readonly BINARY_NAME="img-scroller.exe"
 readonly DIST_DIR="dist/windows-x64"
 readonly PART_FILE_SUFFIX=".part"
-readonly OBSERVED_DLL_IMPORT_LIST="PENDING — filled once in Wave 1 verification (Task 5) from the x86_64-w64-mingw32-objdump import audit of our produced exe"
+readonly OBSERVED_DLL_IMPORT_LIST="advapi32.dll, api-ms-win-core-path-l1-1-0.dll, api-ms-win-core-synch-l1-2-0.dll, api-ms-win-core-winrt-error-l1-1-0.dll, bcryptprimitives.dll, combase.dll, dwmapi.dll, gdi32.dll, imm32.dll, kernel32.dll, msvcrt.dll, ntdll.dll, ole32.dll, oleaut32.dll, opengl32.dll, rpcrt4.dll, shell32.dll, shlwapi.dll, user32.dll, userenv.dll, uxtheme.dll, ws2_32.dll"
 
 report_failure() {
   printf 'build-windows: error: %s\n' "$1" >&2
