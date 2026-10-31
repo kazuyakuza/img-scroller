@@ -15,7 +15,7 @@ readonly PART_FILE_SUFFIX=".part"
 readonly OBSERVED_DLL_IMPORT_LIST="PENDING — filled once in Wave 1 verification (Task 5) from the x86_64-w64-mingw32-objdump import audit of our produced exe"
 
 report_failure() {
-  printf 'build-windows: error: %s\n' "$1"
+  printf 'build-windows: error: %s\n' "$1" >&2
   exit 1
 }
 
@@ -64,7 +64,7 @@ main() {
   source_artifact_path=$(compose_source_artifact_path)
   cargo build --release --locked --target "$WINDOWS_TARGET" || report_failure "cargo build failed (exit $?); check Cargo.toml / Cargo.lock consistency via the dev checks"
   assert_source_artifact_present "$source_artifact_path"
-  final_artifact_path=$(install_artifact_into_dist "$source_artifact_path")
+  final_artifact_path=$(install_artifact_into_dist "$source_artifact_path") || exit 1
   printf 'build-windows: OK\n'
   printf 'build-windows: artifact: %s\n' "$final_artifact_path"
   printf 'build-windows: GNU runtime static-linking evidence — OBSERVED DLL import list: %s\n' "$OBSERVED_DLL_IMPORT_LIST"
