@@ -2,7 +2,7 @@
 
 ## Status
 
-Landed for Wave 1 (branch `feat/wave-1-skeleton-open-image`, 2026-10-31): the Cargo project, the egui/eframe window shell, the open-image flow (CLI argument + native open dialog + WIC decode), and the fit-scaled image display are implemented and verified through the container harness (dev checks: `ALL CHECKS PASSED`; Windows x64 release cross-build: exit 0 → `dist/windows-x64/img-scroller.exe`). The remaining v1 features (navigation, fullscreen, zoom, "Open with...", packaging) are planned. Facts are sourced from [brief.md](brief.md) (source of truth), the landed code, and the build guides ([docs/build.md](../../docs/build.md), [docs/build-windows.md](../../docs/build-windows.md)).
+Landed for Wave 1 (branch `feat/wave-1-skeleton-open-image`, 2026-10-31): the Cargo project, the egui/eframe window shell, the open-image flow (CLI argument + native open dialog + WIC decode), and the fit-scaled image display. Landed for Wave 2 (branch `feat/wave-2-horizontal-scroll`, version 0.2.0, 2026-11-01): horizontal sibling-image navigation — the current-folder listing module, Left/Right keyboard navigation, and the on-screen corner navigation rails (mechanism: `## Horizontal Navigation Mechanism (Implemented, Wave 2)` below). Both waves are verified through the container harness (dev checks: `ALL CHECKS PASSED`, 26 unit tests; Windows x64 release cross-build: exit 0 → `dist/windows-x64/img-scroller.exe`). The remaining v1 features (vertical navigation, fullscreen, zoom, "Open with...", packaging) are planned. Facts are sourced from [brief.md](brief.md) (source of truth), the landed code, and the build guides ([docs/build.md](../../docs/build.md), [docs/build-windows.md](../../docs/build-windows.md)).
 
 ## Contents
 
@@ -10,20 +10,21 @@ Landed for Wave 1 (branch `feat/wave-1-skeleton-open-image`, 2026-10-31): the Ca
 2. [Image Format Support](#image-format-support)
 3. [Dependencies (Landed, Wave 1)](#dependencies-landed-wave-1)
 4. [WIC Decode and Open-Dialog Mechanism (Implemented)](#wic-decode-and-open-dialog-mechanism-implemented)
-5. [Development Environment and Setup](#development-environment-and-setup)
-6. [Build Environment (Container on the Alpine VM)](#build-environment-container-on-the-alpine-vm)
-7. [Build and Run](#build-and-run)
-8. [Testing](#testing)
-9. [Technical Constraints](#technical-constraints)
-10. [Distribution and Packaging (Planned)](#distribution-and-packaging-planned)
-11. [Tool Usage Patterns for AI Agents](#tool-usage-patterns-for-ai-agents)
-12. [References](#references)
+5. [Horizontal Navigation Mechanism (Implemented, Wave 2)](#horizontal-navigation-mechanism-implemented-wave-2)
+6. [Development Environment and Setup](#development-environment-and-setup)
+7. [Build Environment (Container on the Alpine VM)](#build-environment-container-on-the-alpine-vm)
+8. [Build and Run](#build-and-run)
+9. [Testing](#testing)
+10. [Technical Constraints](#technical-constraints)
+11. [Distribution and Packaging (Planned)](#distribution-and-packaging-planned)
+12. [Tool Usage Patterns for AI Agents](#tool-usage-patterns-for-ai-agents)
+13. [References](#references)
 
 ## Technology Stack
 
 | Component | Choice | Rationale/notes |
 | --- | --- | --- |
-| Language | Rust, edition 2024 | Cargo package `img-scroller` version 0.1.0 (single binary; tracked `Cargo.lock`). |
+| Language | Rust, edition 2024 | Cargo package `img-scroller` version 0.2.0 (single binary; tracked `Cargo.lock`). |
 | GUI | egui/eframe | `eframe` =0.37.0 (`default-features = false`), glow renderer feature; pure Rust, lightweight. |
 | Image decoding | Windows Imaging Component (WIC) system codecs | Accessed through the `windows` crate =0.62.2 (mechanism: `## WIC Decode and Open-Dialog Mechanism (Implemented)`); no bundled decoders. |
 | Target platform | Windows 10 and Windows 11 | Window shell + open flow implemented; runtime/GUI validation is operator-run. |
@@ -51,7 +52,20 @@ Implemented in `src/platform/windows.rs` via the windows-rs COM projection (`win
 - COM initialization: `CoInitializeEx(None, COINIT_APARTMENTTHREADED)`; `S_OK`, `S_FALSE`, and `RPC_E_CHANGED_MODE` all count as initialized.
 - Open dialog: `CoCreateInstance(&FileOpenDialog)` → `IFileOpenDialog` with options `FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST | FOS_FILEMUSTEXIST`; `Show` receives the owner HWND resolved from the eframe frame through `raw-window-handle` (Win32 handle); the result is read via `GetResult` → `IShellItem::GetDisplayName(SIGDN_FILESYSPATH)` and freed with `CoTaskMemFree`.
 - WIC decode chain: `CoCreateInstance(&CLSID_WICImagingFactory)` → `IWICImagingFactory::CreateDecoderFromFilename` (`GENERIC_READ`, `WICDecodeMetadataCacheOnDemand`) → `GetFrame(0)` → `GetSize` → `CreateFormatConverter` → `Initialize` to `GUID_WICPixelFormat32bppRGBA` (dither `WICBitmapDitherTypeNone`, palette `WICBitmapPaletteTypeCustom`) → `CopyPixels` read from the initialized converter (the conversion to straight RGBA materializes during this copy) into an RGBA8 byte buffer.
-- Failure classification: `WINCODEC_ERR_COMPONENTNOTFOUND` → `Unsupported`; every other error → `Unloadable`; both surface the single unsupported-file message (constant in `src/image_loading.rs`) in the window's bottom message bar.
+- Failure classification: `WINCODEC_ERR_COMPONENTNOTFOUND` → `Unsupported`; every other error → `Unloadable`; both surface the single unsupported-file message (constant in `src/image_loading.rs`) in the bottom navigation rail's message area (the rails render only while an image is open — mechanism: `## Horizontal Navigation Mechanism (Implemented, Wave 2)`).
+
+## Horizontal Navigation Mechanism (Implemented, Wave 2)
+
+Implemented in `src/folder_listing.rs` (pure listing logic, container-testable) plus `src/app.rs` / `src/app/rails.rs` (intake and on-screen controls):
+
+- Listing scope: the sibling images of the opened image's folder ONLY — one non-recursive directory read of the opened image's parent; directories are never listed (nested subfolders are not entered).
+- Image filter: a fixed 17-extension whitelist (`avif`, `bmp`, `dib`, `gif`, `heic`, `heif`, `ico`, `jfif`, `jpe`, `jpeg`, `jpg`, `jxr`, `png`, `tif`, `tiff`, `webp`, `wdp`), matched ignoring ASCII case. WIC codec availability is NOT probed — an extension-listed file the system cannot decode fails at open time through the normal failure path.
+- Order (v1 fixed alphanumeric, no settings UI): file names compare by lowercase form first; names equal ignoring case tie-break by exact characters (e.g. `alpha.gif` < `ALPHA.jpg` < `Alpha.jpg` < `alpha.jpg`).
+- Listing state: `ImagesScrollerApp.current_folder_listing` (RAM-only) — rebuilt from the new folder on EVERY successful open; `None` until the first open succeeds.
+- Keyboard: `ArrowLeft` → previous, `ArrowRight` → next, evaluated per frame; the arrows navigate DIRECTLY — pan-then-navigate interplay is Wave-5 scope, not implemented here.
+- Edge behavior: at the list's first/last position navigation stays silently (no wrap, no message); every "nothing to navigate to" case (no image open, no listing, unresolvable index, list beginning/end) resolves to no neighbor.
+- Failure rule: opening a neighbor reuses the Wave-1 `open_image` seam — a failed decode keeps the currently displayed image and shows the unsupported-file message.
+- On-screen rails (user-approved layout K3, confirmed 2026-10-31): a right rail (40 pt) with ↑/↓ folder arrows — visible but DISABLED in Wave 2 (Wave 3 activates folder navigation) — and a bottom rail (40 pt) with ←/→ image arrows plus the message area (it replaced the Wave-1 message surface). A direction button is enabled exactly when the navigation seam resolves a neighbor. Both rails render ONLY while an image is open, so a failure message on the empty state is invisible by approved design.
 
 ## Development Environment and Setup
 
@@ -85,7 +99,7 @@ Build-environment decision recorded 2026-10-30 (source: [`.agent/todos/20261030/
 
 ## Testing
 
-- 15 unit tests, all container-runnable through `cargo test --locked` (dev-checks step 3): `src/app.rs` — 4 (window-title constant; failed CLI open keeps no path and shows the message; successful open stores path/payload and clears the message; failure after success keeps the previous image); `src/image_loading.rs` — 4 (message wording; per-failure message mapping; pixel-buffer sizing; empty/overflow rejection); `src/app_display.rs` — 2 (initial texture state; upload happens exactly once per decode); `src/scaling.rs` — 5 (fit vectors ×4; zero-dimension rejection).
+- 26 unit tests, all container-runnable through `cargo test --locked` (dev-checks step 3): `src/folder_listing/tests.rs` — 5 (case-insensitive sort with exact-name tie-break; folder-only enumeration incl. nested-subfolder exclusion; unlisted/missing index resolution; ±1 stepping with list-edge reports; empty/missing folder); `src/app/tests.rs` — 9 (window-title constant; failed CLI open keeps no path and shows the message; successful open stores path/payload and clears the message; failure after success keeps the previous image; empty-state navigation changes nothing; previous/next resolve in sort order; first/last position stays silent; failed neighbor open keeps the image + message; every successful open rebuilds the listing); `src/app/rails_tests.rs` — 1 (arrow-button enablement follows the navigation edges); `src/image_loading.rs` — 4 (message wording; per-failure message mapping; pixel-buffer sizing; empty/overflow rejection); `src/app_display.rs` — 2 (initial texture state; upload happens exactly once per decode); `src/scaling.rs` — 5 (fit vectors ×4; zero-dimension rejection).
 - Scope: pure logic only. OS-bound WIC/dialog code (`src/platform/windows.rs`) is untested by design — it cannot execute in the Linux container; the facade's non-Windows `stub.rs` (dialog → `None`, decode → `Unloadable`) keeps container builds/tests compiling and keeps the app-level failure transition testable.
 - Windows runtime/GUI behavior (native dialog, real decode, real display) is OPERATOR-RUN on a real Windows 10/11 machine — recorded as operator-pending, never agent-failed.
 

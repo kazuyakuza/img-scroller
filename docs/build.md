@@ -74,3 +74,7 @@ Windows GUI/runtime can never run there. Runtime/GUI validation of a produced `.
 
 `Cargo.lock` is tracked in git. Every cargo invocation in this harness uses `--locked`; dependency
 changes must land together with the committed `Cargo.lock`.
+
+## Shell-script line endings
+
+The harness scripts must reach the container with LF line endings: the repository pins `*.sh text eol=lf` in `.gitattributes`, so every checkout materializes them with LF. (Added after a CRLF Windows checkout made `sh` abort with `set: Illegal option -`; if a working tree regains CRLF endings, renormalize the two scripts before running the harness.)
