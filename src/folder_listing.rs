@@ -2,7 +2,7 @@
 //! one folder only -- non-recursive, whitelisted-extension-filtered, and
 //! sorted by the fixed v1 alphanumeric collation (folded name + exact tie-break).
 
-use std::cmp::Ordering;
+use crate::name_collation::compare_entry_names;
 use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -45,7 +45,7 @@ impl FolderListing {
             .filter_map(|dir_entry| listed_image_entry_path(dir_entry.ok()?))
             .collect();
         image_paths.sort_by(|left_path, right_path| {
-            compare_image_file_names(&left_path.to_string_lossy(), &right_path.to_string_lossy())
+            compare_entry_names(&left_path.to_string_lossy(), &right_path.to_string_lossy())
         });
         Some(image_paths)
     }
@@ -111,14 +111,6 @@ fn is_listed_image_extension(extension: &OsStr) -> bool {
     IMAGE_FILE_EXTENSIONS
         .iter()
         .any(|listed| extension.eq_ignore_ascii_case(*listed))
-}
-
-fn compare_image_file_names(left_name: &str, right_name: &str) -> Ordering {
-    let case_folded_order = left_name.to_lowercase().cmp(&right_name.to_lowercase());
-    if case_folded_order != Ordering::Equal {
-        return case_folded_order;
-    }
-    left_name.cmp(right_name)
 }
 
 #[cfg(test)]

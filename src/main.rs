@@ -4,8 +4,10 @@ mod app;
 mod app_display;
 mod folder_listing;
 mod image_loading;
+mod name_collation;
 mod platform;
 mod scaling;
+mod sibling_folder_listing;
 
 use std::path::PathBuf;
 
