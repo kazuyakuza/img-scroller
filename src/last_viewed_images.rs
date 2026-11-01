@@ -21,7 +21,7 @@ impl LastViewedImages {
     /// the opened path's parent folder (plain `parent()`, never canonicalized
     /// -- Task 3 looks up with the same folder-path derivation).
     pub(crate) fn record_displayed_image(&mut self, image_path: &Path) {
-        let folder_path = image_path.parent().unwrap_or_else(|| Path::new(""));
+        let folder_path = image_path.parent().unwrap_or(Path::new(""));
         self.folder_to_image_paths
             .insert(folder_path.to_path_buf(), image_path.to_path_buf());
     }
@@ -30,9 +30,7 @@ impl LastViewedImages {
     /// folder was visited. Task 3's target-priority lookup calls this.
     #[allow(dead_code)]
     pub(crate) fn last_displayed_image(&self, folder_path: &Path) -> Option<&Path> {
-        self.folder_to_image_paths
-            .get(folder_path)
-            .map(|image_path| image_path.as_path())
+        self.folder_to_image_paths.get(folder_path).map(PathBuf::as_path)
     }
 
     #[cfg(test)]
