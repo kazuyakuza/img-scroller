@@ -115,6 +115,11 @@ impl ImagesScrollerApp {
         };
         Some(image_path)
     }
+
+    /// True while an image remains successfully opened (the corner rails' gate).
+    fn image_is_open(&self) -> bool {
+        self.opened_image_path.is_some()
+    }
 }
 
 impl eframe::App for ImagesScrollerApp {
@@ -132,10 +137,9 @@ impl eframe::App for ImagesScrollerApp {
             self.open_toolbar_button(ui, frame);
         });
 
-        if let Some(message) = self.message_text {
-            egui::Panel::bottom("message_bar").show(ui, |ui| {
-                ui.label(message);
-            });
+        if self.image_is_open() {
+            rails::show_folder_rail(ui);
+            rails::show_image_rail(self, ui);
         }
 
         egui::CentralPanel::default().show(ui, |panel_ui| {
@@ -155,6 +159,8 @@ pub fn window_options() -> eframe::NativeOptions {
         ..eframe::NativeOptions::default()
     }
 }
+
+mod rails;
 
 #[cfg(test)]
 mod tests;
