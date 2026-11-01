@@ -114,7 +114,7 @@ Each item below is to be decided during implementation, NOT now:
 
 - Vertical-navigation engine design: sibling-folder flow, target-image priority state, and the session last-viewed memory (Wave 3). The horizontal sibling-image slice is decided and landed (Wave 2).
 - Fullscreen/zoom keybindings and zoom step sizes.
-- Pan-then-navigate details while zoomed (Wave 4).
+- Pan-then-navigate details while zoomed (Wave 5).
 - Distribution-helper mechanism (script vs. executable).
 - Config file contents/format.
 - Design patterns beyond immediate-mode.
