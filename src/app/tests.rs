@@ -134,7 +134,10 @@ fn navigation_at_the_first_and_last_list_positions_stays_silent() {
     );
     let solo_folder = TempImageFolder::create("single_image_folder");
     solo_folder.create_file("only.png");
-    app.accept_open_outcome(solo_folder.image_path("only.png"), Ok(sample_decoded_image()));
+    app.accept_open_outcome(
+        solo_folder.image_path("only.png"),
+        Ok(sample_decoded_image()),
+    );
     assert_eq!(app.neighbor_image_path(NavigationDirection::Previous), None);
     assert_eq!(app.neighbor_image_path(NavigationDirection::Next), None);
     assert!(app.message_text.is_none());
@@ -172,7 +175,10 @@ fn every_successful_open_rebuilds_the_listing_from_the_new_folder() {
         app.neighbor_image_path(NavigationDirection::Previous),
         Some(first_folder.image_path("a.png"))
     );
-    app.accept_open_outcome(second_folder.image_path("e.png"), Ok(sample_decoded_image()));
+    app.accept_open_outcome(
+        second_folder.image_path("e.png"),
+        Ok(sample_decoded_image()),
+    );
     assert_eq!(
         app.neighbor_image_path(NavigationDirection::Previous),
         Some(second_folder.image_path("d.png"))
@@ -187,12 +193,30 @@ fn arrow_button_enablement_follows_the_navigation_edges() {
     folder.create_file("b.png");
     folder.create_file("c.png");
     let mut app = ImagesScrollerApp::empty_state();
-    assert!(!super::rails::navigation_button_enabled(&app, NavigationDirection::Previous));
-    assert!(!super::rails::navigation_button_enabled(&app, NavigationDirection::Next));
+    assert!(!super::rails::navigation_button_enabled(
+        &app,
+        NavigationDirection::Previous
+    ));
+    assert!(!super::rails::navigation_button_enabled(
+        &app,
+        NavigationDirection::Next
+    ));
     app.accept_open_outcome(folder.image_path("a.png"), Ok(sample_decoded_image()));
-    assert!(!super::rails::navigation_button_enabled(&app, NavigationDirection::Previous));
-    assert!(super::rails::navigation_button_enabled(&app, NavigationDirection::Next));
+    assert!(!super::rails::navigation_button_enabled(
+        &app,
+        NavigationDirection::Previous
+    ));
+    assert!(super::rails::navigation_button_enabled(
+        &app,
+        NavigationDirection::Next
+    ));
     app.accept_open_outcome(folder.image_path("c.png"), Ok(sample_decoded_image()));
-    assert!(super::rails::navigation_button_enabled(&app, NavigationDirection::Previous));
-    assert!(!super::rails::navigation_button_enabled(&app, NavigationDirection::Next));
+    assert!(super::rails::navigation_button_enabled(
+        &app,
+        NavigationDirection::Previous
+    ));
+    assert!(!super::rails::navigation_button_enabled(
+        &app,
+        NavigationDirection::Next
+    ));
 }

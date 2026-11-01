@@ -97,15 +97,9 @@ impl ImagesScrollerApp {
     /// listing; every "nothing to navigate to" case (no image, no listing,
     /// unresolvable index, list beginning/end reached) resolves to None.
     fn neighbor_image_path(&self, direction: NavigationDirection) -> Option<PathBuf> {
-        let Some(opened_path) = self.opened_image_path.as_ref() else {
-            return None;
-        };
-        let Some(listing) = self.current_folder_listing.as_ref() else {
-            return None;
-        };
-        let Some(listed_index) = listing.listed_index_of(opened_path) else {
-            return None;
-        };
+        let opened_path = self.opened_image_path.as_ref()?;
+        let listing = self.current_folder_listing.as_ref()?;
+        let listed_index = listing.listed_index_of(opened_path)?;
         let neighbor = match direction {
             NavigationDirection::Previous => listing.previous_neighbor(listed_index),
             NavigationDirection::Next => listing.next_neighbor(listed_index),

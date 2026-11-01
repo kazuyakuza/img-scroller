@@ -10,13 +10,16 @@ const RAIL_SIZE: f32 = 40.0;
 const ARROW_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(28.0, 24.0);
 const ARROW_BUTTON_SPACING: f32 = 8.0;
 
-fn arrow_button(glyph: &str) -> egui::Button {
+fn arrow_button(glyph: &str) -> egui::Button<'_> {
     egui::Button::new(glyph).min_size(ARROW_BUTTON_SIZE)
 }
 
 /// A direction button is active exactly when the navigation seam resolves a
 /// neighbor: no image, no listing, unresolvable index, and list edges disable.
-pub(super) fn navigation_button_enabled(app: &ImagesScrollerApp, direction: NavigationDirection) -> bool {
+pub(super) fn navigation_button_enabled(
+    app: &ImagesScrollerApp,
+    direction: NavigationDirection,
+) -> bool {
     app.neighbor_image_path(direction).is_some()
 }
 
@@ -53,10 +56,16 @@ fn image_rail_controls(app: &mut ImagesScrollerApp, rail_ui: &mut egui::Ui) {
     rail_ui.with_layout(
         egui::Layout::left_to_right(egui::Align::Center),
         |rail_ui| {
-            if rail_ui.add_enabled(previous_enabled, arrow_button("←")).clicked() {
+            if rail_ui
+                .add_enabled(previous_enabled, arrow_button("←"))
+                .clicked()
+            {
                 app.navigate(NavigationDirection::Previous);
             }
-            if rail_ui.add_enabled(next_enabled, arrow_button("→")).clicked() {
+            if rail_ui
+                .add_enabled(next_enabled, arrow_button("→"))
+                .clicked()
+            {
                 app.navigate(NavigationDirection::Next);
             }
             rail_ui.label(message.unwrap_or(""));
