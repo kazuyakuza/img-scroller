@@ -2,7 +2,7 @@
 
 # Files in src/
 
-- app.rs - eframe application shell: viewer window options, open-flow state, top Open… button, Left/Right keyboard navigation and the shared navigate seam, in-session folder-listing state, window-title constant
+- app.rs - eframe application shell: viewer window options, open-flow state, the empty-state centered Open button, the image-open gate for the floating pill, Left/Right keyboard navigation and the shared navigate seam, in-session folder-listing state, window-title constant
 - app_display.rs - central image display: texture lifecycle wrapper (one upload per decode), fit-scaled paint, pending-upload flag
 - folder_listing.rs - current-folder image listing for horizontal navigation: one non-recursive parent-folder read, 17-extension image whitelist, lowercase-folded sort with exact-name tie-break, ±1 neighbor stepping with list-edge reports
 - image_loading.rs - open-image seam: load_image entry, DecodedImage payload shape, failure classification, unsupported-file message constant
@@ -11,7 +11,7 @@
 
 # Folders in src/
 
-- app/ - child modules of the application shell: rails.rs (corner navigation rails: right rail with disabled up/down folder arrows, bottom rail with image arrows + message area), tests.rs (shell/navigation unit tests), rails_tests.rs (rail button enablement tests)
+- app/ - child modules of the application shell: arrow_direction.rs (painted-arrow control types for the floating pill), floating_controls.rs (centered floating bottom pill: message line + painted vector-triangle arrow buttons), tests.rs (shell/navigation unit tests), floating_controls_tests.rs (pill arrow-button enablement tests)
 - folder_listing/ - child module: tests.rs (listing/collation/neighbor unit tests)
 - platform/ - OS-bound facade for the native open dialog and WIC decode: mod.rs (facade re-exports), windows.rs (Windows implementation), stub.rs (non-Windows fallback)
 
