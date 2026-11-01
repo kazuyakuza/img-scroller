@@ -5,12 +5,13 @@
 #![allow(dead_code)]
 
 use std::cmp::Ordering;
+use std::ffi::OsStr;
 use std::fs;
-use std::path::{OsStr, Path, PathBuf};
+use std::path::{Path, PathBuf};
 
 const IMAGE_FILE_EXTENSIONS: [&str; 17] = [
-    "avif", "bmp", "dib", "gif", "heic", "heif", "ico", "jfif", "jpe", "jpeg", "jpg", "jxr",
-    "png", "tif", "tiff", "webp", "wdp",
+    "avif", "bmp", "dib", "gif", "heic", "heif", "ico", "jfif", "jpe", "jpeg", "jpg", "jxr", "png",
+    "tif", "tiff", "webp", "wdp",
 ];
 
 pub(crate) struct FolderListing {
@@ -35,9 +36,7 @@ impl FolderListing {
 
     fn from_folder(folder_path: &Path) -> Option<Self> {
         let resolved_folder = fs::canonicalize(folder_path).ok()?;
-        let Some(image_paths) = Self::collect_folder_images(&resolved_folder) else {
-            return None;
-        };
+        let image_paths = Self::collect_folder_images(&resolved_folder)?;
         Some(Self { image_paths })
     }
 

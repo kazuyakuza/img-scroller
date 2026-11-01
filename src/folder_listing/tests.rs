@@ -42,17 +42,37 @@ fn listed_images_sort_case_insensitively_then_by_exact_name_tie_break() {
     folder.create_file("alpha.jpg");
     folder.create_file("alpha.gif");
     folder.create_file("zeta.webp");
-    let listing =
-        FolderListing::from_opened_image(folder.image_path("beta.jpg").as_path())
-            .expect("listing built");
+    let listing = FolderListing::from_opened_image(folder.image_path("beta.jpg").as_path())
+        .expect("listing built");
     assert_eq!(listing.listed_image_count(), 7);
-    assert_eq!(listing.listed_index_of(&folder.image_path("alpha.gif")), Some(0));
-    assert_eq!(listing.listed_index_of(&folder.image_path("ALPHA.jpg")), Some(1));
-    assert_eq!(listing.listed_index_of(&folder.image_path("Alpha.jpg")), Some(2));
-    assert_eq!(listing.listed_index_of(&folder.image_path("alpha.jpg")), Some(3));
-    assert_eq!(listing.listed_index_of(&folder.image_path("beta.jpg")), Some(4));
-    assert_eq!(listing.listed_index_of(&folder.image_path("Beta.png")), Some(5));
-    assert_eq!(listing.listed_index_of(&folder.image_path("zeta.webp")), Some(6));
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("alpha.gif")),
+        Some(0)
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("ALPHA.jpg")),
+        Some(1)
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("Alpha.jpg")),
+        Some(2)
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("alpha.jpg")),
+        Some(3)
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("beta.jpg")),
+        Some(4)
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("Beta.png")),
+        Some(5)
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("zeta.webp")),
+        Some(6)
+    );
 }
 
 #[test]
@@ -65,17 +85,28 @@ fn listing_excludes_directories_and_files_without_listed_extensions() {
     folder.create_file("upper.jpg");
     fs::create_dir(folder.folder_path.join("sibling_subfolder")).expect("subfolder");
     fs::write(
-        folder.folder_path.join("sibling_subfolder").join("inner.png"),
+        folder
+            .folder_path
+            .join("sibling_subfolder")
+            .join("inner.png"),
         b"x",
     )
     .expect("nested file");
-    let listing =
-        FolderListing::from_opened_image(folder.image_path("upper.jpg").as_path())
-            .expect("listing built");
+    let listing = FolderListing::from_opened_image(folder.image_path("upper.jpg").as_path())
+        .expect("listing built");
     assert_eq!(listing.listed_image_count(), 3);
-    assert_eq!(listing.listed_index_of(&folder.image_path(".concealed.png")), Some(0));
-    assert_eq!(listing.listed_index_of(&folder.image_path("LOWER.PNG")), Some(1));
-    assert_eq!(listing.listed_index_of(&folder.image_path("upper.jpg")), Some(2));
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path(".concealed.png")),
+        Some(0)
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("LOWER.PNG")),
+        Some(1)
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("upper.jpg")),
+        Some(2)
+    );
 }
 
 #[test]
@@ -83,16 +114,24 @@ fn unlisted_and_missing_images_resolve_to_no_listing_index() {
     let folder = TempFolder::create("index_resolution");
     folder.create_file("only.jpg");
     folder.create_file("other.txt");
-    let listing =
-        FolderListing::from_opened_image(folder.image_path("only.jpg").as_path())
-            .expect("listing built");
-    assert_eq!(listing.listed_index_of(&folder.image_path("only.jpg")), Some(0));
+    let listing = FolderListing::from_opened_image(folder.image_path("only.jpg").as_path())
+        .expect("listing built");
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("only.jpg")),
+        Some(0)
+    );
     assert_eq!(
         listing.listed_index_of(&folder.folder_path.join(".").join("only.jpg")),
         Some(0)
     );
-    assert_eq!(listing.listed_index_of(&folder.image_path("other.txt")), None);
-    assert_eq!(listing.listed_index_of(&folder.image_path("missing.png")), None);
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("other.txt")),
+        None
+    );
+    assert_eq!(
+        listing.listed_index_of(&folder.image_path("missing.png")),
+        None
+    );
 }
 
 #[test]
@@ -101,9 +140,8 @@ fn neighbors_step_by_one_and_report_list_edges() {
     folder.create_file("a.png");
     folder.create_file("b.png");
     folder.create_file("c.png");
-    let listing =
-        FolderListing::from_opened_image(folder.image_path("b.png").as_path())
-            .expect("listing built");
+    let listing = FolderListing::from_opened_image(folder.image_path("b.png").as_path())
+        .expect("listing built");
     assert_eq!(
         listing.previous_neighbor(1),
         ListedNeighbor::At {
@@ -128,11 +166,9 @@ fn neighbors_step_by_one_and_report_list_edges() {
 #[test]
 fn empty_folder_yields_empty_listing_and_missing_folder_yields_none() {
     let folder = TempFolder::create("empty_folder");
-    let listing =
-        FolderListing::from_opened_image(folder.image_path("unopened.png").as_path())
-            .expect("listing built for an existing folder");
+    let listing = FolderListing::from_opened_image(folder.image_path("unopened.png").as_path())
+        .expect("listing built for an existing folder");
     assert_eq!(listing.listed_image_count(), 0);
-    let listing_without_folder =
-        FolderListing::from_opened_image(Path::new("single_name.png"));
+    let listing_without_folder = FolderListing::from_opened_image(Path::new("single_name.png"));
     assert!(listing_without_folder.is_none());
 }
