@@ -2,6 +2,7 @@
 
 mod app;
 mod app_display;
+mod folder_listing;
 mod image_loading;
 mod platform;
 mod scaling;
