@@ -158,3 +158,6 @@ mod rails;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod rails_tests;
