@@ -11,7 +11,7 @@ use super::{ImagesScrollerApp, NavigationDirection};
 const FLOATING_PILL_AREA_ID: &str = "floating_navigation_pill";
 const FLOATING_PILL_BOTTOM_OFFSET: f32 = -24.0;
 const FLOATING_PILL_FILL_COLOR: egui::Color32 =
-    egui::Color32::from_rgba_unmultiplied(20, 20, 20, 180);
+    egui::Color32::from_rgba_unmultiplied_const(20, 20, 20, 180);
 const FLOATING_PILL_CORNER_RADIUS: u8 = 10;
 const FLOATING_PILL_INNER_MARGIN_POINTS: f32 = 8.0;
 const ARROW_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(36.0, 32.0);
@@ -31,13 +31,13 @@ pub(super) fn navigation_button_enabled(
 /// Shows the pill: one centered, anchored overlay Area above the image surface
 /// (non-space-reserving; Order::Foreground keeps it painted above CentralPanel).
 pub(super) fn show_floating_pill(app: &mut ImagesScrollerApp, host_ui: &mut egui::Ui) {
-    egui::Area::new(egui::Id::new(FLOATING_PILL_AREA_ID))
+    egui::Area::new(egui::Id::unique(FLOATING_PILL_AREA_ID))
         .anchor(
             egui::Align2::CENTER_BOTTOM,
             egui::vec2(0.0, FLOATING_PILL_BOTTOM_OFFSET),
         )
         .order(egui::Order::Foreground)
-        .show(host_ui, |area_ui| {
+        .show(host_ui.ctx(), |area_ui| {
             show_pill_contents(app, area_ui);
         });
 }
@@ -63,15 +63,12 @@ fn show_message_line(message: Option<&'static str>, pill_ui: &mut egui::Ui) {
 
 fn show_button_row(app: &mut ImagesScrollerApp, pill_ui: &mut egui::Ui) {
     let button_specs = arrow_button_specs(app);
-    pill_ui.with_layout(
-        egui::Layout::left_to_right(egui::Align::Center),
-        |row_ui| {
-            for button_spec in &button_specs {
-                add_folder_group_gap(row_ui, button_spec.control);
-                button_spec.show_and_navigate(app, row_ui);
-            }
-        },
-    );
+    pill_ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |row_ui| {
+        for button_spec in &button_specs {
+            add_folder_group_gap(row_ui, button_spec.control);
+            button_spec.show_and_navigate(app, row_ui);
+        }
+    });
 }
 
 fn add_folder_group_gap(row_ui: &mut egui::Ui, arrow_control: ArrowControl) {
@@ -149,10 +146,8 @@ impl ArrowButtonSpec {
     }
 
     fn paint_triangle(&self, row_ui: &egui::Ui, button_response: &egui::Response) {
-        let triangle_rect = egui::Rect::from_center_size(
-            button_response.rect.center(),
-            ARROW_TRIANGLE_SIZE,
-        );
+        let triangle_rect =
+            egui::Rect::from_center_size(button_response.rect.center(), ARROW_TRIANGLE_SIZE);
         let triangle = egui::Shape::rotated_triangle(
             triangle_rect,
             self.control.painted_direction().paint_rotation(),

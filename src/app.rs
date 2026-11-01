@@ -118,7 +118,11 @@ impl ImagesScrollerApp {
     }
 
     /// Empty-state layout: an empty central paint carrying the ONE center Open button.
-    fn show_empty_state_layout(&mut self, open_dialog_frame: &mut eframe::Frame, ui: &mut egui::Ui) {
+    fn show_empty_state_layout(
+        &mut self,
+        open_dialog_frame: &mut eframe::Frame,
+        ui: &mut egui::Ui,
+    ) {
         egui::CentralPanel::default().show(ui, |central_ui| {
             self.show_centered_open_button(open_dialog_frame, central_ui);
         });
@@ -131,13 +135,12 @@ impl ImagesScrollerApp {
         open_dialog_frame: &mut eframe::Frame,
         central_ui: &mut egui::Ui,
     ) {
-        egui::Area::new(egui::Id::new(EMPTY_STATE_OPEN_AREA_ID))
+        egui::Area::new(egui::Id::unique(EMPTY_STATE_OPEN_AREA_ID))
             .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
-            .show(central_ui, |area_ui| {
-                let open_button = egui::Button::new(
-                    egui::RichText::new(OPEN_LABEL_TEXT).size(OPEN_LABEL_SIZE),
-                )
-                .min_size(OPEN_BUTTON_SIZE);
+            .show(central_ui.ctx(), |area_ui| {
+                let open_button =
+                    egui::Button::new(egui::RichText::new(OPEN_LABEL_TEXT).size(OPEN_LABEL_SIZE))
+                        .min_size(OPEN_BUTTON_SIZE);
                 if area_ui.add(open_button).clicked() {
                     self.open_via_dialog(open_dialog_frame);
                 }
