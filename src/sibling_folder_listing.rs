@@ -41,16 +41,22 @@ impl SiblingFolderListing {
         self.sibling_folder_paths.len()
     }
     #[allow(dead_code)]
-    pub(crate) fn previous_neighbor_of(&self, folder_path: &Path) -> Option<ListedFolderNeighbor> {
-        let position = self.position_of_current_folder(folder_path)?;
+    pub(crate) fn previous_neighbor_of(
+        &self,
+        opened_image_path: &Path,
+    ) -> Option<ListedFolderNeighbor> {
+        let position = self.position_of_current_folder(opened_image_path)?;
         if position == 0 {
             return Some(ListedFolderNeighbor::ListBeginningReached);
         }
         Some(self.neighbor_at(position - 1))
     }
     #[allow(dead_code)]
-    pub(crate) fn next_neighbor_of(&self, folder_path: &Path) -> Option<ListedFolderNeighbor> {
-        let position = self.position_of_current_folder(folder_path)?;
+    pub(crate) fn next_neighbor_of(
+        &self,
+        opened_image_path: &Path,
+    ) -> Option<ListedFolderNeighbor> {
+        let position = self.position_of_current_folder(opened_image_path)?;
         if position == self.sibling_folder_paths.len() {
             return Some(ListedFolderNeighbor::ListEndReached);
         }
@@ -80,7 +86,8 @@ impl SiblingFolderListing {
             sibling_folder_paths,
         }
     }
-    fn position_of_current_folder(&self, current_folder_path: &Path) -> Option<usize> {
+    fn position_of_current_folder(&self, anchor_image_path: &Path) -> Option<usize> {
+        let current_folder_path = anchor_image_path.parent()?;
         let resolved_folder = fs::canonicalize(current_folder_path).ok()?;
         let current_name = resolved_folder.file_name()?.to_string_lossy();
         let preceding_folder_count = self

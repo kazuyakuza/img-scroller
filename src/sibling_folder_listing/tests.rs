@@ -2,6 +2,8 @@ use super::{ListedFolderNeighbor, ScopeEntriesReader, ScopeEntry, SiblingFolderL
 use std::fs;
 use std::path::{Path, PathBuf};
 
+const CURRENT_FOLDER_NAME: &str = "mid";
+
 struct TempScope {
     scope_path: PathBuf,
 }
@@ -13,12 +15,13 @@ impl TempScope {
             test_case,
             std::process::id()
         ));
-        fs::create_dir_all(scope_path.join("mid")).expect("scope fixture created");
-        fs::write(scope_path.join("mid").join("shot.png"), b"x").expect("marker written");
+        let mid_folder_path = scope_path.join(CURRENT_FOLDER_NAME);
+        fs::create_dir_all(&mid_folder_path).expect("scope fixture created");
+        fs::write(mid_folder_path.join("shot.png"), b"x").expect("marker written");
         Self { scope_path }
     }
     fn current_image_path(&self, file_name: &str) -> PathBuf {
-        self.scope_path.join("mid").join(file_name)
+        self.scope_path.join(CURRENT_FOLDER_NAME).join(file_name)
     }
     fn scope_child_path(&self, name: &str) -> PathBuf {
         self.scope_path.join(name)
@@ -101,7 +104,7 @@ fn current_folder_is_excluded_from_the_enumerated_siblings() {
     let read_entries = |_: &Path| {
         Some(vec![
             scope.synthetic_entry("first", true),
-            scope.synthetic_entry("mid", true),
+            scope.synthetic_entry(CURRENT_FOLDER_NAME, true),
             scope.synthetic_entry("second", true),
         ])
     };
