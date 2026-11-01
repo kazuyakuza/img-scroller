@@ -32,14 +32,14 @@ Dated 2026-11-01. **Wave 2 (`.agent/todos/20261029/20261029-todo-4.md`) horizont
 
 ## Current Project State
 
-- **Wave 1 landed on `main`** (`92dc22c`, pushed to `origin`): container harness + application skeleton (open flow, WIC decode, fit display). **The user confirmed the Wave-1 exe OPERATOR-RUN worked as expected (reported 2026-11-01).**
+- **Wave 1 landed on `main`** (pushed to `origin` through `5e5a91b`): container harness + application skeleton (open flow, WIC decode, fit display). **The user confirmed the Wave-1 exe OPERATOR-RUN worked as expected (reported 2026-11-01).**
 - **Wave 2 landed on `feat/wave-2-horizontal-scroll` (version 0.2.0)**: `src/folder_listing.rs` + `src/folder_listing/tests.rs`; Left/Right keyboard navigation + shared `navigate` seam in `src/app.rs`; corner rails `src/app/rails.rs` (+ `src/app/tests.rs`, `src/app/rails_tests.rs`); 26 unit tests; dev-checks `ALL CHECKS PASSED`; `.gitattributes` enforces `*.sh text eol=lf` (`cf244d5`).
 - Release artifact: gitignored `dist/windows-x64/img-scroller.exe` (19,464,396 bytes, Wave-2 rebuild 2026-11-01); import audit: 22 OBSERVED DLLs recorded in `scripts/build-windows.sh` + `docs/build-windows.md`.
 - **TODO state**: `.agent/todos/20261029/20261029-todo-4.md` — Tasks 1–4 `[DONE]`/`[x]` (Task 4's OPERATOR-RUN sub-item stays unchecked until the user reports); Task 5 (documentation) in progress; then Step 5 (rename to `-DONE`, merge to `main`, push `origin` ONLY).
 - Wave TODO files ready: `20261029-todo-5.md` (Wave 3) … `todo-9` (Wave 7); process ONE wave per session, in order.
 - Binding facts unchanged: all Rust/Cargo inside the container on the Alpine VM (`alpine-vm` MCP: `vm_status` first; exit code authoritative; vboxsf EBUSY on container manifest writes → authorized host-side write fallback is the documented pattern); host needs NO Rust/Cargo; GUI/runtime validation is OPERATOR-RUN on real Windows 10/11.
 - Open item (flagged to the user, NOT a TODO now): non-script text files (`Dockerfile`, `docker-compose.yml`, `Cargo.toml`, `*.rs`) are still `i/lf w/crlf` in the Windows working tree — only `*.sh` is LF-enforced by `.gitattributes`; broader renormalization would need a dedicated future plan.
-- Git: branch `feat/wave-2-horizontal-scroll` (Tasks 1–4 through `85007ce`, plus this step's docs commit); `main` == `origin/main` == `92dc22c`; merge/push happen at Step 5.
+- Git: branch `feat/wave-2-horizontal-scroll` (Tasks 1–4 through `85007ce`, plus this step's docs commit `0b9702f`); `main` is at `24ad0b6` (Wave-2 global plan, not yet pushed); `origin/main` is at `5e5a91b`; merge/push happen at Step 5.
 
 ## Immediate Next Steps
 
