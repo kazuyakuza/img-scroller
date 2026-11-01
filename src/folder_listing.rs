@@ -2,8 +2,6 @@
 //! one folder only -- non-recursive, whitelisted-extension-filtered, and
 //! sorted by the fixed v1 alphanumeric collation (folded name + exact tie-break).
 
-#![allow(dead_code)]
-
 use std::cmp::Ordering;
 use std::ffi::OsStr;
 use std::fs;
@@ -21,6 +19,7 @@ pub(crate) struct FolderListing {
 #[derive(Debug, PartialEq)]
 pub(crate) enum ListedNeighbor {
     At {
+        #[allow(dead_code)]
         listed_index: usize,
         image_path: PathBuf,
     },
@@ -51,6 +50,7 @@ impl FolderListing {
         Some(image_paths)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn listed_image_count(&self) -> usize {
         self.image_paths.len()
     }
