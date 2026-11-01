@@ -1,7 +1,8 @@
 //! Sibling-folder listing for vertical navigation: the DIRECTORY entries of the
-//! parent of the opened image's folder only, from one non-recursive read, with
-//! the current folder excluded from the destinations and sorted by the fixed
-//! v1 collation shared with the image listing.
+//! parent of the opened image's folder only, from one non-recursive read -- an
+//! unreadable scope parent yields an empty listing -- with the current folder
+//! excluded from the destinations and sorted by the fixed v1 collation shared
+//! with the image listing.
 
 use crate::name_collation::compare_entry_names;
 use std::cmp::Ordering;
@@ -15,6 +16,7 @@ struct ScopeEntry {
     is_directory: bool,
 }
 
+/// Resolved sibling destination folder, or the list bound reached from the anchor.
 #[derive(Debug, PartialEq)]
 #[allow(dead_code)]
 pub(crate) enum ListedFolderNeighbor {
@@ -32,14 +34,17 @@ pub(crate) struct SiblingFolderListing {
 }
 
 impl SiblingFolderListing {
+    /// Build the listing from the opened image path; `None` if folder or parent is unresolvable.
     #[allow(dead_code)]
     pub(crate) fn from_opened_image(opened_image_path: &Path) -> Option<Self> {
         Self::from_opened_image_with_scope_entries(opened_image_path, &read_scope_entries)
     }
+    /// Number of listed sibling destination folders (the current folder is excluded).
     #[allow(dead_code)]
     pub(crate) fn listed_folder_count(&self) -> usize {
         self.sibling_folder_paths.len()
     }
+    /// Previous sibling from the anchor; `ListBeginningReached` at the start of the list.
     #[allow(dead_code)]
     pub(crate) fn previous_neighbor_of(
         &self,
@@ -51,6 +56,7 @@ impl SiblingFolderListing {
         }
         Some(self.neighbor_at(position - 1))
     }
+    /// Next sibling from the anchor; `ListEndReached` at the end of the list.
     #[allow(dead_code)]
     pub(crate) fn next_neighbor_of(
         &self,
