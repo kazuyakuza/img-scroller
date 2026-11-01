@@ -4,6 +4,7 @@ mod app;
 mod app_display;
 mod folder_listing;
 mod image_loading;
+mod last_viewed_images;
 mod name_collation;
 mod platform;
 mod scaling;

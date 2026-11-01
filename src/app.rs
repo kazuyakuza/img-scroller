@@ -7,6 +7,7 @@ use eframe::egui;
 use crate::app_display::CurrentImageDisplay;
 use crate::folder_listing::{FolderListing, ListedNeighbor};
 use crate::image_loading::{self, DecodedImage, ImageLoadFailure};
+use crate::last_viewed_images::LastViewedImages;
 use crate::platform;
 
 /// Title shown on the viewer window title bar (final app name, user-decided 2026-10-29).
@@ -18,6 +19,8 @@ pub struct ImagesScrollerApp {
     /// Sibling-image listing of the opened image's folder in folder-listing order
     /// (rebuilt on every successful open; None until the first open succeeds).
     current_folder_listing: Option<FolderListing>,
+    /// Session memory: the last displayed image of every folder visited in-session.
+    last_viewed_images: LastViewedImages,
     /// Decoded pixels of the last successfully opened image (read by the display surface).
     decoded_image: Option<DecodedImage>,
     message_text: Option<&'static str>,
@@ -39,6 +42,7 @@ impl ImagesScrollerApp {
         Self {
             opened_image_path: None,
             current_folder_listing: None,
+            last_viewed_images: LastViewedImages::empty(),
             decoded_image: None,
             message_text: None,
             current_display: CurrentImageDisplay::initial(),
@@ -60,6 +64,7 @@ impl ImagesScrollerApp {
         match outcome {
             Ok(decoded_image) => {
                 self.current_folder_listing = FolderListing::from_opened_image(path.as_path());
+                self.last_viewed_images.record_displayed_image(&path);
                 self.opened_image_path = Some(path);
                 self.decoded_image = Some(decoded_image);
                 self.message_text = None;
@@ -190,3 +195,5 @@ mod tests;
 
 #[cfg(test)]
 mod floating_controls_tests;
+#[cfg(test)]
+mod last_viewed_tests;
