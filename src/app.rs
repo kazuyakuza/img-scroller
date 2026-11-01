@@ -71,14 +71,6 @@ impl ImagesScrollerApp {
         }
     }
 
-    fn open_toolbar_button(&mut self, ui: &mut egui::Ui, frame: &eframe::Frame) {
-        ui.horizontal(|ui| {
-            if ui.button("Open…").clicked() {
-                self.open_via_dialog(frame);
-            }
-        });
-    }
-
     fn open_via_dialog(&mut self, frame: &eframe::Frame) {
         if let Some(image_path) = platform::show_open_image_dialog(frame) {
             self.open_image(image_path);
@@ -110,9 +102,46 @@ impl ImagesScrollerApp {
         Some(image_path)
     }
 
-    /// True while an image remains successfully opened (the corner rails' gate).
+    /// True while an image remains successfully opened (the floating controls' empty-state gate).
     fn image_is_open(&self) -> bool {
         self.opened_image_path.is_some()
+    }
+
+    /// Image-open layout: the centered floating control pill plus the central image paint.
+    fn show_image_layout(&mut self, ui: &mut egui::Ui) {
+        floating_controls::show_floating_pill(self, ui);
+        egui::CentralPanel::default().show(ui, |central_ui| {
+            if let Some(decoded_image) = self.decoded_image.as_ref() {
+                self.current_display.paint(central_ui, decoded_image);
+            }
+        });
+    }
+
+    /// Empty-state layout: an empty central paint carrying the ONE center Open button.
+    fn show_empty_state_layout(&mut self, open_dialog_frame: &mut eframe::Frame, ui: &mut egui::Ui) {
+        egui::CentralPanel::default().show(ui, |central_ui| {
+            self.show_centered_open_button(open_dialog_frame, central_ui);
+        });
+    }
+
+    /// The only Open control: anchored to the window center in the empty state;
+    /// the click reuses the native open dialog seam (the retired toolbar's path).
+    fn show_centered_open_button(
+        &mut self,
+        open_dialog_frame: &mut eframe::Frame,
+        central_ui: &mut egui::Ui,
+    ) {
+        egui::Area::new(egui::Id::new(EMPTY_STATE_OPEN_AREA_ID))
+            .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
+            .show(central_ui, |area_ui| {
+                let open_button = egui::Button::new(
+                    egui::RichText::new(OPEN_LABEL_TEXT).size(OPEN_LABEL_SIZE),
+                )
+                .min_size(OPEN_BUTTON_SIZE);
+                if area_ui.add(open_button).clicked() {
+                    self.open_via_dialog(open_dialog_frame);
+                }
+            });
     }
 }
 
@@ -126,23 +155,18 @@ impl eframe::App for ImagesScrollerApp {
         if right_pressed {
             self.navigate(NavigationDirection::Next);
         }
-
-        egui::Panel::top("open_toolbar").show(ui, |ui| {
-            self.open_toolbar_button(ui, frame);
-        });
-
         if self.image_is_open() {
-            rails::show_folder_rail(ui);
-            rails::show_image_rail(self, ui);
+            self.show_image_layout(ui);
+        } else {
+            self.show_empty_state_layout(frame, ui);
         }
-
-        egui::CentralPanel::default().show(ui, |panel_ui| {
-            if let Some(decoded_image) = self.decoded_image.as_ref() {
-                self.current_display.paint(panel_ui, decoded_image);
-            }
-        });
     }
 }
+
+const EMPTY_STATE_OPEN_AREA_ID: &str = "empty_state_open_button";
+const OPEN_LABEL_TEXT: &str = "Open…";
+const OPEN_LABEL_SIZE: f32 = 18.0;
+const OPEN_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(180.0, 48.0);
 
 pub fn window_options() -> eframe::NativeOptions {
     eframe::NativeOptions {
@@ -154,10 +178,12 @@ pub fn window_options() -> eframe::NativeOptions {
     }
 }
 
-mod rails;
+mod arrow_direction;
+
+mod floating_controls;
 
 #[cfg(test)]
 mod tests;
 
 #[cfg(test)]
-mod rails_tests;
+mod floating_controls_tests;
