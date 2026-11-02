@@ -137,3 +137,6 @@ fn scope_entry_of(dir_entry: fs::DirEntry) -> Option<ScopeEntry> {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod neighbor_tests;

@@ -70,7 +70,6 @@ fn vertical_navigation_resolves_the_adjacent_sibling_folders_in_sort_order() {
         Some(scope.child_folder_path("folder3"))
     );
 }
-
 #[test]
 fn vertical_navigation_reopens_the_visited_folders_last_viewed_image() {
     let scope = TempParentScope::create("visited_priority");
@@ -93,7 +92,6 @@ fn vertical_navigation_reopens_the_visited_folders_last_viewed_image() {
         Some(scope.child_image_path("folder1", "name2.png"))
     );
 }
-
 #[test]
 fn vertical_navigation_opens_the_first_image_of_a_new_folder() {
     let scope = TempParentScope::create("first_image_priority");
@@ -112,7 +110,6 @@ fn vertical_navigation_opens_the_first_image_of_a_new_folder() {
         Some(scope.child_image_path("folder2", "a.png"))
     );
 }
-
 #[test]
 fn entering_an_image_less_sibling_folder_clears_the_image_and_reanchors_the_listing() {
     let scope = TempParentScope::create("empty_mode_entry");
@@ -144,7 +141,6 @@ fn entering_an_image_less_sibling_folder_clears_the_image_and_reanchors_the_list
     assert!(app.neighbor_image_path(NavigationDirection::Next).is_none());
     assert_eq!(EMPTY_FOLDER_MESSAGE, "Empty folder");
 }
-
 #[test]
 fn empty_folder_mode_continues_vertically_in_both_folder_kinds() {
     let scope = TempParentScope::create("empty_mode_continuation");
