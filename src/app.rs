@@ -32,8 +32,8 @@ pub struct ImagesScrollerApp {
     /// Session fullscreen flag (Wave-4 Task 1): ON hides the native chrome AND
     /// all UI controls; never persisted; read by the fullscreen modules.
     fullscreen_on: bool,
-    /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the
-    /// display path; reset on every successful open; never persisted.
+    /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the display
+    /// path; reset on every successful open; never persisted.
     zoom_factor: f32,
 }
 

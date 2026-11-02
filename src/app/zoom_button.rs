@@ -10,10 +10,8 @@ use super::ImagesScrollerApp;
 
 const ZOOM_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(36.0, 32.0);
 const ZOOM_GROUP_GAP: f32 = 16.0;
-/// One zoom-glyph bar length/thickness (the + and - icon geometry).
 const GLYPH_BAR_LENGTH: f32 = 12.0;
 const GLYPH_BAR_THICKNESS: f32 = 2.5;
-/// The restore-fit marker: a stroked square outline.
 const FIT_MARKER_SIDE: f32 = 11.0;
 const FIT_MARKER_STROKE_WIDTH: f32 = 2.0;
 
@@ -90,8 +88,6 @@ impl ZoomButtonSpec {
         }
     }
 
-    /// Default egui button-text palette: idle in `inactive`, brightened on
-    /// hover, dimmed in `noninteractive` while disabled (exact visual states).
     fn zoom_glyph_color(
         &self,
         row_ui: &egui::Ui,
