@@ -15,10 +15,10 @@ use crate::sibling_folder_listing::SiblingFolderListing;
 pub const APP_WINDOW_TITLE: &str = "Images Scroller";
 
 pub struct ImagesScrollerApp {
-    /// Path of the last successfully decoded image (read again by Wave 2's navigation code).
+    /// Path of the last successfully opened image (anchor of both navigation-seam axes).
     opened_image_path: Option<PathBuf>,
     /// Sibling-image listing of the opened image's folder in folder-listing order
-    /// (rebuilt on every successful open; None until the first open succeeds).
+    /// (rebuilt on every successful open; released when empty-folder mode is entered).
     current_folder_listing: Option<FolderListing>,
     /// Session memory: the last displayed image of every folder visited in-session.
     last_viewed_images: LastViewedImages,
@@ -58,7 +58,7 @@ impl ImagesScrollerApp {
         self.accept_open_outcome(opened_path, outcome);
     }
 
-    /// Failure keeps any previously loaded image and state untouched except the message.
+    /// Success applies the open transition (browsed folder cleared); failure updates only the message.
     fn accept_open_outcome(
         &mut self,
         path: PathBuf,
