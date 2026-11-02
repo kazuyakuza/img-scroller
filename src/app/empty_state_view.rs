@@ -20,7 +20,7 @@ impl ImagesScrollerApp {
 
     /// The only Open control: anchored to the window center in the empty state;
     /// the click reuses the native open dialog seam (the retired toolbar's path).
-    pub(super) fn show_centered_open_button(
+    fn show_centered_open_button(
         &mut self,
         open_dialog_frame: &mut eframe::Frame,
         central_ui: &mut egui::Ui,

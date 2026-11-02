@@ -13,15 +13,11 @@ pub(super) const FULLSCREEN_TOGGLE_KEY: egui::Key = egui::Key::F11;
 impl ImagesScrollerApp {
     /// Toggle action shared by the F11 intake and the pill button: flips the
     /// flag and sends the matching borderless-fullscreen command exactly once,
-    /// in the frame the flag flips. Returns the post-toggle flag.
-    pub(super) fn toggle_fullscreen_and_send_command(
-        &mut self,
-        screen_context: &egui::Context,
-    ) -> bool {
+    /// in the frame the flag flips.
+    pub(super) fn toggle_fullscreen_and_send_command(&mut self, screen_context: &egui::Context) {
         let fullscreen_after_toggle = self.toggle_fullscreen();
         screen_context
             .send_viewport_cmd(egui::ViewportCommand::Fullscreen(fullscreen_after_toggle));
-        fullscreen_after_toggle
     }
 
     /// The ONE control-visibility gate: EVERY overlay control (pill, empty-state
