@@ -2,7 +2,7 @@
 
 # Files in src/
 
-- app.rs - eframe application shell: viewer window options, open-flow state, the empty-state centered Open button, the image-open gate for the floating pill, Left/Right keyboard navigation and the shared navigate seam, in-session folder-listing state, window-title constant
+- app.rs - eframe application shell: viewer window options, open-flow state, the empty-state centered Open button, the navigation-context gate for the floating pill (image open or browsed empty folder), four-direction arrow-key navigation and the shared navigate seam, in-session folder/sibling-folder listings plus last-viewed memory and empty-folder-browse state, window-title constant
 - app_display.rs - central image display: texture lifecycle wrapper (one upload per decode), fit-scaled paint, pending-upload flag
 - folder_listing.rs - current-folder image listing for horizontal navigation: one non-recursive parent-folder read, 17-extension image whitelist, ±1 neighbor stepping with list-edge reports, plus first_listed_image (the vertical first-image priority probe); sorts with the shared name_collation
 - image_loading.rs - open-image seam: load_image entry, DecodedImage payload shape, failure classification, unsupported-file message constant
