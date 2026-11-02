@@ -1,6 +1,8 @@
 //! Empty-state view: the fresh empty state's central layout carrying the ONE
 //! centered Open button (no image AND no folder context). Extracted verbatim
-//! from the app shell to keep `app.rs` within the per-file line cap.
+//! from the app shell to keep `app.rs` within the per-file line cap. Part of
+//! the chrome: rendered only while fullscreen is OFF (reachable only through
+//! that dispatch gate).
 
 use eframe::egui;
 

@@ -18,6 +18,8 @@ const FLOATING_PILL_INNER_MARGIN_POINTS: f32 = 8.0;
 const ARROW_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(36.0, 32.0);
 const ARROW_TRIANGLE_SIZE: egui::Vec2 = egui::Vec2::new(10.0, 10.0);
 const FOLDER_GROUP_GAP: f32 = 16.0;
+/// Separates the fullscreen button from the navigation arrow groups in the
+/// pill row (mirrors the folder-subgroup gap).
 const FULLSCREEN_GROUP_GAP: f32 = 16.0;
 const MESSAGE_TEXT_SIZE: f32 = 12.0;
 
