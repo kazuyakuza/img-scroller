@@ -57,7 +57,7 @@ All source lives in `src/` (folder map: [`.agent/project-structure.md`](../proje
 1. Launch: CLI argument present → `open_image(path)` runs before the first frame; absent → the empty state's big centered "Open…" button → native `IFileOpenDialog` (owner HWND via `raw-window-handle`).
 2. Decode: `platform::decode_image` → WIC factory → decoder from filename → frame → format converter initialized to 32bppRGBA → `CopyPixels` copies from the converter (mechanism detail: [tech.md](tech.md)).
 3. Success: state stores path + `DecodedImage`, clears the message, and flags a pending texture upload; the next frame's central-panel paint uploads exactly once and paints the image fit-scaled and centered (per-frame fit recomputation via `scaling::fitted_size`, so window resizes keep the display sane).
-4. Failure: `Unsupported`/`Unloadable` → the floating pill's message line shows the unsupported-file message (the pill renders only while an image is open); a previously loaded image and the rest of the state stay untouched.
+4. Failure: `Unsupported`/`Unloadable` → the floating pill's message line shows the unsupported-file message (the pill renders while an image is open or an empty-folder context is browsed); a previously loaded image and the rest of the state stay untouched.
 
 ## Navigation Critical Paths
 
