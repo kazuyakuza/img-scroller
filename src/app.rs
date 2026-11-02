@@ -35,8 +35,7 @@ pub struct ImagesScrollerApp {
     /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the display
     /// path; reset on every successful open; never persisted.
     zoom_factor: f32,
-    /// Session fit mode (Wave-4 Task 3): `FitVisible` = whole-image fit;
-    /// set by the fit seam; reset on every successful open; never persisted.
+    /// Session fit mode (Wave-4 Task 3): `FitVisible` = whole-image fit; reset on every open.
     fit_mode: crate::scaling::FitMode,
 }
 

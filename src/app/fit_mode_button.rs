@@ -91,8 +91,6 @@ impl FitModeButtonSpec {
         }
     }
 
-    /// Default egui button-text palette: idle in `inactive`, brightened on
-    /// hover, dimmed in `noninteractive` while disabled (the arrow palette).
     fn fit_glyph_color(
         &self,
         row_ui: &egui::Ui,
@@ -110,73 +108,49 @@ impl FitModeButtonSpec {
     fn paint_glyph(&self, row_ui: &egui::Ui, button_response: &egui::Response) {
         let glyph_center = button_response.rect.center();
         let glyph_color = self.fit_glyph_color(row_ui, button_response);
-        for glyph_shape in self.fit_glyph_shapes(glyph_center, glyph_color) {
+        for glyph_shape in self.action.glyph_shapes(glyph_center, glyph_color) {
             row_ui.painter().add(glyph_shape);
         }
     }
+}
 
+impl FitModeButtonAction {
     /// Per-action glyph geometry: one axis line plus the two opposing
     /// triangles of the painted-arrow family (`Shape::rotated_triangle`).
-    fn fit_glyph_shapes(
+    fn glyph_shapes(
         &self,
         glyph_center: egui::Pos2,
         glyph_color: egui::Color32,
     ) -> Vec<egui::Shape> {
-        match self.action {
-            FitModeButtonAction::FitWidth => fit_width_glyph_shapes(glyph_center, glyph_color),
-            FitModeButtonAction::FitHeight => fit_height_glyph_shapes(glyph_center, glyph_color),
-        }
+        let horizontal = matches!(self, Self::FitWidth);
+        let axis_offset = if horizontal {
+            egui::vec2(FIT_ARROW_SPACING, 0.0)
+        } else {
+            egui::vec2(0.0, FIT_ARROW_SPACING)
+        };
+        let (minus_facing, plus_facing) = if horizontal {
+            (ArrowDirection::Left, ArrowDirection::Right)
+        } else {
+            (ArrowDirection::Up, ArrowDirection::Down)
+        };
+        vec![
+            if horizontal {
+                horizontal_axis_line_shape(glyph_center, glyph_color)
+            } else {
+                vertical_axis_line_shape(glyph_center, glyph_color)
+            },
+            egui::Shape::rotated_triangle(
+                egui::Rect::from_center_size(glyph_center - axis_offset, FIT_ARROW_TRIANGLE_SIZE),
+                minus_facing.paint_rotation(),
+                glyph_color,
+            ),
+            egui::Shape::rotated_triangle(
+                egui::Rect::from_center_size(glyph_center + axis_offset, FIT_ARROW_TRIANGLE_SIZE),
+                plus_facing.paint_rotation(),
+                glyph_color,
+            ),
+        ]
     }
-}
-
-/// Fit-width [W]: a horizontal bar capped by left/right arrow triangles.
-fn fit_width_glyph_shapes(
-    glyph_center: egui::Pos2,
-    glyph_color: egui::Color32,
-) -> Vec<egui::Shape> {
-    let axis_line = horizontal_axis_line_shape(glyph_center, glyph_color);
-    let left = egui::Shape::rotated_triangle(
-        egui::Rect::from_center_size(
-            glyph_center - egui::vec2(FIT_ARROW_SPACING, 0.0),
-            FIT_ARROW_TRIANGLE_SIZE,
-        ),
-        ArrowDirection::Left.paint_rotation(),
-        glyph_color,
-    );
-    let right = egui::Shape::rotated_triangle(
-        egui::Rect::from_center_size(
-            glyph_center + egui::vec2(FIT_ARROW_SPACING, 0.0),
-            FIT_ARROW_TRIANGLE_SIZE,
-        ),
-        ArrowDirection::Right.paint_rotation(),
-        glyph_color,
-    );
-    vec![axis_line, left, right]
-}
-
-/// Fit-height [H]: a vertical bar capped by up/down arrow triangles.
-fn fit_height_glyph_shapes(
-    glyph_center: egui::Pos2,
-    glyph_color: egui::Color32,
-) -> Vec<egui::Shape> {
-    let axis_line = vertical_axis_line_shape(glyph_center, glyph_color);
-    let up = egui::Shape::rotated_triangle(
-        egui::Rect::from_center_size(
-            glyph_center - egui::vec2(0.0, FIT_ARROW_SPACING),
-            FIT_ARROW_TRIANGLE_SIZE,
-        ),
-        ArrowDirection::Up.paint_rotation(),
-        glyph_color,
-    );
-    let down = egui::Shape::rotated_triangle(
-        egui::Rect::from_center_size(
-            glyph_center + egui::vec2(0.0, FIT_ARROW_SPACING),
-            FIT_ARROW_TRIANGLE_SIZE,
-        ),
-        ArrowDirection::Down.paint_rotation(),
-        glyph_color,
-    );
-    vec![axis_line, up, down]
 }
 
 fn horizontal_axis_line_shape(glyph_center: egui::Pos2, glyph_color: egui::Color32) -> egui::Shape {
