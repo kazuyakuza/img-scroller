@@ -70,8 +70,8 @@ impl ImagesScrollerApp {
 
     /// Sets the session fit mode and anchors the zoom factor to that mode's
     /// 1× base (Option A interplay). Non-default modes announce themselves
-    /// once, at activation; `FitVisible` is silent (it is also the restore /
-    /// open-success reset target).
+    /// once, at activation; `FitVisible` stays silent and clears the standing
+    /// message (it is also the restore / open-success reset target).
     pub(super) fn set_fit_mode(&mut self, fit_mode: crate::scaling::FitMode) {
         self.fit_mode = fit_mode;
         self.zoom_factor = crate::zoom::RESTORE_TO_FIT_FACTOR;

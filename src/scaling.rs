@@ -40,7 +40,7 @@ fn is_positive_size(size: egui::Vec2) -> bool {
 /// the whole-image fit carried since Wave 1; `FitWidth`/`FitHeight` are the
 /// Windows-user expressions of "fit width"/"fit height". Session-only means:
 /// no persistence lives here (the app seam owns the reset policy).
-#[allow(clippy::enum_variant_names)]
+#[allow(clippy::enum_variant_names)] // the variants ARE the user-facing mode names
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) enum FitMode {
     /// Whole-image fit: fully visible and centered.

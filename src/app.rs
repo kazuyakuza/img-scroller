@@ -35,7 +35,7 @@ pub struct ImagesScrollerApp {
     /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the display
     /// path; reset on every successful open; never persisted.
     zoom_factor: f32,
-    /// Session fit mode (Wave-4 Task 3): `FitVisible` = whole-image fit; reset on every open.
+    /// Session fit mode (Wave-4 Task 3): `FitVisible` = whole-image fit; reset on every successful open.
     fit_mode: crate::scaling::FitMode,
 }
 
@@ -124,7 +124,7 @@ impl ImagesScrollerApp {
         }
     }
 
-    /// The 0.3.0 chrome layouts, unchanged (navigation-context gate preserved).
+    /// The 0.3.0 chrome-layout dispatch, unchanged (navigation-context gate preserved).
     fn show_chrome_layout(&mut self, frame: &mut eframe::Frame, ui: &mut egui::Ui) {
         if self.navigation_context_is_active() {
             self.show_navigation_layout(ui);

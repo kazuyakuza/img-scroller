@@ -1,8 +1,8 @@
+//! Exact-in-f32 test vectors only (powers of two divisors), matching the
+//! `fitted_size` test conventions.
+
 use super::{FitMode, fit_height_size, fit_width_size, fitted_size};
 use eframe::egui;
-
-/// Exact-in-f32 test vectors only (powers of two divisors), matching the
-/// `fitted_size` test conventions.
 
 #[test]
 fn fit_width_spans_the_available_width_and_overflows_vertically() {
