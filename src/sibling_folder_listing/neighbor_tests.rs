@@ -1,3 +1,7 @@
+//! Neighbor-stepping and symlink-policy tests of sibling_folder_listing,
+//! reusing the TempScope/listing helpers published by the sibling
+//! `tests` module over the same fixture.
+
 use super::ListedFolderNeighbor;
 use super::tests::{
     TempScope, folder_neighbor, listing_for, listing_with_entries, scope_child_paths,
