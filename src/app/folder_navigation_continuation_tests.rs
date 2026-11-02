@@ -24,8 +24,7 @@ fn assert_enablement_matches_resolution(app: &ImagesScrollerApp) {
     );
 }
 
-#[test]
-fn vertical_navigation_stays_silent_at_the_sibling_list_edges() {
+fn assert_image_mode_sibling_edges_are_silent() {
     let scope = TempParentScope::create("sibling_edges");
     scope.create_child_folder("folder1");
     scope.create_child_folder("folder2");
@@ -51,6 +50,11 @@ fn vertical_navigation_stays_silent_at_the_sibling_list_edges() {
         None
     );
     assert!(app.message_text.is_none());
+}
+
+#[test]
+fn vertical_navigation_stays_silent_at_the_sibling_list_edges() {
+    assert_image_mode_sibling_edges_are_silent();
     let empty_scope = TempParentScope::create("sibling_edges_empty_mode");
     empty_scope.create_child_folder("folder1");
     empty_scope.create_child_folder("folder2");

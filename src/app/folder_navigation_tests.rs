@@ -3,7 +3,7 @@ use super::tests::sample_decoded_image;
 use super::{ImagesScrollerApp, NavigationDirection};
 use crate::image_loading::UNSUPPORTED_FILE_MESSAGE;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub(super) struct TempParentScope {
     parent_path: PathBuf,
@@ -45,9 +45,9 @@ impl Drop for TempParentScope {
     }
 }
 
-pub(super) fn app_opened_in(scope_image_path: &PathBuf) -> ImagesScrollerApp {
+pub(super) fn app_opened_in(scope_image_path: &Path) -> ImagesScrollerApp {
     let mut app = ImagesScrollerApp::empty_state();
-    app.accept_open_outcome(scope_image_path.clone(), Ok(sample_decoded_image()));
+    app.accept_open_outcome(scope_image_path.to_path_buf(), Ok(sample_decoded_image()));
     app
 }
 
