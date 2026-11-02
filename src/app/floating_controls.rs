@@ -1,11 +1,12 @@
 //! Floating centered bottom navigation controls: one overlay pill above the
-//! central image holding the message line and four painted arrow buttons.
-//! All four arrow enablements follow the keyboard seam per frame; the caller
-//! keeps the pill-visibility gate.
+//! central image holding the message line, four painted arrow buttons and the
+//! fifth fullscreen toggle button. All four arrow enablements follow the
+//! keyboard seam per frame; the caller keeps the pill-visibility gate.
 
 use eframe::egui;
 
 use super::arrow_direction::ArrowControl;
+use super::fullscreen_button;
 use super::{ImagesScrollerApp, NavigationDirection};
 
 const FLOATING_PILL_AREA_ID: &str = "floating_navigation_pill";
@@ -17,6 +18,7 @@ const FLOATING_PILL_INNER_MARGIN_POINTS: f32 = 8.0;
 const ARROW_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(36.0, 32.0);
 const ARROW_TRIANGLE_SIZE: egui::Vec2 = egui::Vec2::new(10.0, 10.0);
 const FOLDER_GROUP_GAP: f32 = 16.0;
+const FULLSCREEN_GROUP_GAP: f32 = 16.0;
 const MESSAGE_TEXT_SIZE: f32 = 12.0;
 
 /// A navigation button is enabled exactly when the navigation seam resolves
@@ -68,6 +70,8 @@ fn show_button_row(app: &mut ImagesScrollerApp, pill_ui: &mut egui::Ui) {
             add_folder_group_gap(row_ui, button_spec.control);
             button_spec.show_and_navigate(app, row_ui);
         }
+        row_ui.add_space(FULLSCREEN_GROUP_GAP);
+        fullscreen_button::show_fullscreen_pill_button(app, row_ui);
     });
 }
 

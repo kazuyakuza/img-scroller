@@ -29,6 +29,9 @@ pub struct ImagesScrollerApp {
     message_text: Option<&'static str>,
     /// Texture state of the central image display (spec §4 "small wrapper" clause).
     current_display: CurrentImageDisplay,
+    /// Session fullscreen flag (Wave-4 Task 1): ON hides the native chrome AND
+    /// all UI controls; never persisted; read by the fullscreen modules.
+    fullscreen_on: bool,
 }
 
 use folder_navigation::NavigationDirection;
@@ -48,6 +51,7 @@ impl ImagesScrollerApp {
             decoded_image: None,
             message_text: None,
             current_display: CurrentImageDisplay::initial(),
+            fullscreen_on: false,
         }
     }
 
@@ -105,39 +109,35 @@ impl ImagesScrollerApp {
         });
     }
 
-    /// Empty-state layout: an empty central paint carrying the ONE center Open button (the fresh empty state: no image AND no folder context).
-    fn show_empty_state_layout(
-        &mut self,
-        open_dialog_frame: &mut eframe::Frame,
-        ui: &mut egui::Ui,
-    ) {
-        egui::CentralPanel::default().show(ui, |central_ui| {
-            self.show_centered_open_button(open_dialog_frame, central_ui);
-        });
+    /// Frame layout dispatch: fullscreen ON runs ONLY the central surface; OFF
+    /// runs the exact 0.3.0 layouts (pill + central surface, or the centered
+    /// Open button in the fresh empty state).
+    fn show_chrome_or_fullscreen_layout(&mut self, frame: &mut eframe::Frame, ui: &mut egui::Ui) {
+        if self.full_ui_chrome_is_visible() {
+            self.show_chrome_layout(frame, ui);
+        } else {
+            self.show_fullscreen_layout(ui);
+        }
     }
 
-    /// The only Open control: anchored to the window center in the empty state;
-    /// the click reuses the native open dialog seam (the retired toolbar's path).
-    fn show_centered_open_button(
-        &mut self,
-        open_dialog_frame: &mut eframe::Frame,
-        central_ui: &mut egui::Ui,
-    ) {
-        egui::Area::new(egui::Id::unique(EMPTY_STATE_OPEN_AREA_ID))
-            .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
-            .show(central_ui.ctx(), |area_ui| {
-                let open_button =
-                    egui::Button::new(egui::RichText::new(OPEN_LABEL_TEXT).size(OPEN_LABEL_SIZE))
-                        .min_size(OPEN_BUTTON_SIZE);
-                if area_ui.add(open_button).clicked() {
-                    self.open_via_dialog(open_dialog_frame);
-                }
-            });
+    /// The 0.3.0 chrome layouts, unchanged (navigation-context gate preserved).
+    fn show_chrome_layout(&mut self, frame: &mut eframe::Frame, ui: &mut egui::Ui) {
+        if self.navigation_context_is_active() {
+            self.show_navigation_layout(ui);
+        } else {
+            self.show_empty_state_layout(frame, ui);
+        }
     }
 }
 
 impl eframe::App for ImagesScrollerApp {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+        let fullscreen_toggle_pressed = ui
+            .ctx()
+            .input(|i| i.key_pressed(fullscreen::FULLSCREEN_TOGGLE_KEY));
+        if fullscreen_toggle_pressed {
+            self.toggle_fullscreen_and_send_command(ui.ctx());
+        }
         let left_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowLeft));
         let right_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowRight));
         let up_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowUp));
@@ -154,18 +154,9 @@ impl eframe::App for ImagesScrollerApp {
         if down_pressed {
             self.navigate(NavigationDirection::NextSiblingFolder);
         }
-        if self.navigation_context_is_active() {
-            self.show_navigation_layout(ui);
-        } else {
-            self.show_empty_state_layout(frame, ui);
-        }
+        self.show_chrome_or_fullscreen_layout(frame, ui);
     }
 }
-
-const EMPTY_STATE_OPEN_AREA_ID: &str = "empty_state_open_button";
-const OPEN_LABEL_TEXT: &str = "Open…";
-const OPEN_LABEL_SIZE: f32 = 18.0;
-const OPEN_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(180.0, 48.0);
 
 pub fn window_options() -> eframe::NativeOptions {
     eframe::NativeOptions {
@@ -183,7 +174,13 @@ mod folder_navigation;
 
 mod empty_folder_view;
 
+mod empty_state_view;
+
 mod floating_controls;
+
+mod fullscreen;
+
+mod fullscreen_button;
 
 #[cfg(test)]
 mod tests;
@@ -194,6 +191,9 @@ mod floating_controls_tests;
 mod folder_navigation_tests;
 #[cfg(test)]
 mod last_viewed_tests;
+
+#[cfg(test)]
+mod fullscreen_tests;
 
 #[cfg(test)]
 mod folder_navigation_continuation_tests;
