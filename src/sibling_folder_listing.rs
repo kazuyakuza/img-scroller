@@ -9,7 +9,7 @@ use std::cmp::Ordering;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-type ScopeEntriesReader = dyn Fn(&Path) -> Option<Vec<ScopeEntry>>;
+type ScopeEntriesReader<'r> = dyn Fn(&Path) -> Option<Vec<ScopeEntry>> + 'r;
 
 struct ScopeEntry {
     path: PathBuf,
@@ -66,7 +66,7 @@ impl SiblingFolderListing {
     }
     fn from_opened_image_with_scope_entries(
         opened_image_path: &Path,
-        read_scope_entries: &ScopeEntriesReader,
+        read_scope_entries: &ScopeEntriesReader<'_>,
     ) -> Option<Self> {
         let current_folder_path = opened_image_path.parent()?;
         let resolved_current_folder = fs::canonicalize(current_folder_path).ok()?;
