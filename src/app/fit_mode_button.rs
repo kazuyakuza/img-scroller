@@ -70,6 +70,10 @@ impl FitModeButtonSpec {
 
     /// A disabled fit button never fires (the disabled-arrow pattern).
     fn accepts_click(&self, button_response: &egui::Response) -> bool {
+        self.enabled_click_would_fire(button_response)
+    }
+
+    fn enabled_click_would_fire(&self, button_response: &egui::Response) -> bool {
         self.enabled && button_response.clicked()
     }
 
@@ -130,15 +134,21 @@ fn fit_width_glyph_shapes(
     glyph_center: egui::Pos2,
     glyph_color: egui::Color32,
 ) -> Vec<egui::Shape> {
-    let axis_line = axis_line_shape(glyph_center, glyph_color, true);
-    let left = fit_arrow_triangle_shape(
-        glyph_center - egui::vec2(FIT_ARROW_SPACING, 0.0),
-        ArrowDirection::Left,
+    let axis_line = horizontal_axis_line_shape(glyph_center, glyph_color);
+    let left = egui::Shape::rotated_triangle(
+        egui::Rect::from_center_size(
+            glyph_center - egui::vec2(FIT_ARROW_SPACING, 0.0),
+            FIT_ARROW_TRIANGLE_SIZE,
+        ),
+        ArrowDirection::Left.paint_rotation(),
         glyph_color,
     );
-    let right = fit_arrow_triangle_shape(
-        glyph_center + egui::vec2(FIT_ARROW_SPACING, 0.0),
-        ArrowDirection::Right,
+    let right = egui::Shape::rotated_triangle(
+        egui::Rect::from_center_size(
+            glyph_center + egui::vec2(FIT_ARROW_SPACING, 0.0),
+            FIT_ARROW_TRIANGLE_SIZE,
+        ),
+        ArrowDirection::Right.paint_rotation(),
         glyph_color,
     );
     vec![axis_line, left, right]
@@ -149,31 +159,28 @@ fn fit_height_glyph_shapes(
     glyph_center: egui::Pos2,
     glyph_color: egui::Color32,
 ) -> Vec<egui::Shape> {
-    let axis_line = axis_line_shape(glyph_center, glyph_color, false);
-    let up = fit_arrow_triangle_shape(
-        glyph_center - egui::vec2(0.0, FIT_ARROW_SPACING),
-        ArrowDirection::Up,
+    let axis_line = vertical_axis_line_shape(glyph_center, glyph_color);
+    let up = egui::Shape::rotated_triangle(
+        egui::Rect::from_center_size(
+            glyph_center - egui::vec2(0.0, FIT_ARROW_SPACING),
+            FIT_ARROW_TRIANGLE_SIZE,
+        ),
+        ArrowDirection::Up.paint_rotation(),
         glyph_color,
     );
-    let down = fit_arrow_triangle_shape(
-        glyph_center + egui::vec2(0.0, FIT_ARROW_SPACING),
-        ArrowDirection::Down,
+    let down = egui::Shape::rotated_triangle(
+        egui::Rect::from_center_size(
+            glyph_center + egui::vec2(0.0, FIT_ARROW_SPACING),
+            FIT_ARROW_TRIANGLE_SIZE,
+        ),
+        ArrowDirection::Down.paint_rotation(),
         glyph_color,
     );
     vec![axis_line, up, down]
 }
 
-/// The axis line: horizontal when `horizontal`, else vertical.
-fn axis_line_shape(
-    glyph_center: egui::Pos2,
-    glyph_color: egui::Color32,
-    horizontal: bool,
-) -> egui::Shape {
-    let line_size = if horizontal {
-        egui::Vec2::new(FIT_AXIS_LINE_LENGTH, FIT_AXIS_LINE_THICKNESS)
-    } else {
-        egui::Vec2::new(FIT_AXIS_LINE_THICKNESS, FIT_AXIS_LINE_LENGTH)
-    };
+fn horizontal_axis_line_shape(glyph_center: egui::Pos2, glyph_color: egui::Color32) -> egui::Shape {
+    let line_size = egui::Vec2::new(FIT_AXIS_LINE_LENGTH, FIT_AXIS_LINE_THICKNESS);
     egui::Shape::rect_filled(
         egui::Rect::from_center_size(glyph_center, line_size),
         egui::CornerRadius::ZERO,
@@ -181,13 +188,11 @@ fn axis_line_shape(
     )
 }
 
-/// One painted triangle at `arrow_center` facing `arrow_facing`'s rotation
-/// (arrow family).
-fn fit_arrow_triangle_shape(
-    arrow_center: egui::Pos2,
-    arrow_facing: ArrowDirection,
-    glyph_color: egui::Color32,
-) -> egui::Shape {
-    let arrow_rect = egui::Rect::from_center_size(arrow_center, FIT_ARROW_TRIANGLE_SIZE);
-    egui::Shape::rotated_triangle(arrow_rect, arrow_facing.paint_rotation(), glyph_color)
+fn vertical_axis_line_shape(glyph_center: egui::Pos2, glyph_color: egui::Color32) -> egui::Shape {
+    let line_size = egui::Vec2::new(FIT_AXIS_LINE_THICKNESS, FIT_AXIS_LINE_LENGTH);
+    egui::Shape::rect_filled(
+        egui::Rect::from_center_size(glyph_center, line_size),
+        egui::CornerRadius::ZERO,
+        glyph_color,
+    )
 }
