@@ -121,7 +121,7 @@ impl ImagesScrollerApp {
     }
 
     /// Frame layout dispatch: fullscreen ON runs ONLY the central surface; OFF
-    /// runs the exact 0.3.0 layouts (pill + central surface, or the centered
+    /// runs the standard chrome layouts (pill + central surface, or the centered
     /// Open button in the fresh empty state).
     fn show_chrome_or_fullscreen_layout(&mut self, frame: &mut eframe::Frame, ui: &mut egui::Ui) {
         if self.full_ui_chrome_is_visible() {
