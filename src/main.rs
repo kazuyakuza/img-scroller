@@ -9,6 +9,7 @@ mod name_collation;
 mod platform;
 mod scaling;
 mod sibling_folder_listing;
+mod zoom;
 
 use std::path::PathBuf;
 

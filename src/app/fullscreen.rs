@@ -5,6 +5,7 @@
 use eframe::egui;
 
 use super::ImagesScrollerApp;
+use crate::app_display::ImagePainting;
 
 /// F11: the de-facto Windows fullscreen toggle (spec §7 user-approved choice;
 /// the only exit while ON, since ALL controls are hidden in ON).
@@ -33,7 +34,13 @@ impl ImagesScrollerApp {
     pub(super) fn show_fullscreen_layout(&mut self, ui: &mut egui::Ui) {
         egui::CentralPanel::default().show(ui, |central_ui| {
             if let Some(decoded_image) = self.decoded_image.as_ref() {
-                self.current_display.paint(central_ui, decoded_image);
+                self.current_display.paint(
+                    central_ui,
+                    ImagePainting {
+                        decoded_image,
+                        zoom_factor: self.zoom_factor,
+                    },
+                );
             }
         });
     }

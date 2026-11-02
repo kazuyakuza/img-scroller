@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use eframe::egui;
 
-use crate::app_display::CurrentImageDisplay;
+use crate::app_display::{CurrentImageDisplay, ImagePainting};
 use crate::folder_listing::FolderListing;
 use crate::image_loading::{self, DecodedImage, ImageLoadFailure};
 use crate::last_viewed_images::LastViewedImages;
@@ -32,6 +32,9 @@ pub struct ImagesScrollerApp {
     /// Session fullscreen flag (Wave-4 Task 1): ON hides the native chrome AND
     /// all UI controls; never persisted; read by the fullscreen modules.
     fullscreen_on: bool,
+    /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the
+    /// display path; reset on every successful open; never persisted.
+    zoom_factor: f32,
 }
 
 use folder_navigation::NavigationDirection;
@@ -52,6 +55,7 @@ impl ImagesScrollerApp {
             message_text: None,
             current_display: CurrentImageDisplay::initial(),
             fullscreen_on: false,
+            zoom_factor: crate::zoom::RESTORE_TO_FIT_FACTOR,
         }
     }
 
@@ -78,6 +82,7 @@ impl ImagesScrollerApp {
                 self.opened_image_path = Some(path);
                 self.decoded_image = Some(decoded_image);
                 self.message_text = None;
+                self.zoom_factor = crate::zoom::RESTORE_TO_FIT_FACTOR;
                 self.current_display.accept_decoded_image();
             }
             Err(_failure) => {
@@ -102,7 +107,13 @@ impl ImagesScrollerApp {
         floating_controls::show_floating_pill(self, ui);
         egui::CentralPanel::default().show(ui, |central_ui| {
             if let Some(decoded_image) = self.decoded_image.as_ref() {
-                self.current_display.paint(central_ui, decoded_image);
+                self.current_display.paint(
+                    central_ui,
+                    ImagePainting {
+                        decoded_image,
+                        zoom_factor: self.zoom_factor,
+                    },
+                );
             } else {
                 empty_folder_view::show_empty_folder_message(central_ui);
             }
@@ -132,28 +143,7 @@ impl ImagesScrollerApp {
 
 impl eframe::App for ImagesScrollerApp {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
-        let fullscreen_toggle_pressed = ui
-            .ctx()
-            .input(|i| i.key_pressed(fullscreen::FULLSCREEN_TOGGLE_KEY));
-        if fullscreen_toggle_pressed {
-            self.toggle_fullscreen_and_send_command(ui.ctx());
-        }
-        let left_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowLeft));
-        let right_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowRight));
-        let up_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowUp));
-        let down_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowDown));
-        if left_pressed {
-            self.navigate(NavigationDirection::Previous);
-        }
-        if right_pressed {
-            self.navigate(NavigationDirection::Next);
-        }
-        if up_pressed {
-            self.navigate(NavigationDirection::PreviousSiblingFolder);
-        }
-        if down_pressed {
-            self.navigate(NavigationDirection::NextSiblingFolder);
-        }
+        self.read_and_dispatch_keystrokes(ui.ctx());
         self.show_chrome_or_fullscreen_layout(frame, ui);
     }
 }
@@ -182,6 +172,12 @@ mod fullscreen;
 
 mod fullscreen_button;
 
+mod zoom;
+
+mod zoom_button;
+
+mod keyboard_intake;
+
 #[cfg(test)]
 mod tests;
 
@@ -197,3 +193,6 @@ mod fullscreen_tests;
 
 #[cfg(test)]
 mod folder_navigation_continuation_tests;
+
+#[cfg(test)]
+mod zoom_tests;

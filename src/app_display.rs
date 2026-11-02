@@ -5,8 +5,16 @@ use eframe::egui;
 
 use crate::image_loading::DecodedImage;
 use crate::scaling;
+use crate::zoom;
 
 const CURRENT_IMAGE_TEXTURE_NAME: &str = "current_image";
+
+/// The 2-argument paint request (project max-args rule): WHICH decoded image
+/// is on screen and at WHAT session zoom factor its fitted size is drawn.
+pub(crate) struct ImagePainting<'a> {
+    pub(crate) decoded_image: &'a DecodedImage,
+    pub(crate) zoom_factor: f32,
+}
 
 /// Texture state of the image shown in the central surface. A successful open
 /// flags a pending upload; the next paint uploads exactly once and clears it.
@@ -28,17 +36,20 @@ impl CurrentImageDisplay {
         self.texture_upload_pending = true;
     }
 
-    /// Paints the decoded image fit-scaled and centered on the given surface.
-    pub(crate) fn paint(&mut self, panel_ui: &mut egui::Ui, decoded_image: &DecodedImage) {
-        self.ensure_current_image_texture(panel_ui.ctx(), decoded_image);
+    /// Paints the decoded image at `fit * zoom`, centered; size overflow is
+    /// clipped by the panel's default clip rect (center-region visible).
+    pub(crate) fn paint(&mut self, panel_ui: &mut egui::Ui, painting: ImagePainting) {
+        self.ensure_current_image_texture(panel_ui.ctx(), painting.decoded_image);
         let Some(image_texture) = self.image_texture.as_ref() else {
             return;
         };
-        let Some(display_size) =
-            scaling::fitted_size(panel_ui.available_size(), image_dimensions(decoded_image))
-        else {
+        let Some(fit_size) = scaling::fitted_size(
+            panel_ui.available_size(),
+            image_dimensions(painting.decoded_image),
+        ) else {
             return;
         };
+        let display_size = zoom::zoomed_draw_size(fit_size, painting.zoom_factor);
         panel_ui.with_layout(
             egui::Layout::centered_and_justified(egui::Direction::TopDown),
             |image_ui| {
