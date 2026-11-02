@@ -2,6 +2,10 @@
 //! fullscreen toggle, the four navigation arrows, the zoom in/out/restore
 //! chords) is read once per frame and dispatched; the intake runs in EVERY
 //! mode (fullscreen included) and always BEFORE the layout dispatch.
+//!
+//! AI Agents: this block was moved verbatim out of `src/app.rs` (held at the
+//! 200-line cap) -- do NOT re-inline it; keep all reads collected before the
+//! dispatch chain.
 
 use eframe::egui;
 

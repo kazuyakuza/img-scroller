@@ -1,7 +1,10 @@
 //! Zoom math (Wave-4 Task 2): the multiplicative step scaling within fixed
 //! bounds, the restore-to-fit reset, the at-bound detection, and the
 //! fit-relative draw size. Pure calculations only: no egui painting, no
-//! texture or pixel code. Sibling of `src/scaling.rs`.
+//! texture or pixel code. Sibling of `src/scaling.rs`. Authoritative for the
+//! MATH only: the clamp below is silent, so the rejected-step pill feedback and
+//! the reset-on-every-successful-open policy both live in the app seam
+//! (`src/app/zoom.rs` and the `accept_open_outcome` wiring in `src/app.rs`).
 
 use eframe::egui;
 

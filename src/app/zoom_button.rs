@@ -167,7 +167,8 @@ impl ZoomButtonSpec {
     }
 
     /// Restore-fit icon: a stroked square outline (fit marker; distinct from
-    /// the fullscreen button's FILLED square).
+    /// the fullscreen button's FILLED square). `rect_stroke` REQUIRES an
+    /// explicit `StrokeKind` (mandatory since egui 0.31) -- keep that argument.
     fn stroked_square_shapes(
         &self,
         glyph_center: egui::Pos2,

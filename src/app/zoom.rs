@@ -2,6 +2,15 @@
 //! chords (I / Shift+Plus, O / Shift+Minus, 0 = restore fit), and the
 //! at-bound pill-message assignment. Buttons live in `zoom_button.rs`; the
 //! pure math lives in `crate::zoom`. Session state only: never persisted.
+//! The pill message fires ONLY when a step is attempted at a bound it already
+//! holds; a step that merely lands on a bound clamps silently (D2). The
+//! reset-on-every-successful-open policy is NOT here -- it lives in `src/app.rs`
+//! (`accept_open_outcome`).
+//!
+//! AI Agents: this app seam (`super::zoom`) is a separate module from the
+//! pure-math `crate::zoom` even though both share the leaf name `zoom`; keep the
+//! two distinct (in `src/app.rs` the `mod zoom;` seam shadows the math, so the
+//! math must be referenced fully-qualified as `crate::zoom::...`).
 
 use eframe::egui;
 

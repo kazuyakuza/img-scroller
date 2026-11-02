@@ -36,8 +36,10 @@ impl CurrentImageDisplay {
         self.texture_upload_pending = true;
     }
 
-    /// Paints the decoded image at `fit * zoom`, centered; size overflow is
-    /// clipped by the panel's default clip rect (center-region visible).
+    /// Paints the decoded image at `fit * zoom` (recomposed every frame); size
+    /// overflow is clipped by the panel's default clip rect (center-region
+    /// visible). No pan or scroll this wave -- Wave 5 composes its offsets onto
+    /// this same fit-scaled size.
     pub(crate) fn paint(&mut self, panel_ui: &mut egui::Ui, painting: ImagePainting) {
         self.ensure_current_image_texture(panel_ui.ctx(), painting.decoded_image);
         let Some(image_texture) = self.image_texture.as_ref() else {
