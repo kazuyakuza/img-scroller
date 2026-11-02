@@ -191,9 +191,9 @@ mod tests;
 #[cfg(test)]
 mod floating_controls_tests;
 #[cfg(test)]
-mod last_viewed_tests;
-#[cfg(test)]
 mod folder_navigation_tests;
+#[cfg(test)]
+mod last_viewed_tests;
 
 #[cfg(test)]
 mod folder_navigation_continuation_tests;

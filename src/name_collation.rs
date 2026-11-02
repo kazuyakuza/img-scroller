@@ -20,13 +20,19 @@ mod tests {
 
     #[test]
     fn lowercase_form_decides_order_before_exact_characters() {
-        assert_eq!(compare_entry_names("alpha.gif", "ALPHA.jpg"), Ordering::Less);
+        assert_eq!(
+            compare_entry_names("alpha.gif", "ALPHA.jpg"),
+            Ordering::Less
+        );
         assert_eq!(compare_entry_names("alpha.gif", "zeta.jpg"), Ordering::Less);
     }
 
     #[test]
     fn exact_characters_tie_break_when_lowercase_forms_match() {
-        assert_eq!(compare_entry_names("Alpha.jpg", "alpha.jpg"), Ordering::Less);
+        assert_eq!(
+            compare_entry_names("Alpha.jpg", "alpha.jpg"),
+            Ordering::Less
+        );
         assert_eq!(compare_entry_names("ALPHA", "Alpha"), Ordering::Less);
     }
 }

@@ -125,7 +125,10 @@ fn entering_an_image_less_sibling_folder_clears_the_image_and_reanchors_the_list
     app.navigate(NavigationDirection::NextSiblingFolder);
     assert!(app.opened_image_path.is_none());
     assert!(app.decoded_image.is_none());
-    assert_eq!(app.browsed_folder_context, Some(scope.child_folder_path("folder2")));
+    assert_eq!(
+        app.browsed_folder_context,
+        Some(scope.child_folder_path("folder2"))
+    );
     assert!(app.current_folder_listing.is_none());
     assert!(app.message_text.is_none());
     assert!(app.navigation_context_is_active());
@@ -154,7 +157,10 @@ fn empty_folder_mode_continues_vertically_in_both_folder_kinds() {
         .expect("stray file written");
     let mut app = app_opened_in(&scope.child_image_path("folder1", "a.png"));
     app.navigate(NavigationDirection::NextSiblingFolder);
-    assert_eq!(app.browsed_folder_context, Some(scope.child_folder_path("folder2")));
+    assert_eq!(
+        app.browsed_folder_context,
+        Some(scope.child_folder_path("folder2"))
+    );
     assert_eq!(
         app.neighbor_image_path(NavigationDirection::NextSiblingFolder),
         Some(scope.child_folder_path("folder3"))
@@ -165,7 +171,10 @@ fn empty_folder_mode_continues_vertically_in_both_folder_kinds() {
     );
     app.navigate(NavigationDirection::NextSiblingFolder);
     assert_eq!(app.message_text, Some(UNSUPPORTED_FILE_MESSAGE));
-    assert_eq!(app.browsed_folder_context, Some(scope.child_folder_path("folder2")));
+    assert_eq!(
+        app.browsed_folder_context,
+        Some(scope.child_folder_path("folder2"))
+    );
     assert!(app.opened_image_path.is_none());
     assert!(app.decoded_image.is_none());
     app.accept_open_outcome(
@@ -184,7 +193,10 @@ fn empty_folder_mode_continues_vertically_in_both_folder_kinds() {
         Some(scope.child_folder_path("folder2"))
     );
     app.navigate(NavigationDirection::PreviousSiblingFolder);
-    assert_eq!(app.browsed_folder_context, Some(scope.child_folder_path("folder2")));
+    assert_eq!(
+        app.browsed_folder_context,
+        Some(scope.child_folder_path("folder2"))
+    );
     assert!(app.opened_image_path.is_none());
     assert!(app.message_text.is_none());
 }

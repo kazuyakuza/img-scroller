@@ -58,8 +58,7 @@ impl ImagesScrollerApp {
             NavigationDirection::Previous | NavigationDirection::Next => {
                 listed_image_neighbor(self, direction)
             }
-            NavigationDirection::PreviousSiblingFolder
-            | NavigationDirection::NextSiblingFolder => {
+            NavigationDirection::PreviousSiblingFolder | NavigationDirection::NextSiblingFolder => {
                 sibling_folder_neighbor_path(self, direction)
             }
         }

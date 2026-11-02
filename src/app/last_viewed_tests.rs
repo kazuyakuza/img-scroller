@@ -2,8 +2,8 @@
 //! updated on every successful open, unclobbered by failed opens, and
 //! scoped per folder.
 
-use super::tests::{TempImageFolder, sample_decoded_image};
 use super::ImagesScrollerApp;
+use super::tests::{TempImageFolder, sample_decoded_image};
 use crate::image_loading::UNSUPPORTED_FILE_MESSAGE;
 use std::path::{Path, PathBuf};
 

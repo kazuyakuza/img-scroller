@@ -29,7 +29,9 @@ impl LastViewedImages {
     /// The session's last displayed image of `folder_path`; `None` before the
     /// folder was visited; `sibling_folder_target_image_path` calls this for the priority lookup.
     pub(crate) fn last_displayed_image(&self, folder_path: &Path) -> Option<&Path> {
-        self.folder_to_image_paths.get(folder_path).map(PathBuf::as_path)
+        self.folder_to_image_paths
+            .get(folder_path)
+            .map(PathBuf::as_path)
     }
 
     #[cfg(test)]

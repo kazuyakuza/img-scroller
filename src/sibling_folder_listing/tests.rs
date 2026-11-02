@@ -39,8 +39,13 @@ impl TempScope {
         }
     }
     fn external_target_path(&self) -> PathBuf {
-        let scope_name = self.scope_path.file_name().unwrap_or_default().to_string_lossy();
-        self.scope_path.with_file_name(format!("{scope_name}_target"))
+        let scope_name = self
+            .scope_path
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy();
+        self.scope_path
+            .with_file_name(format!("{scope_name}_target"))
     }
 }
 
@@ -68,7 +73,10 @@ fn folder_neighbor(listed_index: usize, folder_path: PathBuf) -> ListedFolderNei
     }
 }
 fn scope_child_paths(scope: &TempScope, names: &[&str]) -> Vec<PathBuf> {
-    names.iter().map(|name| scope.scope_child_path(name)).collect()
+    names
+        .iter()
+        .map(|name| scope.scope_child_path(name))
+        .collect()
 }
 
 #[test]
@@ -150,18 +158,30 @@ fn folder_neighbors_step_by_one_and_report_scope_edges() {
     let gamma_at_one = || Some(folder_neighbor(1, scope.scope_child_path("gamma")));
     let beta_anchor = scope.scope_child_path("beta").join("img.png");
     let beta_listing = listing_with_entries(beta_anchor.as_path(), &read_entries);
-    assert_eq!(beta_listing.previous_neighbor_of(beta_anchor.as_path()), alpha_at_zero());
-    assert_eq!(beta_listing.next_neighbor_of(beta_anchor.as_path()), gamma_at_one());
+    assert_eq!(
+        beta_listing.previous_neighbor_of(beta_anchor.as_path()),
+        alpha_at_zero()
+    );
+    assert_eq!(
+        beta_listing.next_neighbor_of(beta_anchor.as_path()),
+        gamma_at_one()
+    );
     let alpha_anchor = scope.scope_child_path("alpha").join("img.png");
     let alpha_listing = listing_with_entries(alpha_anchor.as_path(), &read_entries);
     assert_eq!(
         alpha_listing.previous_neighbor_of(alpha_anchor.as_path()),
         Some(ListedFolderNeighbor::ListBeginningReached)
     );
-    assert_eq!(alpha_listing.next_neighbor_of(alpha_anchor.as_path()), beta_at_zero());
+    assert_eq!(
+        alpha_listing.next_neighbor_of(alpha_anchor.as_path()),
+        beta_at_zero()
+    );
     let gamma_anchor = scope.scope_child_path("gamma").join("img.png");
     let gamma_listing = listing_with_entries(gamma_anchor.as_path(), &read_entries);
-    assert_eq!(gamma_listing.previous_neighbor_of(gamma_anchor.as_path()), beta_at_one());
+    assert_eq!(
+        gamma_listing.previous_neighbor_of(gamma_anchor.as_path()),
+        beta_at_one()
+    );
     assert_eq!(
         gamma_listing.next_neighbor_of(gamma_anchor.as_path()),
         Some(ListedFolderNeighbor::ListEndReached)

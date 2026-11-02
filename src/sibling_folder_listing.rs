@@ -72,7 +72,10 @@ impl SiblingFolderListing {
         let resolved_current_folder = fs::canonicalize(current_folder_path).ok()?;
         let scope_parent_path = resolved_current_folder.parent()?;
         let scope_entries = read_scope_entries(scope_parent_path).unwrap_or_default();
-        Some(Self::sorted_scope_folders(scope_entries, &resolved_current_folder))
+        Some(Self::sorted_scope_folders(
+            scope_entries,
+            &resolved_current_folder,
+        ))
     }
     fn sorted_scope_folders(entries: Vec<ScopeEntry>, current_folder: &Path) -> Self {
         let mut sibling_folder_paths: Vec<PathBuf> = entries
@@ -108,13 +111,20 @@ impl SiblingFolderListing {
 }
 
 fn preceding_folder_name(listed_path: &Path, current_name: &str) -> bool {
-    let listed_name = listed_path.file_name().unwrap_or_default().to_string_lossy();
+    let listed_name = listed_path
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy();
     compare_entry_names(&listed_name, current_name) == Ordering::Less
 }
 
 fn read_scope_entries(folder_path: &Path) -> Option<Vec<ScopeEntry>> {
     let dir_entries = fs::read_dir(folder_path).ok()?;
-    Some(dir_entries.filter_map(|entry| scope_entry_of(entry.ok()?)).collect())
+    Some(
+        dir_entries
+            .filter_map(|entry| scope_entry_of(entry.ok()?))
+            .collect(),
+    )
 }
 
 fn scope_entry_of(dir_entry: fs::DirEntry) -> Option<ScopeEntry> {

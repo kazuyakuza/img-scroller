@@ -8,7 +8,8 @@ use std::fs;
 fn assert_enablement_matches_resolution(app: &ImagesScrollerApp) {
     assert_eq!(
         navigation_button_enabled(app, NavigationDirection::Previous),
-        app.neighbor_image_path(NavigationDirection::Previous).is_some()
+        app.neighbor_image_path(NavigationDirection::Previous)
+            .is_some()
     );
     assert_eq!(
         navigation_button_enabled(app, NavigationDirection::Next),
@@ -16,11 +17,13 @@ fn assert_enablement_matches_resolution(app: &ImagesScrollerApp) {
     );
     assert_eq!(
         navigation_button_enabled(app, NavigationDirection::PreviousSiblingFolder),
-        app.neighbor_image_path(NavigationDirection::PreviousSiblingFolder).is_some()
+        app.neighbor_image_path(NavigationDirection::PreviousSiblingFolder)
+            .is_some()
     );
     assert_eq!(
         navigation_button_enabled(app, NavigationDirection::NextSiblingFolder),
-        app.neighbor_image_path(NavigationDirection::NextSiblingFolder).is_some()
+        app.neighbor_image_path(NavigationDirection::NextSiblingFolder)
+            .is_some()
     );
 }
 
@@ -146,7 +149,10 @@ fn vertical_button_enablement_matches_the_neighbor_resolution_semantics() {
         &app,
         NavigationDirection::NextSiblingFolder
     ));
-    assert!(!navigation_button_enabled(&app, NavigationDirection::Previous));
+    assert!(!navigation_button_enabled(
+        &app,
+        NavigationDirection::Previous
+    ));
     assert!(!navigation_button_enabled(&app, NavigationDirection::Next));
     assert_enablement_matches_resolution(&app);
 }
