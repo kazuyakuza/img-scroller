@@ -1,7 +1,7 @@
 //! Floating centered bottom navigation controls: one overlay pill above the
 //! central image holding the message line and four painted arrow buttons.
-//! Previous/next enablement follows the keyboard seam per frame; up/down are
-//! the Wave-3-reserved disabled pair. The caller keeps the image-open gate.
+//! All four arrow enablements follow the keyboard seam per frame; the caller
+//! keeps the pill-visibility gate.
 
 use eframe::egui;
 
@@ -20,7 +20,7 @@ const FOLDER_GROUP_GAP: f32 = 16.0;
 const MESSAGE_TEXT_SIZE: f32 = 12.0;
 
 /// A navigation button is enabled exactly when the navigation seam resolves
-/// a neighbor: no image, no listing, unresolvable index, and list edges disable.
+/// a neighbor; no image or browsed folder, no listing, unresolvable anchor, and list edges disable.
 pub(super) fn navigation_button_enabled(
     app: &ImagesScrollerApp,
     direction: NavigationDirection,
@@ -140,7 +140,7 @@ impl ArrowButtonSpec {
         self.control.navigation_direction()
     }
 
-    /// A disabled arrow never navigates (the Wave-3 reserve stays handler-free).
+    /// A disabled arrow never navigates (a disabled arrow stays handler-free).
     fn accepts_click(&self, button_response: &egui::Response) -> bool {
         self.enabled && button_response.clicked()
     }

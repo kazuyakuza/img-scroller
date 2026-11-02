@@ -5,10 +5,11 @@ use std::path::PathBuf;
 use eframe::egui;
 
 use crate::app_display::CurrentImageDisplay;
-use crate::folder_listing::{FolderListing, ListedNeighbor};
+use crate::folder_listing::FolderListing;
 use crate::image_loading::{self, DecodedImage, ImageLoadFailure};
 use crate::last_viewed_images::LastViewedImages;
 use crate::platform;
+use crate::sibling_folder_listing::SiblingFolderListing;
 
 /// Title shown on the viewer window title bar (final app name, user-decided 2026-10-29).
 pub const APP_WINDOW_TITLE: &str = "Images Scroller";
@@ -21,6 +22,8 @@ pub struct ImagesScrollerApp {
     current_folder_listing: Option<FolderListing>,
     /// Session memory: the last displayed image of every folder visited in-session.
     last_viewed_images: LastViewedImages,
+    current_sibling_folders: Option<SiblingFolderListing>,
+    browsed_folder_context: Option<PathBuf>,
     /// Decoded pixels of the last successfully opened image (read by the display surface).
     decoded_image: Option<DecodedImage>,
     message_text: Option<&'static str>,
@@ -28,10 +31,7 @@ pub struct ImagesScrollerApp {
     current_display: CurrentImageDisplay,
 }
 
-enum NavigationDirection {
-    Previous,
-    Next,
-}
+use folder_navigation::NavigationDirection;
 
 impl ImagesScrollerApp {
     pub fn new(_creation_context: &eframe::CreationContext<'_>) -> Self {
@@ -43,6 +43,8 @@ impl ImagesScrollerApp {
             opened_image_path: None,
             current_folder_listing: None,
             last_viewed_images: LastViewedImages::empty(),
+            current_sibling_folders: None,
+            browsed_folder_context: None,
             decoded_image: None,
             message_text: None,
             current_display: CurrentImageDisplay::initial(),
@@ -52,7 +54,8 @@ impl ImagesScrollerApp {
     /// Opens an image synchronously: decodes now, then applies the outcome to the open-flow state.
     pub fn open_image(&mut self, path: PathBuf) {
         let outcome = image_loading::load_image(&path);
-        self.accept_open_outcome(path, outcome);
+        let opened_path = std::fs::canonicalize(&path).unwrap_or_else(|_| path.clone());
+        self.accept_open_outcome(opened_path, outcome);
     }
 
     /// Failure keeps any previously loaded image and state untouched except the message.
@@ -65,6 +68,9 @@ impl ImagesScrollerApp {
             Ok(decoded_image) => {
                 self.current_folder_listing = FolderListing::from_opened_image(path.as_path());
                 self.last_viewed_images.record_displayed_image(&path);
+                self.current_sibling_folders =
+                    SiblingFolderListing::from_opened_image(path.as_path());
+                self.browsed_folder_context = None;
                 self.opened_image_path = Some(path);
                 self.decoded_image = Some(decoded_image);
                 self.message_text = None;
@@ -82,47 +88,24 @@ impl ImagesScrollerApp {
         }
     }
 
-    /// Navigates one sibling image per arrow direction; a failed neighbor open
-    /// keeps the current image (Wave-1 open-flow failure rule).
-    fn navigate(&mut self, direction: NavigationDirection) {
-        if let Some(neighbor_path) = self.neighbor_image_path(direction) {
-            self.open_image(neighbor_path);
-        }
-    }
-
-    /// Resolves the ±1 sibling path from the opened path and the current
-    /// listing; every "nothing to navigate to" case (no image, no listing,
-    /// unresolvable index, list beginning/end reached) resolves to None.
-    fn neighbor_image_path(&self, direction: NavigationDirection) -> Option<PathBuf> {
-        let opened_path = self.opened_image_path.as_ref()?;
-        let listing = self.current_folder_listing.as_ref()?;
-        let listed_index = listing.listed_index_of(opened_path)?;
-        let neighbor = match direction {
-            NavigationDirection::Previous => listing.previous_neighbor(listed_index),
-            NavigationDirection::Next => listing.next_neighbor(listed_index),
-        };
-        let ListedNeighbor::At { image_path, .. } = neighbor else {
-            return None;
-        };
-        Some(image_path)
-    }
-
-    /// True while an image remains successfully opened (the floating controls' empty-state gate).
+    /// True while an image remains successfully opened (read by the navigation seam's pill-visibility gate).
     fn image_is_open(&self) -> bool {
         self.opened_image_path.is_some()
     }
 
-    /// Image-open layout: the centered floating control pill plus the central image paint.
-    fn show_image_layout(&mut self, ui: &mut egui::Ui) {
+    /// Pill layout: the floating pill plus the central surface -- the image paint when one is open, else the empty-folder message.
+    fn show_navigation_layout(&mut self, ui: &mut egui::Ui) {
         floating_controls::show_floating_pill(self, ui);
         egui::CentralPanel::default().show(ui, |central_ui| {
             if let Some(decoded_image) = self.decoded_image.as_ref() {
                 self.current_display.paint(central_ui, decoded_image);
+            } else {
+                empty_folder_view::show_empty_folder_message(central_ui);
             }
         });
     }
 
-    /// Empty-state layout: an empty central paint carrying the ONE center Open button.
+    /// Empty-state layout: an empty central paint carrying the ONE center Open button (the fresh empty state: no image AND no folder context).
     fn show_empty_state_layout(
         &mut self,
         open_dialog_frame: &mut eframe::Frame,
@@ -157,14 +140,22 @@ impl eframe::App for ImagesScrollerApp {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         let left_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowLeft));
         let right_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowRight));
+        let up_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowUp));
+        let down_pressed = ui.ctx().input(|i| i.key_pressed(egui::Key::ArrowDown));
         if left_pressed {
             self.navigate(NavigationDirection::Previous);
         }
         if right_pressed {
             self.navigate(NavigationDirection::Next);
         }
-        if self.image_is_open() {
-            self.show_image_layout(ui);
+        if up_pressed {
+            self.navigate(NavigationDirection::PreviousSiblingFolder);
+        }
+        if down_pressed {
+            self.navigate(NavigationDirection::NextSiblingFolder);
+        }
+        if self.navigation_context_is_active() {
+            self.show_navigation_layout(ui);
         } else {
             self.show_empty_state_layout(frame, ui);
         }
@@ -188,6 +179,10 @@ pub fn window_options() -> eframe::NativeOptions {
 
 mod arrow_direction;
 
+mod folder_navigation;
+
+mod empty_folder_view;
+
 mod floating_controls;
 
 #[cfg(test)]
@@ -197,3 +192,8 @@ mod tests;
 mod floating_controls_tests;
 #[cfg(test)]
 mod last_viewed_tests;
+#[cfg(test)]
+mod folder_navigation_tests;
+
+#[cfg(test)]
+mod folder_navigation_continuation_tests;

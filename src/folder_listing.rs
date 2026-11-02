@@ -55,6 +55,12 @@ impl FolderListing {
         self.image_paths.len()
     }
 
+    /// The FIRST whitelisted image in the fixed collation (the vertical
+    /// navigation's new-folder target); None for an empty listing.
+    pub(crate) fn first_listed_image(&self) -> Option<PathBuf> {
+        self.image_paths.first().cloned()
+    }
+
     pub(crate) fn listed_index_of(&self, opened_image_path: &Path) -> Option<usize> {
         let resolved_image_path = fs::canonicalize(opened_image_path).ok()?;
         self.image_paths

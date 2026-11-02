@@ -28,7 +28,6 @@ impl LastViewedImages {
 
     /// The session's last displayed image of `folder_path`; `None` before the
     /// folder was visited. Task 3's target-priority lookup calls this.
-    #[allow(dead_code)]
     pub(crate) fn last_displayed_image(&self, folder_path: &Path) -> Option<&Path> {
         self.folder_to_image_paths.get(folder_path).map(PathBuf::as_path)
     }

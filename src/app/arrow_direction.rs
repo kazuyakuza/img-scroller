@@ -25,8 +25,8 @@ impl ArrowDirection {
 }
 
 /// Which navigation control a floating-pill button represents. The image
-/// arrows navigate via the keyboard seam; the folder arrows are disabled in
-/// Wave 2 and follow Wave 3.
+/// arrows step sibling images and the folder arrows step the sibling folders
+/// under the same parent; both axes share the keyboard navigation seam.
 #[derive(Clone, Copy, PartialEq)]
 pub(super) enum ArrowControl {
     ImagePrevious,
@@ -49,17 +49,18 @@ impl ArrowControl {
         match self {
             Self::ImagePrevious => "Previous image",
             Self::ImageNext => "Next image",
-            Self::FolderUp => "Up folder",
-            Self::FolderDown => "Down folder",
+            Self::FolderUp => "Previous sibling folder",
+            Self::FolderDown => "Next sibling folder",
         }
     }
 
-    /// None for the Wave-3-reserved folder arrows (no navigation this wave).
+    /// Concrete direction per button; all four arrows navigate.
     pub(super) fn navigation_direction(self) -> Option<NavigationDirection> {
         match self {
             Self::ImagePrevious => Some(NavigationDirection::Previous),
             Self::ImageNext => Some(NavigationDirection::Next),
-            Self::FolderUp | Self::FolderDown => None,
+            Self::FolderUp => Some(NavigationDirection::PreviousSiblingFolder),
+            Self::FolderDown => Some(NavigationDirection::NextSiblingFolder),
         }
     }
 }

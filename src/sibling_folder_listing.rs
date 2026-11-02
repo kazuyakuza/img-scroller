@@ -18,7 +18,6 @@ struct ScopeEntry {
 
 /// Resolved sibling destination folder, or the list bound reached from the anchor.
 #[derive(Debug, PartialEq)]
-#[allow(dead_code)]
 pub(crate) enum ListedFolderNeighbor {
     At {
         #[allow(dead_code)]
@@ -35,7 +34,6 @@ pub(crate) struct SiblingFolderListing {
 
 impl SiblingFolderListing {
     /// Build the listing from the opened image path; `None` if folder or parent is unresolvable.
-    #[allow(dead_code)]
     pub(crate) fn from_opened_image(opened_image_path: &Path) -> Option<Self> {
         Self::from_opened_image_with_scope_entries(opened_image_path, &read_scope_entries)
     }
@@ -45,7 +43,6 @@ impl SiblingFolderListing {
         self.sibling_folder_paths.len()
     }
     /// Previous sibling from the anchor; `ListBeginningReached` at the start of the list.
-    #[allow(dead_code)]
     pub(crate) fn previous_neighbor_of(
         &self,
         opened_image_path: &Path,
@@ -57,7 +54,6 @@ impl SiblingFolderListing {
         Some(self.neighbor_at(position - 1))
     }
     /// Next sibling from the anchor; `ListEndReached` at the end of the list.
-    #[allow(dead_code)]
     pub(crate) fn next_neighbor_of(
         &self,
         opened_image_path: &Path,
