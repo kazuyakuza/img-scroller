@@ -7,6 +7,10 @@
 //! reset-on-every-successful-open policy is NOT here -- it lives in `src/app.rs`
 //! (`accept_open_outcome`).
 //!
+//! Fit modes (Wave-4 Task 3) share this seam: `set_fit_mode` is the ONE
+//! mode-set-and-reset call (hotkeys `W`/`H`, both pill buttons, the restore
+//! path, and the open-success reset all funnel through it).
+//!
 //! AI Agents: this app seam (`super::zoom`) is a separate module from the
 //! pure-math `crate::zoom` even though both share the leaf name `zoom`; keep the
 //! two distinct (in `src/app.rs` the `mod zoom;` seam shadows the math, so the
@@ -23,6 +27,16 @@ const ZOOM_IN_KEY: egui::Key = egui::Key::I;
 const ZOOM_OUT_KEY: egui::Key = egui::Key::O;
 /// Restore-to-fit hotkey: the digit zero (egui's exact digit member).
 pub(super) const RESTORE_FIT_KEY: egui::Key = egui::Key::Num0;
+
+/// Fit-width hotkey `W` (Wave-4 Task 3, user-approved K1 binding).
+pub(super) const FIT_WIDTH_KEY: egui::Key = egui::Key::W;
+/// Fit-height hotkey `H` (the user-approved twin of `W`).
+pub(super) const FIT_HEIGHT_KEY: egui::Key = egui::Key::H;
+
+/// Pill label announced once, at fit-width activation (singular channel).
+pub(super) const FIT_WIDTH_MESSAGE: &str = "Fit width";
+/// Pill label announced once, at fit-height activation.
+pub(super) const FIT_HEIGHT_MESSAGE: &str = "Fit height";
 
 /// Pill message shown when a zoom-out step is rejected at the fit bound
 /// (pinned by the zoom tests; reaches the pill through `message_text`).
@@ -47,10 +61,25 @@ impl ImagesScrollerApp {
         self.zoom_factor = zoom::zoom_out_factor(self.zoom_factor);
     }
 
-    /// Hotkey `0` and the restore button: returns the zoom to whole-image fit.
-    /// Silent by design everywhere (the fit state is its own feedback).
+    /// Hotkey `0` and the restore button: back to whole-image fit (Wave-4
+    /// Task 3: the mode returns to `FitVisible` too). Silent: the fit state
+    /// is its own feedback.
     pub(super) fn restore_zoom_to_fit(&mut self) {
-        self.zoom_factor = zoom::RESTORE_TO_FIT_FACTOR;
+        self.set_fit_mode(crate::scaling::FitMode::FitVisible);
+    }
+
+    /// Sets the session fit mode and anchors the zoom factor to that mode's
+    /// 1× base (Option A interplay). Non-default modes announce themselves
+    /// once, at activation; `FitVisible` is silent (it is also the restore /
+    /// open-success reset target).
+    pub(super) fn set_fit_mode(&mut self, fit_mode: crate::scaling::FitMode) {
+        self.fit_mode = fit_mode;
+        self.zoom_factor = crate::zoom::RESTORE_TO_FIT_FACTOR;
+        self.announce_fit_mode(fit_mode);
+    }
+
+    fn announce_fit_mode(&mut self, fit_mode: crate::scaling::FitMode) {
+        self.message_text = fit_mode_activation_label(fit_mode);
     }
 
     /// Zoom-in-button enablement: enabled until the x8 ceiling is reached.
@@ -115,4 +144,14 @@ pub(super) fn zoom_out_chord_was_pressed(chord_context: &egui::Context) -> bool 
         return false;
     }
     chord_context.input(|input| input.modifiers.shift)
+}
+
+/// The once-at-activation pill label of a fit mode; the default `FitVisible`
+/// is silent by design.
+fn fit_mode_activation_label(fit_mode: crate::scaling::FitMode) -> Option<&'static str> {
+    match fit_mode {
+        crate::scaling::FitMode::FitVisible => None,
+        crate::scaling::FitMode::FitWidth => Some(FIT_WIDTH_MESSAGE),
+        crate::scaling::FitMode::FitHeight => Some(FIT_HEIGHT_MESSAGE),
+    }
 }

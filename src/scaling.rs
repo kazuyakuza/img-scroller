@@ -36,6 +36,69 @@ fn is_positive_size(size: egui::Vec2) -> bool {
     true
 }
 
+/// The three session fit modes of the viewer (Wave-4 Task 3). `FitVisible` is
+/// the whole-image fit carried since Wave 1; `FitWidth`/`FitHeight` are the
+/// Windows-user expressions of "fit width"/"fit height". Session-only means:
+/// no persistence lives here (the app seam owns the reset policy).
+#[allow(clippy::enum_variant_names)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) enum FitMode {
+    /// Whole-image fit: fully visible and centered.
+    FitVisible,
+    /// Width fit: the width spans the available width; vertical overflow allowed.
+    FitWidth,
+    /// Height fit: the height spans the available height; horizontal overflow allowed.
+    FitHeight,
+}
+
+impl FitMode {
+    /// The mode's fit-base size of `image_size` inside `available_size`.
+    /// Returns None on any zero/negative dimension (the `fitted_size` guards,
+    /// shared by every variant).
+    pub(crate) fn base_size(
+        self,
+        available_size: egui::Vec2,
+        image_size: egui::Vec2,
+    ) -> Option<egui::Vec2> {
+        match self {
+            Self::FitVisible => fitted_size(available_size, image_size),
+            Self::FitWidth => fit_width_size(available_size, image_size),
+            Self::FitHeight => fit_height_size(available_size, image_size),
+        }
+    }
+}
+
+/// The width-fit draw size: the image WIDTH spans the available width; the
+/// height follows the aspect ratio and may overflow vertically. Same
+/// zero/negative-dimension rejection style as `fitted_size`.
+pub(crate) fn fit_width_size(
+    available_size: egui::Vec2,
+    image_size: egui::Vec2,
+) -> Option<egui::Vec2> {
+    if !is_positive_size(image_size) {
+        return None;
+    }
+    if !is_positive_size(available_size) {
+        return None;
+    }
+    Some(image_size * (available_size.x / image_size.x))
+}
+
+/// The height-fit twin of `fit_width_size`: the image HEIGHT spans the
+/// available height; the width may overflow horizontally.
+pub(crate) fn fit_height_size(
+    available_size: egui::Vec2,
+    image_size: egui::Vec2,
+) -> Option<egui::Vec2> {
+    if !is_positive_size(image_size) {
+        return None;
+    }
+    if !is_positive_size(available_size) {
+        return None;
+    }
+    Some(image_size * (available_size.y / image_size.y))
+}
+
 #[cfg(test)]
 mod tests {
     use super::fitted_size;
@@ -93,3 +156,6 @@ mod tests {
         assert_eq!(fitted_size(egui::Vec2::new(100.0, 0.0), usable), None);
     }
 }
+
+#[cfg(test)]
+mod fit_mode_tests;

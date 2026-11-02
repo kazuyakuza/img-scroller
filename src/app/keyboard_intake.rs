@@ -1,7 +1,8 @@
 //! Per-frame keyboard intake: every edge-triggered chord of the app (the
 //! fullscreen toggle, the four navigation arrows, the zoom in/out/restore
-//! chords) is read once per frame and dispatched; the intake runs in EVERY
-//! mode (fullscreen included) and always BEFORE the layout dispatch.
+//! chords, and the fit-mode `W`/`H` keys) is read once per frame and
+//! dispatched; the intake runs in EVERY mode (fullscreen included) and always
+//! BEFORE the layout dispatch.
 //!
 //! AI Agents: this block was moved verbatim out of `src/app.rs` (held at the
 //! 200-line cap) -- do NOT re-inline it; keep all reads collected before the
@@ -22,6 +23,8 @@ impl ImagesScrollerApp {
         let zoom_in_pressed = zoom::zoom_in_chord_was_pressed(screen_context);
         let zoom_out_pressed = zoom::zoom_out_chord_was_pressed(screen_context);
         let restore_fit_pressed = was_pressed(screen_context, zoom::RESTORE_FIT_KEY);
+        let fit_width_pressed = was_pressed(screen_context, zoom::FIT_WIDTH_KEY);
+        let fit_height_pressed = was_pressed(screen_context, zoom::FIT_HEIGHT_KEY);
         let left_pressed = was_pressed(screen_context, egui::Key::ArrowLeft);
         let right_pressed = was_pressed(screen_context, egui::Key::ArrowRight);
         let up_pressed = was_pressed(screen_context, egui::Key::ArrowUp);
@@ -37,6 +40,12 @@ impl ImagesScrollerApp {
         }
         if restore_fit_pressed {
             self.restore_zoom_to_fit();
+        }
+        if fit_width_pressed {
+            self.set_fit_mode(crate::scaling::FitMode::FitWidth);
+        }
+        if fit_height_pressed {
+            self.set_fit_mode(crate::scaling::FitMode::FitHeight);
         }
         if left_pressed {
             self.navigate(NavigationDirection::Previous);

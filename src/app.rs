@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use eframe::egui;
 
-use crate::app_display::{CurrentImageDisplay, ImagePainting};
+use crate::app_display::CurrentImageDisplay;
 use crate::folder_listing::FolderListing;
 use crate::image_loading::{self, DecodedImage, ImageLoadFailure};
 use crate::last_viewed_images::LastViewedImages;
@@ -35,6 +35,9 @@ pub struct ImagesScrollerApp {
     /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the display
     /// path; reset on every successful open; never persisted.
     zoom_factor: f32,
+    /// Session fit mode (Wave-4 Task 3): `FitVisible` = whole-image fit;
+    /// set by the fit seam; reset on every successful open; never persisted.
+    fit_mode: crate::scaling::FitMode,
 }
 
 use folder_navigation::NavigationDirection;
@@ -56,6 +59,7 @@ impl ImagesScrollerApp {
             current_display: CurrentImageDisplay::initial(),
             fullscreen_on: false,
             zoom_factor: crate::zoom::RESTORE_TO_FIT_FACTOR,
+            fit_mode: crate::scaling::FitMode::FitVisible,
         }
     }
 
@@ -82,7 +86,7 @@ impl ImagesScrollerApp {
                 self.opened_image_path = Some(path);
                 self.decoded_image = Some(decoded_image);
                 self.message_text = None;
-                self.zoom_factor = crate::zoom::RESTORE_TO_FIT_FACTOR;
+                self.set_fit_mode(crate::scaling::FitMode::FitVisible);
                 self.current_display.accept_decoded_image();
             }
             Err(_failure) => {
@@ -98,7 +102,7 @@ impl ImagesScrollerApp {
     }
 
     /// True while an image remains successfully opened (read by the navigation seam's pill-visibility gate).
-    fn image_is_open(&self) -> bool {
+    pub(super) fn image_is_open(&self) -> bool {
         self.opened_image_path.is_some()
     }
 
@@ -106,17 +110,7 @@ impl ImagesScrollerApp {
     fn show_navigation_layout(&mut self, ui: &mut egui::Ui) {
         floating_controls::show_floating_pill(self, ui);
         egui::CentralPanel::default().show(ui, |central_ui| {
-            if let Some(decoded_image) = self.decoded_image.as_ref() {
-                self.current_display.paint(
-                    central_ui,
-                    ImagePainting {
-                        decoded_image,
-                        zoom_factor: self.zoom_factor,
-                    },
-                );
-            } else {
-                empty_folder_view::show_empty_folder_message(central_ui);
-            }
+            self.show_navigation_central_surface(central_ui);
         });
     }
 
@@ -160,6 +154,8 @@ pub fn window_options() -> eframe::NativeOptions {
 
 mod arrow_direction;
 
+mod central_surface;
+
 mod folder_navigation;
 
 mod empty_folder_view;
@@ -175,6 +171,8 @@ mod fullscreen_button;
 mod zoom;
 
 mod zoom_button;
+
+mod fit_mode_button;
 
 mod keyboard_intake;
 
@@ -196,3 +194,6 @@ mod folder_navigation_continuation_tests;
 
 #[cfg(test)]
 mod zoom_tests;
+
+#[cfg(test)]
+mod fit_mode_tests;
