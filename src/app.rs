@@ -1,4 +1,4 @@
-//! Application shell: the regular, resizable viewer window of Images Scroller.
+//! Application shell: the resizable viewer window of Images Scroller, maximized at every launch.
 
 use std::path::PathBuf;
 
