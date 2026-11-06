@@ -9,13 +9,9 @@ use super::arrow_direction::ArrowControl;
 use super::fit_mode_button::FitModeButtonAction;
 use super::zoom_button::ZoomButtonAction;
 
-/// Pill-button caption size (9 pt; the spec's `RichText::size(9.0)`).
 const CAPTION_TEXT_SIZE: f32 = 9.0;
-/// Vertical gap between the painted glyph block and the caption line.
 const CAPTION_TEXT_GAP: f32 = 2.0;
 
-/// All ten pill buttons, keyed by button (the caption/tooltip tables below
-/// resolve per button; no per-module duplicate string tables).
 #[derive(Clone, Copy)]
 pub(super) enum PillButton {
     ImagePrevious,

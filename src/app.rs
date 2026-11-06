@@ -152,49 +152,32 @@ pub fn window_options() -> eframe::NativeOptions {
 }
 
 mod arrow_direction;
-
 mod button_hint;
-
 mod central_surface;
-
-mod folder_navigation;
-
 mod empty_folder_view;
-
 mod empty_state_view;
-
-mod floating_controls;
-
-mod fullscreen;
-
-mod fullscreen_button;
-
-mod zoom;
-
-mod zoom_button;
-
 mod fit_mode_button;
-
+mod floating_controls;
+mod folder_navigation;
+mod fullscreen;
+mod fullscreen_button;
 mod keyboard_intake;
-
-#[cfg(test)]
-mod tests;
-
-#[cfg(test)]
-mod floating_controls_tests;
-#[cfg(test)]
-mod folder_navigation_tests;
-#[cfg(test)]
-mod last_viewed_tests;
-
-#[cfg(test)]
-mod fullscreen_tests;
-
-#[cfg(test)]
-mod folder_navigation_continuation_tests;
-
-#[cfg(test)]
-mod zoom_tests;
+mod zoom;
+mod zoom_button;
 
 #[cfg(test)]
 mod fit_mode_tests;
+#[cfg(test)]
+mod floating_controls_tests;
+#[cfg(test)]
+mod folder_navigation_continuation_tests;
+#[cfg(test)]
+mod folder_navigation_tests;
+#[cfg(test)]
+mod fullscreen_tests;
+#[cfg(test)]
+mod last_viewed_tests;
+#[cfg(test)]
+mod tests;
+#[cfg(test)]
+mod zoom_tests;
