@@ -146,7 +146,7 @@ pub fn window_options() -> eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title(APP_WINDOW_TITLE)
             .with_resizable(true)
-            .with_maximized(false),
+            .with_maximized(true),
         ..eframe::NativeOptions::default()
     }
 }

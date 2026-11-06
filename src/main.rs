@@ -1,5 +1,8 @@
 //! Entry point of the Images Scroller viewer.
 
+// Release runs windowed — no console.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 mod app;
 mod app_display;
 mod folder_listing;
