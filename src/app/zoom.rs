@@ -14,6 +14,10 @@
 //! mode-set-and-reset call (hotkeys `W`/`H`, both pill buttons, the restore
 //! path, and the open-success reset all funnel through it).
 //!
+//! The '+/-' aliases are strictly shift-gated: Shift+'+'/Shift+'-' fire,
+//! plain '='/'+'/'-' do nothing (Wave 4.1 Task 6); keyboard-layout variance
+//! is the OPERATOR-RUN note, not a code fallback.
+//!
 //! AI Agents: this app seam (`super::zoom`) is a separate module from the
 //! pure-math `crate::zoom` even though both share the leaf name `zoom`; keep the
 //! two distinct (in `src/app.rs` the `mod zoom;` seam shadows the math, so the
@@ -99,9 +103,9 @@ impl ImagesScrollerApp {
     }
 }
 
-/// The zoom-in chord set: hotkey `I`, or the Shift+'+' alias (Shift held
-/// while `=`/`+` is pressed; BOTH egui logical resolutions of Shift+Plus are
-/// accepted -- D4).
+/// The zoom-in chord set: hotkey `I`, or the Shift-gated '='/'+' resolutions
+/// only (strict rule, Wave 4.1 Task 6; D4's unconditional Plus accept is
+/// removed).
 pub(super) fn zoom_in_chord_was_pressed(chord_context: &egui::Context) -> bool {
     if chord_context.input(|input| input.key_pressed(ZOOM_IN_KEY)) {
         return true;
@@ -109,26 +113,48 @@ pub(super) fn zoom_in_chord_was_pressed(chord_context: &egui::Context) -> bool {
     zoom_in_shift_alias_was_pressed(chord_context)
 }
 
-fn zoom_in_shift_alias_was_pressed(chord_context: &egui::Context) -> bool {
-    if chord_context.input(|input| input.key_pressed(egui::Key::Plus)) {
-        return true;
-    }
-    if !chord_context.input(|input| input.key_pressed(egui::Key::Equals)) {
-        return false;
-    }
-    chord_context.input(|input| input.modifiers.shift)
+/// The strict-shift alias rule (Wave 4.1 Task 6): an alias fires ONLY when
+/// the alias key was pressed this frame AND Shift is held; the unshifted
+/// '='/'+'/'-' keys do NOTHING. Pure: no egui reading.
+pub(super) fn shift_alias_is_pressed(alias_key_was_pressed: bool, shift_held: bool) -> bool {
+    alias_key_was_pressed && shift_held
 }
 
-/// The zoom-out chord set: hotkey `O`, or the Shift+'-' alias (Shift held
-/// while `-` resolves to `Key::Minus`).
+/// The zoom-in shift alias: the `=`/`+` row key WHILE Shift is held. BOTH
+/// egui logical resolutions of Shift+'+' are accepted (shift-gated):(a)
+/// `Key::Equals` (unshifted '=' resolution on some layouts), (b) `Key::Plus`
+/// (the reachable '+' resolution: shifted '=' on US layouts, unshifted '+'
+/// on e.g. German layouts, and the numpad fallback). OPERATOR-RUN note:
+/// keyboard-layout variance is operator-tested, not hidden in code.
+fn zoom_in_shift_alias_was_pressed(chord_context: &egui::Context) -> bool {
+    let shift_held = chord_context.input(|input| input.modifiers.shift);
+    shift_alias_is_pressed(
+        chord_context.input(|input| input.key_pressed(egui::Key::Equals)),
+        shift_held,
+    ) || shift_alias_is_pressed(
+        chord_context.input(|input| input.key_pressed(egui::Key::Plus)),
+        shift_held,
+    )
+}
+
+/// The zoom-out chord set: hotkey `O`, or the Shift-gated '-' resolution only
+/// (strict rule, Wave 4.1 Task 6).
 pub(super) fn zoom_out_chord_was_pressed(chord_context: &egui::Context) -> bool {
     if chord_context.input(|input| input.key_pressed(ZOOM_OUT_KEY)) {
         return true;
     }
-    if !chord_context.input(|input| input.key_pressed(egui::Key::Minus)) {
-        return false;
-    }
-    chord_context.input(|input| input.modifiers.shift)
+    zoom_out_shift_alias_was_pressed(chord_context)
+}
+
+/// The zoom-out shift alias: `-` WHILE Shift is held (`Key::Minus` is the
+/// only egui resolution of the '-' key; the shifted '_' press resolves by
+/// physical position back to `Key::Minus` per the egui-winit fallback).
+fn zoom_out_shift_alias_was_pressed(chord_context: &egui::Context) -> bool {
+    let shift_held = chord_context.input(|input| input.modifiers.shift);
+    shift_alias_is_pressed(
+        chord_context.input(|input| input.key_pressed(egui::Key::Minus)),
+        shift_held,
+    )
 }
 
 /// The once-at-activation pill label of a fit mode; the default `FitVisible`
