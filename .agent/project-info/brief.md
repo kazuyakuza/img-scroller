@@ -112,6 +112,17 @@ Features below are explicitly NOT in v1 and may be added later:
 - Settings UI for changing the sort order (v1 is fixed alphanumeric — see `## Sorting Order`).
 - Persistence of the per-folder last-viewed memory across sessions (v1 memory is session-only and destroyed on close — see `### Vertical Scroll (Sibling Folders)`).
 
+## Addendum — Operator Corrections (2026-11-02, BINDING)
+
+The 2026-11-02 operator chat corrections supersede the contradicting sentences of this brief wherever they appear (this addendum governs); everything not contradicted below stays byte-identical. Source: [`.agent/todos/20261102/20261102-todo-1.md`](../todos/20261102/20261102-todo-1.md) (Wave 4.1).
+
+1. **Launch window state** (supersedes the `### Open Image with System-Registered Formats` sentence "The image opens in a regular resizable viewer window consistent with the classic viewer experience (not maximized, not a modal dialog)" AND the `### Fullscreen Mode` sentence "Default fullscreen state at launch: OFF — the window opens normal or maximized at the user's own placement/size"): the application window opens **ALWAYS MAXIMIZED at EVERY launch** (never auto-fullscreened; the fullscreen default stays OFF), and while the release build runs, **no console window is visible**. The viewing window remains a regular RESIZABLE window — the maximized state is just its launch size.
+2. **Zoom range is symmetric** (supersedes any reading of `### Zoom In/Out and Fit Modes` that blocks zoom-out at whole-image fit): zoom-out is NOT blocked at the neutral fit level; the zoom-out lower limit is SYMMETRIC to the zoom-in upper limit (same magnitude reversed — when the zoom-in max is ×8, the zoom-out floor is ÷8 of the fit size).
+3. **Zoom/fit actions are silent** (supersedes the Wave-4 message scheme): the bound-step and fit-activation messages are removed — zoom/fit actions do not announce anything (the only app message remains the unsupported-file failure text).
+4. **Fit width/height are ONE-SHOT size sets** (supersedes fit-mode persistence in `### Zoom In/Out and Fit Modes`): pressing `W`/`H` or their buttons ONLY sets the current zoom level so the current image's width/height fills the window — nothing else; normal zoom in/out works from that level afterward (no persistent mode may block zoom-out).
+5. **ESC exits fullscreen** (additional to F11; the exact interplay was decided in the Wave-4.1 architector step): ESC exits fullscreen ON; otherwise ESC does nothing.
+6. **Affordance add-on** (new requirement from the 2026-11-02 operator chat): each keyboard-distinct UI button displays a small reference of its related hotkey beneath it, and hovering any button shows a short tooltip of what it does.
+
 <!-- DO NOT DELETE NEXT SECTION -->
 
 ## Important Note for AI Agents

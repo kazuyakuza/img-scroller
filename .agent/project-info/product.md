@@ -70,3 +70,14 @@ These are explicitly NOT in v1; they may be added later (per brief `## Out of Sc
 - Any further functionality inherited from the old gallery app beyond the 7 v1 features.
 - Settings UI for changing the sort order (v1 is fixed alphanumeric).
 - Persistence of the per-folder last-viewed memory across sessions (v1 memory is session-only, destroyed on close).
+
+## Addendum — Operator Corrections (2026-11-02, BINDING)
+
+User-facing corrections superseding the contradicting sentences of this product overview; source: the binding addendum in [brief.md](brief.md) (Wave 4.1 — [`.agent/todos/20261102/20261102-todo-1.md`](todos/20261102/20261102-todo-1.md)).
+
+1. **Launch window state**: the window opens **ALWAYS MAXIMIZED at EVERY launch** (never auto-fullscreened; fullscreen default OFF; the viewing window stays a regular resizable window), and the release build shows **no console window**.
+2. **Zoom range symmetric**: zoom-out is NOT blocked at the neutral fit level and keeps shrinking to the symmetric floor (÷8 of fit when the ceiling is ×8).
+3. **Zoom/fit actions silent**: no bound-step or fit-activation messages (the only app message is the unsupported-file failure text).
+4. **Fit width/height are one-shot size sets**: `W`/`H` or their buttons set the zoom level so width/height fills the window — zoom continues from that level (no persistent mode, nothing blocked).
+5. **ESC exits fullscreen** while ON (F11 unchanged; ESC a no-op otherwise).
+6. **Affordance add-on**: each keyboard-distinct UI button shows a small hotkey reference beneath it; every button shows a hover tooltip.
