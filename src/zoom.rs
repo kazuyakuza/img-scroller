@@ -1,22 +1,27 @@
-//! Zoom math (Wave-4 Task 2): the multiplicative step scaling within fixed
-//! bounds, the restore-to-fit reset, the at-bound detection, and the
-//! fit-relative draw size. Pure calculations only: no egui painting, no
-//! texture or pixel code. Sibling of `src/scaling.rs`. Authoritative for the
-//! MATH only: the clamp below is silent and zoom actions write no messages,
-//! so the silent at-bound no-op and the reset-on-every-successful-open policy
-//! both live in the app seam (`src/app/zoom.rs` and the `accept_open_outcome`
-//! wiring in `src/app.rs`).
+//! Zoom math (Wave-4 Task 2): the multiplicative step scaling within the fixed
+//! SYMMETRIC bounds `[ZOOM_FACTOR_MINIMUM, ZOOM_FACTOR_MAXIMUM]` around the
+//! neutral fit factor `1.0` (the "0" no-zoom baseline), the restore-to-fit
+//! reset, the at-bound detection, and the fit-relative draw size. Zoom-out
+//! BELOW fit is allowed and reaches the ÷8 floor when the ceiling is ×8.
+//! Pure calculations only: no egui painting, no texture or pixel code.
+//! Sibling of `src/scaling.rs`. Authoritative for the MATH only: the clamp
+//! below is silent and zoom actions write no messages, so the silent at-bound
+//! no-op and the reset-on-every-successful-open policy both live in the app
+//! seam (`src/app/zoom.rs` and the `accept_open_outcome` wiring in `src/app.rs`).
 
 use eframe::egui;
 
 /// Fixed multiplicative factor of one zoom-in/zoom-out step.
 pub(crate) const ZOOM_STEP_MULTIPLIER: f32 = 1.25;
-/// Lower zoom bound: plain whole-image fit (zooming out below fit is rejected).
-pub(crate) const ZOOM_FACTOR_MINIMUM: f32 = 1.0;
 /// Upper zoom bound: the largest supported zoom-in.
 pub(crate) const ZOOM_FACTOR_MAXIMUM: f32 = 8.0;
-/// The restore-to-fit target captured as a named value (family of the bounds).
-pub(crate) const RESTORE_TO_FIT_FACTOR: f32 = ZOOM_FACTOR_MINIMUM;
+/// Lower zoom bound: the SYMMETRIC zoom-out floor -- the exact inverse of
+/// the ceiling (when the ceiling is ×8, zoom-out reaches ÷8 of the fit size).
+pub(crate) const ZOOM_FACTOR_MINIMUM: f32 = 1.0 / ZOOM_FACTOR_MAXIMUM;
+/// The restore-to-fit target: the neutral fit baseline ("0" / no-zoom),
+/// NOT the zoom-out floor -- fit is the zero point INSIDE the symmetric
+/// range [ZOOM_FACTOR_MINIMUM, ZOOM_FACTOR_MAXIMUM].
+pub(crate) const RESTORE_TO_FIT_FACTOR: f32 = 1.0;
 /// Absorption bound for the at-bound detections (fits-factor drift guard).
 const ZOOM_BOUND_TOLERANCE: f32 = 1.0e-4; // 0.0001 f32 epsilon-class guard
 
@@ -25,7 +30,8 @@ pub(crate) fn zoom_in_factor(factor: f32) -> f32 {
     clamped_zoom_factor(factor * ZOOM_STEP_MULTIPLIER)
 }
 
-/// The zoom factor after one zoom-out step from `factor`, never below fit.
+/// The zoom factor after one zoom-out step from `factor`, clamped at the
+/// symmetric floor.
 pub(crate) fn zoom_out_factor(factor: f32) -> f32 {
     clamped_zoom_factor(factor / ZOOM_STEP_MULTIPLIER)
 }
@@ -34,7 +40,8 @@ fn clamped_zoom_factor(factor: f32) -> f32 {
     factor.clamp(ZOOM_FACTOR_MINIMUM, ZOOM_FACTOR_MAXIMUM)
 }
 
-/// Whether `factor` has reached the fit floor (zoom-out/restore are inert there).
+/// Whether `factor` has reached the symmetric zoom-out floor (zoom-out is
+/// inert there; the restore-fit button is NOT -- it re-anchors to 1.0).
 pub(crate) fn zoom_factor_is_at_minimum(factor: f32) -> bool {
     factor <= ZOOM_FACTOR_MINIMUM + ZOOM_BOUND_TOLERANCE
 }
@@ -42,6 +49,13 @@ pub(crate) fn zoom_factor_is_at_minimum(factor: f32) -> bool {
 /// Whether `factor` has reached the ceiling (zoom-in is inert there).
 pub(crate) fn zoom_factor_is_at_maximum(factor: f32) -> bool {
     factor >= ZOOM_FACTOR_MAXIMUM - ZOOM_BOUND_TOLERANCE
+}
+
+/// Whether `factor` sits AWAY from the neutral fit baseline (1.0) outside
+/// the bound tolerance -- the restore-fit-button enablement. True at both
+/// bounds and everywhere between except fit itself.
+pub(crate) fn zoom_factor_is_off_restore_target(factor: f32) -> bool {
+    (factor - RESTORE_TO_FIT_FACTOR).abs() > ZOOM_BOUND_TOLERANCE
 }
 
 /// The per-frame draw size of the image at `fit_size` scaled by the zoom factor
@@ -74,16 +88,16 @@ mod tests {
     }
 
     #[test]
-    fn zoom_out_never_goes_below_fit() {
-        assert_eq!(zoom_out_factor(1.0), ZOOM_FACTOR_MINIMUM);
-        let below_fit_step = 1.05;
-        assert_eq!(zoom_out_factor(below_fit_step), ZOOM_FACTOR_MINIMUM);
+    fn zoom_out_clamps_at_the_symmetric_floor() {
+        assert_eq!(zoom_out_factor(1.0), 0.8); // below fit is now REACHED
+        assert_eq!(zoom_out_factor(0.1), ZOOM_FACTOR_MINIMUM); // 0.1/1.25 clamps
+        assert_eq!(zoom_out_factor(ZOOM_FACTOR_MINIMUM), ZOOM_FACTOR_MINIMUM);
     }
 
     #[test]
-    fn zoom_factor_is_at_minimum_is_exact_at_the_fit_bound() {
-        assert!(zoom_factor_is_at_minimum(1.0));
-        assert!(!zoom_factor_is_at_minimum(1.25));
+    fn zoom_factor_is_at_minimum_is_exact_at_the_symmetric_floor() {
+        assert!(zoom_factor_is_at_minimum(ZOOM_FACTOR_MINIMUM));
+        assert!(!zoom_factor_is_at_minimum(1.0)); // the fit level is mid-range now
     }
 
     #[test]
@@ -106,8 +120,9 @@ mod tests {
     #[test]
     fn zoom_bounds_and_restore_constant_are_pinned() {
         assert_eq!(ZOOM_STEP_MULTIPLIER, 1.25);
-        assert_eq!(ZOOM_FACTOR_MINIMUM, 1.0);
         assert_eq!(ZOOM_FACTOR_MAXIMUM, 8.0);
+        assert_eq!(ZOOM_FACTOR_MINIMUM, 0.125);
+        assert_eq!(ZOOM_FACTOR_MINIMUM * ZOOM_FACTOR_MAXIMUM, 1.0); // symmetric inverse
         assert_eq!(RESTORE_TO_FIT_FACTOR, 1.0);
     }
 }

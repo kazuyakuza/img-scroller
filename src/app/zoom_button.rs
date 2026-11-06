@@ -45,8 +45,8 @@ pub(super) fn show_zoom_pill_buttons(app: &mut ImagesScrollerApp, row_ui: &mut e
 fn zoom_button_specs(app: &ImagesScrollerApp) -> [ZoomButtonSpec; 3] {
     [
         ZoomButtonSpec::row_button(ZoomButtonAction::ZoomIn, app.zoom_can_grow()),
-        ZoomButtonSpec::row_button(ZoomButtonAction::ZoomOut, app.zoomed_beyond_fit()),
-        ZoomButtonSpec::row_button(ZoomButtonAction::RestoreFit, app.zoomed_beyond_fit()),
+        ZoomButtonSpec::row_button(ZoomButtonAction::ZoomOut, app.zoom_can_shrink()),
+        ZoomButtonSpec::row_button(ZoomButtonAction::RestoreFit, app.zoomed_off_fit()),
     ]
 }
 

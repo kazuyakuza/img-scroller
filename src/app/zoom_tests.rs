@@ -13,7 +13,9 @@ use std::path::PathBuf;
 fn fresh_app_starts_zoomed_to_fit() {
     let app = ImagesScrollerApp::empty_state();
     assert_eq!(app.zoom_factor, crate::zoom::RESTORE_TO_FIT_FACTOR);
-    assert!(!app.zoomed_beyond_fit());
+    assert!(!app.zoomed_off_fit()); // the restore-fit button is DISABLED at fit
+    assert!(app.zoom_can_shrink()); // zoom-out is now ENABLED at fit (goes below)
+    assert!(app.zoom_can_grow());
 }
 
 #[test]
@@ -21,7 +23,8 @@ fn zoom_in_once_zooms_beyond_fit() {
     let mut app = ImagesScrollerApp::empty_state();
     app.zoom_in_once();
     assert_eq!(app.zoom_factor, 1.25);
-    assert!(app.zoomed_beyond_fit());
+    assert!(app.zoomed_off_fit());
+    assert!(app.zoom_can_shrink());
     assert!(app.zoom_can_grow());
 }
 
@@ -34,11 +37,30 @@ fn restore_zoom_to_fit_returns_to_fit() {
 }
 
 #[test]
-fn zoom_out_at_fit_is_rejected_silently() {
+fn zoom_out_from_fit_shrinks_below_fit() {
     let mut app = ImagesScrollerApp::empty_state();
     app.zoom_out_once();
-    assert_eq!(app.zoom_factor, 1.0);
+    assert_eq!(app.zoom_factor, 0.8); // 1.0 / 1.25, exact in f32
+    assert_eq!(app.fit_mode, crate::scaling::FitMode::FitVisible);
+    assert!(app.zoom_can_shrink());
+    assert!(app.message_text.is_none()); // silent -- Task-4 binding in force
+    app.zoom_out_once();
+    assert_eq!(app.zoom_factor, 0.64);
     assert!(app.message_text.is_none());
+}
+
+#[test]
+fn repeated_zoom_out_steps_reach_the_floor_then_stay() {
+    let mut app = ImagesScrollerApp::empty_state();
+    for _ in 0..10 {
+        app.zoom_out_once(); //            10 × ÷1.25 from 1.0 ≈ 0.107 < 0.125
+    }
+    assert_eq!(app.zoom_factor, crate::zoom::ZOOM_FACTOR_MINIMUM);
+    assert!(!app.zoom_can_shrink()); //    disabled at the floor
+    assert!(app.zoomed_off_fit()); //      restore-fit still ENABLED at the floor
+    app.zoom_out_once(); //                inert silent no-op at the floor
+    assert!(app.message_text.is_none());
+    assert_eq!(app.zoom_factor, crate::zoom::ZOOM_FACTOR_MINIMUM);
 }
 
 #[test]

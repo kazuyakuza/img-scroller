@@ -63,9 +63,10 @@ fn restore_fit_returns_to_the_whole_image_mode_at_the_fit_factor() {
 }
 
 #[test]
-fn zoom_out_at_fit_is_silent_then_fit_width_announces() {
+fn zoom_out_below_fit_is_silent_then_fit_width_announces() {
     let mut app = ImagesScrollerApp::empty_state();
     app.zoom_out_once();
+    assert_eq!(app.zoom_factor, 0.8); // zoom-out now SUCCEEDS below fit
     assert!(app.message_text.is_none());
     app.set_fit_mode(crate::scaling::FitMode::FitWidth);
     assert_eq!(app.message_text, Some(zoom::FIT_WIDTH_MESSAGE));

@@ -1,12 +1,14 @@
 //! Manual zoom (Wave-4 Task 2): the session zoom-factor seam, its keyboard
 //! chords (I / Shift+Plus, O / Shift+Minus, 0 = restore fit), and the
 //! at-bound step guards. Buttons live in `zoom_button.rs`; the pure math
-//! lives in `crate::zoom`. Session state only: never persisted. A zoom
-//! step attempted at a bound it already holds is a silent no-op (the
-//! factor is unchanged and NO message is written); a step that merely
-//! lands on a bound clamps silently too (D2). Zoom actions write NOTHING
-//! to `message_text` (wave 4.1 Task 4). The reset-on-every-successful-open
-//! policy is NOT here -- it lives in `src/app.rs` (`accept_open_outcome`).
+//! lives in `crate::zoom`. Session state only: never persisted. The factor
+//! lives in the symmetric range `[ZOOM_FACTOR_MINIMUM, ZOOM_FACTOR_MAXIMUM]`
+//! = `[1/8, 8]` with `1.0` the neutral fit / no-zoom baseline. Zoom-out steps
+//! divide by 1.25 and keep going BELOW fit down to the floor; a step
+//! attempted at that floor is a silent no-op, and a step landing on any bound
+//! clamps silently. Zoom actions write NOTHING to `message_text` (wave 4.1
+//! Task 4). The reset-on-every-successful-open policy is NOT here -- it lives
+//! in `src/app.rs` (`accept_open_outcome`).
 //!
 //! Fit modes (Wave-4 Task 3) share this seam: `set_fit_mode` is the ONE
 //! mode-set-and-reset call (hotkeys `W`/`H`, both pill buttons, the restore
@@ -48,7 +50,7 @@ impl ImagesScrollerApp {
         self.zoom_factor = zoom::zoom_in_factor(self.zoom_factor);
     }
 
-    /// One zoom-out step; a step attempted at the fit floor is a silent no-op.
+    /// One zoom-out step; a step attempted at the symmetric floor is a silent no-op.
     pub(super) fn zoom_out_once(&mut self) {
         if zoom::zoom_factor_is_at_minimum(self.zoom_factor) {
             return;
@@ -77,15 +79,23 @@ impl ImagesScrollerApp {
         self.message_text = fit_mode_activation_label(fit_mode);
     }
 
-    /// Zoom-in-button enablement: enabled until the x8 ceiling is reached.
+    /// Zoom-in-button enablement: enabled until the ×8 ceiling is reached.
     pub(super) fn zoom_can_grow(&self) -> bool {
         !zoom::zoom_factor_is_at_maximum(self.zoom_factor)
     }
 
-    /// Enablement of BOTH the zoom-out and the restore-fit buttons:
-    /// enabled everywhere except exactly at the fit floor.
-    pub(super) fn zoomed_beyond_fit(&self) -> bool {
+    /// Zoom-out-button enablement: enabled while the factor is above the
+    /// symmetric floor (`ZOOM_FACTOR_MINIMUM`) -- zoom-out now works BELOW
+    /// fit, so the fit level itself does NOT disable it (only the floor does).
+    pub(super) fn zoom_can_shrink(&self) -> bool {
         !zoom::zoom_factor_is_at_minimum(self.zoom_factor)
+    }
+
+    /// Restore-fit-button enablement: enabled whenever the factor is away
+    /// from the neutral fit value 1.0 (including at the zoom-out floor,
+    /// where the zoom-out button is already disabled).
+    pub(super) fn zoomed_off_fit(&self) -> bool {
+        zoom::zoom_factor_is_off_restore_target(self.zoom_factor)
     }
 }
 
