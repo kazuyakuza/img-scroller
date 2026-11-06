@@ -1,6 +1,7 @@
 //! Fullscreen mode (Wave-4 Task 1): the session flag state, its edge-triggered
 //! viewport-command toggle, the ONE control-visibility gate, and the
 //! fullscreen-only central surface. OFF restores all controls, image central.
+//! Wave-4.1 Task 3 addition: fullscreen exits via F11 OR ESC; nothing else changes.
 
 use eframe::egui;
 

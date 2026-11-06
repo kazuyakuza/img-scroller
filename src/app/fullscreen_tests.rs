@@ -1,6 +1,6 @@
-//! Fullscreen unit tests: launch state, the pinned F11 shortcut, the shared
-//! toggle's exactly-once flip, and the one chrome-visibility gate in every
-//! reachable mode.
+//! Fullscreen unit tests: launch state, the pinned F11 shortcut, the pinned
+//! ESC exit key and its predicate, the shared toggle's exactly-once flip, and
+//! the one chrome-visibility gate in every reachable mode.
 
 use super::ImagesScrollerApp;
 use super::fullscreen::FULLSCREEN_TOGGLE_KEY;

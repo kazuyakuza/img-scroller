@@ -1,6 +1,6 @@
 //! Per-frame keyboard intake: every edge-triggered chord of the app (the
 //! fullscreen F11 toggle and the ESC-while-ON exit, the four navigation arrows,
-//! chords, and the fit-mode `W`/`H` keys) is read once per frame and
+//! the zoom `I`/`O`/`0` chords, and the fit-mode `W`/`H` keys) is read once per frame and
 //! dispatched; the intake runs in EVERY mode (fullscreen included) and always
 //! BEFORE the layout dispatch.
 //!
