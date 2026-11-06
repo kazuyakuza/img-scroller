@@ -26,8 +26,8 @@ impl ImagesScrollerApp {
         }
     }
 
-    /// The single paint request: the decoded image at the session fit mode's
-    /// base size, scaled by the zoom factor (inside `CurrentImageDisplay`).
+    /// The single paint request: the decoded image at the whole-image fitted
+    /// size, scaled by the session zoom factor (inside `CurrentImageDisplay`).
     fn paint_open_image(&mut self, central_ui: &mut egui::Ui) {
         let Some(decoded_image) = self.decoded_image.as_ref() else {
             return;

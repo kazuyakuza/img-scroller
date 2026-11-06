@@ -27,8 +27,8 @@ struct FitButtonSpec {
     enabled: bool,
 }
 
-/// Appends the fit-mode group to the pill row, separated by the standard
-/// group gap after the zoom buttons (user-approved placement).
+/// Appends the one-shot fit button group to the pill row, separated by the
+/// standard group gap after the zoom buttons (user-approved placement).
 pub(super) fn show_fit_pill_buttons(app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
     row_ui.add_space(FIT_GROUP_GAP);
     let button_specs = fit_button_specs(app);
@@ -50,8 +50,8 @@ impl FitButtonSpec {
         Self { action, enabled }
     }
 
-    /// Paints the glyph and, when clicked while enabled, sets the fit mode
-    /// (the app seam resets the factor and gives the feedback).
+    /// Paints the glyph and, when clicked while enabled, applies the one-shot
+    /// fit action (sets the zoom factor only; no message, no persistent mode).
     fn show_and_apply_action(&self, app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
         let placement = PillButtonPlacement::for_button(
             PillButton::from_fit_action(self.action),
