@@ -1,5 +1,5 @@
 //! Per-frame keyboard intake: every edge-triggered chord of the app (the
-//! fullscreen toggle, the four navigation arrows, the zoom in/out/restore
+//! fullscreen F11 toggle and the ESC-while-ON exit, the four navigation arrows,
 //! chords, and the fit-mode `W`/`H` keys) is read once per frame and
 //! dispatched; the intake runs in EVERY mode (fullscreen included) and always
 //! BEFORE the layout dispatch.
@@ -22,6 +22,10 @@ impl ImagesScrollerApp {
     /// chords, so a same-frame fit message overwrites a zoom-bound message.
     pub(super) fn read_and_dispatch_keystrokes(&mut self, screen_context: &egui::Context) {
         let fullscreen_pressed = was_pressed(screen_context, fullscreen::FULLSCREEN_TOGGLE_KEY);
+        let escape_exit_pressed = fullscreen::escape_exits_fullscreen(
+            self.fullscreen_on,
+            was_pressed(screen_context, fullscreen::FULLSCREEN_EXIT_KEY),
+        );
         let zoom_in_pressed = zoom::zoom_in_chord_was_pressed(screen_context);
         let zoom_out_pressed = zoom::zoom_out_chord_was_pressed(screen_context);
         let restore_fit_pressed = was_pressed(screen_context, zoom::RESTORE_FIT_KEY);
@@ -32,6 +36,9 @@ impl ImagesScrollerApp {
         let up_pressed = was_pressed(screen_context, egui::Key::ArrowUp);
         let down_pressed = was_pressed(screen_context, egui::Key::ArrowDown);
         if fullscreen_pressed {
+            self.toggle_fullscreen_and_send_command(screen_context);
+        }
+        if escape_exit_pressed {
             self.toggle_fullscreen_and_send_command(screen_context);
         }
         if zoom_in_pressed {

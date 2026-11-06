@@ -4,6 +4,7 @@
 
 use super::ImagesScrollerApp;
 use super::fullscreen::FULLSCREEN_TOGGLE_KEY;
+use super::fullscreen::{FULLSCREEN_EXIT_KEY, escape_exits_fullscreen};
 use super::tests::{TempImageFolder, sample_decoded_image};
 use eframe::egui;
 
@@ -17,6 +18,19 @@ fn fresh_app_starts_with_fullscreen_off() {
 #[test]
 fn fullscreen_shortcut_is_f11() {
     assert_eq!(FULLSCREEN_TOGGLE_KEY, egui::Key::F11);
+}
+
+#[test]
+fn fullscreen_escape_key_is_escape() {
+    assert_eq!(FULLSCREEN_EXIT_KEY, egui::Key::Escape);
+}
+
+#[test]
+fn escape_exits_fullscreen_matches_its_predicate() {
+    assert!(escape_exits_fullscreen(true, true));
+    assert!(!escape_exits_fullscreen(true, false));
+    assert!(!escape_exits_fullscreen(false, true));
+    assert!(!escape_exits_fullscreen(false, false));
 }
 
 #[test]
