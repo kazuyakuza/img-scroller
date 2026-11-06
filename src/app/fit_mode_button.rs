@@ -8,6 +8,7 @@ use eframe::egui;
 
 use super::ImagesScrollerApp;
 use super::arrow_direction::ArrowDirection;
+use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
 use crate::scaling::FitMode;
 
 pub(super) const FIT_WIDTH_BUTTON_LABEL: &str = "Fit width";
@@ -20,7 +21,8 @@ const FIT_AXIS_LINE_THICKNESS: f32 = 2.5;
 const FIT_ARROW_TRIANGLE_SIZE: egui::Vec2 = egui::Vec2::new(6.0, 6.0);
 const FIT_ARROW_SPACING: f32 = 7.5;
 
-enum FitModeButtonAction {
+#[derive(Clone, Copy)]
+pub(super) enum FitModeButtonAction {
     FitWidth,
     FitHeight,
 }
@@ -56,16 +58,28 @@ impl FitModeButtonSpec {
     /// Paints the glyph and, when clicked while enabled, sets the fit mode
     /// (the app seam resets the factor and gives the feedback).
     fn show_and_apply_action(&self, app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
+        let placement = PillButtonPlacement::for_button(
+            PillButton::from_fit_mode_action(self.action),
+            FIT_BUTTON_SIZE,
+        );
+        let button_column = ButtonColumnSite::new(row_ui, placement);
+        let button_response = show_button_column(button_column, |column_ui| {
+            self.allocate_and_paint(column_ui)
+        });
+        if self.accepts_click(&button_response) {
+            self.apply_action(app);
+        }
+    }
+
+    fn allocate_and_paint(&self, column_ui: &mut egui::Ui) -> egui::Response {
         let (_, button_response) =
-            row_ui.allocate_exact_size(FIT_BUTTON_SIZE, egui::Sense::click());
+            column_ui.allocate_exact_size(FIT_BUTTON_SIZE, egui::Sense::click());
         button_response.widget_info(|| {
             egui::WidgetInfo::labeled(egui::Role::Button, self.enabled, self.accessible_label())
         });
         let button_response = button_response.on_hover_cursor(egui::CursorIcon::PointingHand);
-        self.paint_glyph(row_ui, &button_response);
-        if self.accepts_click(&button_response) {
-            self.apply_action(app);
-        }
+        self.paint_glyph(column_ui, &button_response);
+        button_response
     }
 
     /// A disabled fit button never fires (the disabled-arrow pattern).

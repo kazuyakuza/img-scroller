@@ -3,10 +3,13 @@
 //! fifth fullscreen toggle button, the three zoom buttons, plus the
 //! fit-width/fit-height buttons (Wave-4 Task 3). All arrow enablements follow
 //! the keyboard seam per frame; the caller keeps the pill-visibility gate.
+//! Every button paints inside a top-aligned vertical column; the six
+//! keyboard-distinct buttons carry their 9 pt hotkey caption (Wave-4.1 Task 2).
 
 use eframe::egui;
 
 use super::arrow_direction::ArrowControl;
+use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
 use super::fit_mode_button;
 use super::fullscreen_button;
 use super::zoom_button;
@@ -70,7 +73,7 @@ fn show_message_line(message: Option<&'static str>, pill_ui: &mut egui::Ui) {
 
 fn show_button_row(app: &mut ImagesScrollerApp, pill_ui: &mut egui::Ui) {
     let button_specs = arrow_button_specs(app);
-    pill_ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |row_ui| {
+    pill_ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |row_ui| {
         for button_spec in &button_specs {
             add_folder_group_gap(row_ui, button_spec.control);
             button_spec.show_and_navigate(app, row_ui);
@@ -123,7 +126,14 @@ impl ArrowButtonSpec {
     /// Paints the arrow and, when clicked while enabled, drives the keyboard
     /// navigation seam. Disabled arrows paint dimmed and stay inert.
     fn show_and_navigate(&self, app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
-        let button_response = self.allocate_and_paint(row_ui);
+        let placement = PillButtonPlacement::for_button(
+            PillButton::from_arrow_control(self.control),
+            ARROW_BUTTON_SIZE,
+        );
+        let button_column = ButtonColumnSite::new(row_ui, placement);
+        let button_response = show_button_column(button_column, |column_ui| {
+            self.allocate_and_paint(column_ui)
+        });
         if let Some(direction) = self.click_direction(&button_response) {
             app.navigate(direction);
         }

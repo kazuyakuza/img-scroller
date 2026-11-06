@@ -153,6 +153,8 @@ pub fn window_options() -> eframe::NativeOptions {
 
 mod arrow_direction;
 
+mod button_hint;
+
 mod central_surface;
 
 mod folder_navigation;

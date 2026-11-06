@@ -7,6 +7,7 @@
 use eframe::egui;
 
 use super::ImagesScrollerApp;
+use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
 
 const ZOOM_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(36.0, 32.0);
 const ZOOM_GROUP_GAP: f32 = 16.0;
@@ -19,7 +20,8 @@ pub(super) const ZOOM_IN_BUTTON_LABEL: &str = "Zoom in";
 pub(super) const ZOOM_OUT_BUTTON_LABEL: &str = "Zoom out";
 pub(super) const RESTORE_FIT_BUTTON_LABEL: &str = "Restore zoom to fit";
 
-enum ZoomButtonAction {
+#[derive(Clone, Copy)]
+pub(super) enum ZoomButtonAction {
     ZoomIn,
     ZoomOut,
     RestoreFit,
@@ -55,16 +57,28 @@ impl ZoomButtonSpec {
 
     /// Paints the glyph and, when clicked while enabled, applies its action.
     fn show_and_apply_action(&self, app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
+        let placement = PillButtonPlacement::for_button(
+            PillButton::from_zoom_action(self.action),
+            ZOOM_BUTTON_SIZE,
+        );
+        let button_column = ButtonColumnSite::new(row_ui, placement);
+        let button_response = show_button_column(button_column, |column_ui| {
+            self.allocate_and_paint(column_ui)
+        });
+        if self.accepts_click(&button_response) {
+            self.apply_action(app);
+        }
+    }
+
+    fn allocate_and_paint(&self, column_ui: &mut egui::Ui) -> egui::Response {
         let (_, button_response) =
-            row_ui.allocate_exact_size(ZOOM_BUTTON_SIZE, egui::Sense::click());
+            column_ui.allocate_exact_size(ZOOM_BUTTON_SIZE, egui::Sense::click());
         button_response.widget_info(|| {
             egui::WidgetInfo::labeled(egui::Role::Button, self.enabled, self.accessible_label())
         });
         let button_response = button_response.on_hover_cursor(egui::CursorIcon::PointingHand);
-        self.paint_glyph(row_ui, &button_response);
-        if self.accepts_click(&button_response) {
-            self.apply_action(app);
-        }
+        self.paint_glyph(column_ui, &button_response);
+        button_response
     }
 
     /// A disabled zoom button never fires (the disabled-arrow pattern).
@@ -102,25 +116,18 @@ impl ZoomButtonSpec {
         row_ui.visuals().widgets.inactive.fg_stroke.color
     }
 
-    /// Paints the button's glyph shapes at the disabled/idle/hovered palette.
+    /// Paints the button's per-action glyph (zoom icons are rects/outline
+    /// only, D8) at the disabled/idle/hovered palette.
     fn paint_glyph(&self, row_ui: &egui::Ui, button_response: &egui::Response) {
         let glyph_center = button_response.rect.center();
         let glyph_color = self.zoom_glyph_color(row_ui, button_response);
-        for glyph_shape in self.zoom_glyph_shapes(glyph_center, glyph_color) {
-            row_ui.painter().add(glyph_shape);
-        }
-    }
-
-    /// Per-action glyph geometry (zoom icons are rects/outline only, D8).
-    fn zoom_glyph_shapes(
-        &self,
-        glyph_center: egui::Pos2,
-        glyph_color: egui::Color32,
-    ) -> Vec<egui::Shape> {
-        match self.action {
+        let glyph_shapes = match self.action {
             ZoomButtonAction::ZoomIn => self.crossed_bar_shapes(glyph_center, glyph_color),
             ZoomButtonAction::ZoomOut => self.single_bar_shapes(glyph_center, glyph_color),
             ZoomButtonAction::RestoreFit => self.stroked_square_shapes(glyph_center, glyph_color),
+        };
+        for glyph_shape in glyph_shapes {
+            row_ui.painter().add(glyph_shape);
         }
     }
 
