@@ -1,6 +1,6 @@
 //! Per-frame keyboard intake: every edge-triggered chord of the app (the
 //! fullscreen F11 toggle and the ESC-while-ON exit, the four navigation arrows,
-//! the zoom `I`/`O`/`0` chords, and the fit-mode `W`/`H` keys) is read once per frame and
+//! the zoom `I`/`O`/`0` chords, and the one-shot fit `W`/`H` keys) is read once per frame and
 //! dispatched; the intake runs in EVERY mode (fullscreen included) and always
 //! BEFORE the layout dispatch.
 //!
@@ -49,10 +49,10 @@ impl ImagesScrollerApp {
             self.restore_zoom_to_fit();
         }
         if fit_width_pressed {
-            self.set_fit_mode(crate::scaling::FitMode::FitWidth);
+            self.set_zoom_to_fit_width(screen_context.viewport_rect().size());
         }
         if fit_height_pressed {
-            self.set_fit_mode(crate::scaling::FitMode::FitHeight);
+            self.set_zoom_to_fit_height(screen_context.viewport_rect().size());
         }
         if left_pressed {
             self.navigate(NavigationDirection::Previous);

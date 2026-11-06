@@ -35,8 +35,6 @@ pub struct ImagesScrollerApp {
     /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the display
     /// path; reset on every successful open; never persisted.
     zoom_factor: f32,
-    /// Session fit mode (Wave-4 Task 3): `FitVisible` = whole-image fit; reset on every successful open.
-    fit_mode: crate::scaling::FitMode,
 }
 
 use folder_navigation::NavigationDirection;
@@ -58,7 +56,6 @@ impl ImagesScrollerApp {
             current_display: CurrentImageDisplay::initial(),
             fullscreen_on: false,
             zoom_factor: crate::zoom::RESTORE_TO_FIT_FACTOR,
-            fit_mode: crate::scaling::FitMode::FitVisible,
         }
     }
 
@@ -85,7 +82,7 @@ impl ImagesScrollerApp {
                 self.opened_image_path = Some(path);
                 self.decoded_image = Some(decoded_image);
                 self.message_text = None;
-                self.set_fit_mode(crate::scaling::FitMode::FitVisible);
+                self.zoom_factor = crate::zoom::RESTORE_TO_FIT_FACTOR;
                 self.current_display.accept_decoded_image();
             }
             Err(_failure) => {
@@ -156,7 +153,7 @@ mod button_hint;
 mod central_surface;
 mod empty_folder_view;
 mod empty_state_view;
-mod fit_mode_button;
+mod fit_button;
 mod floating_controls;
 mod folder_navigation;
 mod fullscreen;
@@ -166,7 +163,7 @@ mod zoom;
 mod zoom_button;
 
 #[cfg(test)]
-mod fit_mode_tests;
+mod fit_one_shot_tests;
 #[cfg(test)]
 mod floating_controls_tests;
 #[cfg(test)]

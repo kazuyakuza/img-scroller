@@ -36,45 +36,10 @@ fn is_positive_size(size: egui::Vec2) -> bool {
     true
 }
 
-/// The three session fit modes of the viewer (Wave-4 Task 3). `FitVisible` is
-/// the whole-image fit carried since Wave 1; `FitWidth`/`FitHeight` are the
-/// Windows-user expressions of "fit width"/"fit height". Session-only means:
-/// no persistence lives here (the app seam owns the reset policy).
-#[allow(clippy::enum_variant_names)] // the variants ARE the user-facing mode names
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) enum FitMode {
-    /// Whole-image fit: fully visible and centered.
-    FitVisible,
-    /// Width fit: the width spans the available width; vertical overflow allowed.
-    FitWidth,
-    /// Height fit: the height spans the available height; horizontal overflow allowed.
-    FitHeight,
-}
-
-impl FitMode {
-    /// The mode's fit-base size of `image_size` inside `available_size`.
-    /// Returns None on any zero/negative dimension (the `fitted_size` guards,
-    /// shared by every variant).
-    pub(crate) fn base_size(
-        self,
-        available_size: egui::Vec2,
-        image_size: egui::Vec2,
-    ) -> Option<egui::Vec2> {
-        match self {
-            Self::FitVisible => fitted_size(available_size, image_size),
-            Self::FitWidth => fit_width_size(available_size, image_size),
-            Self::FitHeight => fit_height_size(available_size, image_size),
-        }
-    }
-}
-
 /// The width-fit draw size: the image WIDTH spans the available width; the
 /// height follows the aspect ratio and may overflow vertically. Same
 /// zero/negative-dimension rejection style as `fitted_size`.
-pub(crate) fn fit_width_size(
-    available_size: egui::Vec2,
-    image_size: egui::Vec2,
-) -> Option<egui::Vec2> {
+fn fit_width_size(available_size: egui::Vec2, image_size: egui::Vec2) -> Option<egui::Vec2> {
     if !is_positive_size(image_size) {
         return None;
     }
@@ -86,10 +51,7 @@ pub(crate) fn fit_width_size(
 
 /// The height-fit twin of `fit_width_size`: the image HEIGHT spans the
 /// available height; the width may overflow horizontally.
-pub(crate) fn fit_height_size(
-    available_size: egui::Vec2,
-    image_size: egui::Vec2,
-) -> Option<egui::Vec2> {
+fn fit_height_size(available_size: egui::Vec2, image_size: egui::Vec2) -> Option<egui::Vec2> {
     if !is_positive_size(image_size) {
         return None;
     }
@@ -97,6 +59,29 @@ pub(crate) fn fit_height_size(
         return None;
     }
     Some(image_size * (available_size.y / image_size.y))
+}
+
+/// One-shot fit factors (Wave 4.1 Task 7): the zoom factor whose paint
+/// produces the landed fit outcome. Each factor derives as the ratio of the
+/// axis-fit size over the whole-image fitted size, then clamps INSIDE to the
+/// symmetric zoom bounds via `crate::zoom::clamped_zoom_factor` (one clamp
+/// source; no duplicate bound constants here). The caller supplies the
+/// available area observed AT INTAKE (full egui viewport rect via
+/// `viewport_rect().size()`); the display keeps composing
+/// `fitted_size(current_available) * zoom_factor` per frame, so a window
+/// resize after a one-shot set does NOT re-fit.
+pub(crate) fn fit_width_factor(available_size: egui::Vec2, image_size: egui::Vec2) -> Option<f32> {
+    let fitted = fitted_size(available_size, image_size)?;
+    let width_fitted = fit_width_size(available_size, image_size)?;
+    Some(crate::zoom::clamped_zoom_factor(width_fitted.x / fitted.x))
+}
+
+/// The height-fit twin of `fit_width_factor`: the zoom factor that makes the
+/// image HEIGHT span the available height (width overflow allowed).
+pub(crate) fn fit_height_factor(available_size: egui::Vec2, image_size: egui::Vec2) -> Option<f32> {
+    let fitted = fitted_size(available_size, image_size)?;
+    let height_fitted = fit_height_size(available_size, image_size)?;
+    Some(crate::zoom::clamped_zoom_factor(height_fitted.y / fitted.y))
 }
 
 #[cfg(test)]
@@ -158,4 +143,4 @@ mod tests {
 }
 
 #[cfg(test)]
-mod fit_mode_tests;
+mod fit_factor_tests;

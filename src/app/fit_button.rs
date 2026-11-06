@@ -1,15 +1,10 @@
-//! The floating pill's fit-mode buttons (Wave-4 Task 3, user-approved INSIDE
-//! the pill, after the zoom group): fit-width [W] and fit-height [H]. Painted
-//! line-and-triangle glyphs of the SAME vector family as the arrows -- no font
-//! glyphs. Enabled exactly while an image is open; rendered DISABLED while an
-//! empty folder is browsed (fresh empty state: the pill is absent anyway).
+//! The floating pill's one-shot fit buttons (Wave 4.1 Task 7): fit-width [W] and fit-height [H]. Painted line-and-triangle glyphs of the SAME vector family as the arrows -- no font glyphs. Clicking set the zoom factor ONLY (one-shot, silent). Enabled exactly while an image is open; rendered DISABLED while an empty folder is browsed (fresh empty state: the pill is absent anyway).
 
 use eframe::egui;
 
 use super::ImagesScrollerApp;
 use super::arrow_direction::ArrowDirection;
 use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
-use crate::scaling::FitMode;
 
 pub(super) const FIT_WIDTH_BUTTON_LABEL: &str = "Fit width";
 pub(super) const FIT_HEIGHT_BUTTON_LABEL: &str = "Fit height";
@@ -22,36 +17,36 @@ const FIT_ARROW_TRIANGLE_SIZE: egui::Vec2 = egui::Vec2::new(6.0, 6.0);
 const FIT_ARROW_SPACING: f32 = 7.5;
 
 #[derive(Clone, Copy)]
-pub(super) enum FitModeButtonAction {
+pub(super) enum FitButtonAction {
     FitWidth,
     FitHeight,
 }
 
-struct FitModeButtonSpec {
-    action: FitModeButtonAction,
+struct FitButtonSpec {
+    action: FitButtonAction,
     enabled: bool,
 }
 
 /// Appends the fit-mode group to the pill row, separated by the standard
 /// group gap after the zoom buttons (user-approved placement).
-pub(super) fn show_fit_mode_pill_buttons(app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
+pub(super) fn show_fit_pill_buttons(app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
     row_ui.add_space(FIT_GROUP_GAP);
-    let button_specs = fit_mode_button_specs(app);
+    let button_specs = fit_button_specs(app);
     for button_spec in &button_specs {
         button_spec.show_and_apply_action(app, row_ui);
     }
 }
 
-fn fit_mode_button_specs(app: &ImagesScrollerApp) -> [FitModeButtonSpec; 2] {
+fn fit_button_specs(app: &ImagesScrollerApp) -> [FitButtonSpec; 2] {
     let image_displayed = app.image_is_open();
     [
-        FitModeButtonSpec::row_button(FitModeButtonAction::FitWidth, image_displayed),
-        FitModeButtonSpec::row_button(FitModeButtonAction::FitHeight, image_displayed),
+        FitButtonSpec::row_button(FitButtonAction::FitWidth, image_displayed),
+        FitButtonSpec::row_button(FitButtonAction::FitHeight, image_displayed),
     ]
 }
 
-impl FitModeButtonSpec {
-    fn row_button(action: FitModeButtonAction, enabled: bool) -> Self {
+impl FitButtonSpec {
+    fn row_button(action: FitButtonAction, enabled: bool) -> Self {
         Self { action, enabled }
     }
 
@@ -59,7 +54,7 @@ impl FitModeButtonSpec {
     /// (the app seam resets the factor and gives the feedback).
     fn show_and_apply_action(&self, app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
         let placement = PillButtonPlacement::for_button(
-            PillButton::from_fit_mode_action(self.action),
+            PillButton::from_fit_action(self.action),
             FIT_BUTTON_SIZE,
         );
         let button_column = ButtonColumnSite::new(row_ui, placement);
@@ -67,7 +62,7 @@ impl FitModeButtonSpec {
             self.allocate_and_paint(column_ui)
         });
         if self.accepts_click(&button_response) {
-            self.apply_action(app);
+            self.apply_action(app, row_ui);
         }
     }
 
@@ -91,17 +86,18 @@ impl FitModeButtonSpec {
         self.enabled && button_response.clicked()
     }
 
-    fn apply_action(&self, app: &mut ImagesScrollerApp) {
+    fn apply_action(&self, app: &mut ImagesScrollerApp, row_ui: &egui::Ui) {
+        let available_size = row_ui.ctx().viewport_rect().size();
         match self.action {
-            FitModeButtonAction::FitWidth => app.set_fit_mode(FitMode::FitWidth),
-            FitModeButtonAction::FitHeight => app.set_fit_mode(FitMode::FitHeight),
+            FitButtonAction::FitWidth => app.set_zoom_to_fit_width(available_size),
+            FitButtonAction::FitHeight => app.set_zoom_to_fit_height(available_size),
         }
     }
 
     fn accessible_label(&self) -> &'static str {
         match self.action {
-            FitModeButtonAction::FitWidth => FIT_WIDTH_BUTTON_LABEL,
-            FitModeButtonAction::FitHeight => FIT_HEIGHT_BUTTON_LABEL,
+            FitButtonAction::FitWidth => FIT_WIDTH_BUTTON_LABEL,
+            FitButtonAction::FitHeight => FIT_HEIGHT_BUTTON_LABEL,
         }
     }
 
@@ -128,7 +124,7 @@ impl FitModeButtonSpec {
     }
 }
 
-impl FitModeButtonAction {
+impl FitButtonAction {
     /// Per-action glyph geometry: one axis line plus the two opposing
     /// triangles of the painted-arrow family (`Shape::rotated_triangle`).
     fn glyph_shapes(

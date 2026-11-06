@@ -41,7 +41,6 @@ fn zoom_out_from_fit_shrinks_below_fit() {
     let mut app = ImagesScrollerApp::empty_state();
     app.zoom_out_once();
     assert_eq!(app.zoom_factor, 0.8); // 1.0 / 1.25, exact in f32
-    assert_eq!(app.fit_mode, crate::scaling::FitMode::FitVisible);
     assert!(app.zoom_can_shrink());
     assert!(app.message_text.is_none()); // silent -- Task-4 binding in force
     app.zoom_out_once();

@@ -3,6 +3,8 @@
 
 use std::path::Path;
 
+use eframe::egui;
+
 use crate::platform;
 
 pub(crate) const UNSUPPORTED_FILE_MESSAGE: &str =
@@ -12,6 +14,14 @@ pub(crate) struct DecodedImage {
     pub width: u32,
     pub height: u32,
     pub pixels: Vec<u8>,
+}
+
+impl DecodedImage {
+    /// Image dimensions as `egui::Vec2`, shared by the display-paint base and
+    /// the one-shot fit-factor seams (no duplicated u32→f32 casts).
+    pub(crate) fn size(&self) -> egui::Vec2 {
+        egui::Vec2::new(self.width as f32, self.height as f32)
+    }
 }
 
 pub(crate) enum ImageLoadFailure {

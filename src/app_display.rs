@@ -4,16 +4,16 @@
 use eframe::egui;
 
 use crate::image_loading::DecodedImage;
+use crate::scaling;
 use crate::zoom;
 
 const CURRENT_IMAGE_TEXTURE_NAME: &str = "current_image";
 
 /// The 2-argument paint request (project max-args rule): WHICH decoded image
-/// is on screen, at WHAT session fit mode its available-area base size is
-/// taken from, and WHAT zoom factor scales that base into the draw size.
+/// is on screen and WHAT zoom factor scales the whole-image fit base into the
+/// draw size.
 pub(crate) struct ImagePainting<'a> {
     pub(crate) decoded_image: &'a DecodedImage,
-    pub(crate) fit_mode: crate::scaling::FitMode,
     pub(crate) zoom_factor: f32,
 }
 
@@ -46,10 +46,9 @@ impl CurrentImageDisplay {
         let Some(image_texture) = self.image_texture.as_ref() else {
             return;
         };
-        let Some(fit_size) = painting.fit_mode.base_size(
-            panel_ui.available_size(),
-            image_dimensions(painting.decoded_image),
-        ) else {
+        let Some(fit_size) =
+            scaling::fitted_size(panel_ui.available_size(), painting.decoded_image.size())
+        else {
             return;
         };
         let display_size = zoom::zoomed_draw_size(fit_size, painting.zoom_factor);
@@ -78,11 +77,6 @@ impl CurrentImageDisplay {
         ));
         self.texture_upload_pending = false;
     }
-}
-
-/// Image dimensions as `egui::Vec2`, shared by the one fit-base call in `paint`.
-fn image_dimensions(decoded_image: &DecodedImage) -> egui::Vec2 {
-    egui::Vec2::new(decoded_image.width as f32, decoded_image.height as f32)
 }
 
 #[cfg(test)]

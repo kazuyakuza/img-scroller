@@ -1,7 +1,7 @@
 //! Floating centered bottom navigation controls: one overlay pill above the
 //! central image holding the message line, four painted arrow buttons, the
 //! fifth fullscreen toggle button, the three zoom buttons, plus the
-//! fit-width/fit-height buttons (Wave-4 Task 3). All arrow enablements follow
+//! one-shot fit-width/fit-height buttons. All arrow enablements follow
 //! the keyboard seam per frame; the caller keeps the pill-visibility gate.
 //! Every button paints inside a top-aligned vertical column; the six
 //! keyboard-distinct buttons carry their 9 pt hotkey caption (Wave-4.1 Task 2).
@@ -10,7 +10,7 @@ use eframe::egui;
 
 use super::arrow_direction::ArrowControl;
 use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
-use super::fit_mode_button;
+use super::fit_button;
 use super::fullscreen_button;
 use super::zoom_button;
 use super::{ImagesScrollerApp, NavigationDirection};
@@ -81,7 +81,7 @@ fn show_button_row(app: &mut ImagesScrollerApp, pill_ui: &mut egui::Ui) {
         row_ui.add_space(FULLSCREEN_GROUP_GAP);
         fullscreen_button::show_fullscreen_pill_button(app, row_ui);
         zoom_button::show_zoom_pill_buttons(app, row_ui);
-        fit_mode_button::show_fit_mode_pill_buttons(app, row_ui);
+        fit_button::show_fit_pill_buttons(app, row_ui);
     });
 }
 

@@ -1,6 +1,6 @@
 //! The central-surface bodies shared by the chrome and fullscreen layouts:
-//! the ONE ImagePainting literal of the application (which decoded image at
-//! WHICH session fit mode and zoom factor paints) and the empty-folder
+//! the ONE ImagePainting literal of the application (which decoded image
+//! at WHICH session zoom factor paints) and the empty-folder
 //! fallback of the chrome navigation layout.
 
 use eframe::egui;
@@ -37,7 +37,6 @@ impl ImagesScrollerApp {
             ImagePainting {
                 decoded_image,
                 zoom_factor: self.zoom_factor,
-                fit_mode: self.fit_mode,
             },
         );
     }

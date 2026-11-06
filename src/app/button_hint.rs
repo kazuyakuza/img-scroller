@@ -6,7 +6,7 @@
 use eframe::egui;
 
 use super::arrow_direction::ArrowControl;
-use super::fit_mode_button::FitModeButtonAction;
+use super::fit_button::FitButtonAction;
 use super::zoom_button::ZoomButtonAction;
 
 const CAPTION_TEXT_SIZE: f32 = 9.0;
@@ -44,10 +44,10 @@ impl PillButton {
         }
     }
 
-    pub(super) fn from_fit_mode_action(action: FitModeButtonAction) -> Self {
+    pub(super) fn from_fit_action(action: FitButtonAction) -> Self {
         match action {
-            FitModeButtonAction::FitWidth => Self::FitWidth,
-            FitModeButtonAction::FitHeight => Self::FitHeight,
+            FitButtonAction::FitWidth => Self::FitWidth,
+            FitButtonAction::FitHeight => Self::FitHeight,
         }
     }
 }

@@ -36,7 +36,8 @@ pub(crate) fn zoom_out_factor(factor: f32) -> f32 {
     clamped_zoom_factor(factor / ZOOM_STEP_MULTIPLIER)
 }
 
-fn clamped_zoom_factor(factor: f32) -> f32 {
+/// Shared with the fit-factor math in `src/scaling.rs` (the ONE clamp source).
+pub(crate) fn clamped_zoom_factor(factor: f32) -> f32 {
     factor.clamp(ZOOM_FACTOR_MINIMUM, ZOOM_FACTOR_MAXIMUM)
 }
 
