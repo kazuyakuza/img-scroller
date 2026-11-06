@@ -23,7 +23,7 @@ pub(crate) const ZOOM_FACTOR_MINIMUM: f32 = 1.0 / ZOOM_FACTOR_MAXIMUM;
 /// range [ZOOM_FACTOR_MINIMUM, ZOOM_FACTOR_MAXIMUM].
 pub(crate) const RESTORE_TO_FIT_FACTOR: f32 = 1.0;
 /// Absorption bound for the at-bound detections (fits-factor drift guard).
-const ZOOM_BOUND_TOLERANCE: f32 = 1.0e-4; // 0.0001 f32 epsilon-class guard
+const ZOOM_BOUND_TOLERANCE: f32 = 1.0e-4;
 
 /// The zoom factor after one zoom-in step from `factor`, clamped to the bounds.
 pub(crate) fn zoom_in_factor(factor: f32) -> f32 {
