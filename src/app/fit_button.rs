@@ -1,4 +1,4 @@
-//! The floating pill's one-shot fit buttons (Wave 4.1 Task 7): fit-width [W] and fit-height [H]. Painted line-and-triangle glyphs of the SAME vector family as the arrows -- no font glyphs. Clicking set the zoom factor ONLY (one-shot, silent). Enabled exactly while an image is open; rendered DISABLED while an empty folder is browsed (fresh empty state: the pill is absent anyway).
+//! The floating pill's one-shot fit buttons (Wave 4.1 Task 7): fit-width [W] and fit-height [H]. This file is the renamed Wave-4 Task 3 `fit_mode_button` pill: the button labels, painted glyphs, sizes and gaps carried over verbatim; only the mode state was removed. Painted line-and-triangle glyphs of the SAME vector family as the arrows -- no font glyphs. Clicking set the zoom factor ONLY (one-shot, silent). Enabled exactly while an image is open; rendered DISABLED while an empty folder is browsed (fresh empty state: the pill is absent anyway).
 
 use eframe::egui;
 
