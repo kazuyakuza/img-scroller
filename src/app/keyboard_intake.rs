@@ -18,8 +18,6 @@ use super::zoom;
 impl ImagesScrollerApp {
     /// Reads every chord for this frame and dispatches its shared action.
     /// One `key_pressed` read per chord key (no hidden chained collisions).
-    /// Dispatch order is significant: the fit activations follow the zoom
-    /// chords, so a same-frame fit message overwrites a zoom-bound message.
     pub(super) fn read_and_dispatch_keystrokes(&mut self, screen_context: &egui::Context) {
         let fullscreen_pressed = was_pressed(screen_context, fullscreen::FULLSCREEN_TOGGLE_KEY);
         let escape_exit_pressed = fullscreen::escape_exits_fullscreen(

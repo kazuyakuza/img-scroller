@@ -1,5 +1,5 @@
-//! App-state zoom tests: the session zoom factor seam, its bounds and
-//! rejected-step feedback, the reset-on-open policy, and the pinned hotkey /
+//! App-state zoom tests: the session zoom factor seam, its bounds and silent
+//! at-bound steps, the reset-on-open policy, and the pinned hotkey /
 //! button-label literals.
 
 use eframe::egui;
@@ -34,15 +34,15 @@ fn restore_zoom_to_fit_returns_to_fit() {
 }
 
 #[test]
-fn zoom_out_at_fit_is_rejected_and_reports_zoom_min() {
+fn zoom_out_at_fit_is_rejected_silently() {
     let mut app = ImagesScrollerApp::empty_state();
     app.zoom_out_once();
     assert_eq!(app.zoom_factor, 1.0);
-    assert_eq!(app.message_text, Some(zoom::ZOOM_AT_MINIMUM_MESSAGE));
+    assert!(app.message_text.is_none());
 }
 
 #[test]
-fn repeated_zoom_in_reaches_the_ceiling_then_reports_zoom_max() {
+fn repeated_zoom_in_reaches_the_ceiling_then_stays_there() {
     let mut app = ImagesScrollerApp::empty_state();
     for _ in 0..10 {
         app.zoom_in_once();
@@ -50,7 +50,7 @@ fn repeated_zoom_in_reaches_the_ceiling_then_reports_zoom_max() {
     assert!(!app.zoom_can_grow());
     assert_eq!(app.zoom_factor, 8.0);
     app.zoom_in_once();
-    assert_eq!(app.message_text, Some(zoom::ZOOM_AT_MAXIMUM_MESSAGE));
+    assert!(app.message_text.is_none());
     assert_eq!(app.zoom_factor, 8.0);
 }
 
@@ -93,12 +93,6 @@ fn failed_open_keeps_the_zoom_factor() {
     assert_eq!(app.zoom_factor, 1.25);
     assert_eq!(app.message_text, Some(UNSUPPORTED_FILE_MESSAGE));
     assert!(app.decoded_image.is_some());
-}
-
-#[test]
-fn zoom_bound_feedback_texts_are_pinned() {
-    assert_eq!(zoom::ZOOM_AT_MINIMUM_MESSAGE, "Zoom min");
-    assert_eq!(zoom::ZOOM_AT_MAXIMUM_MESSAGE, "Zoom max");
 }
 
 #[test]

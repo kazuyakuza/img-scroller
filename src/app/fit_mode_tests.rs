@@ -63,10 +63,10 @@ fn restore_fit_returns_to_the_whole_image_mode_at_the_fit_factor() {
 }
 
 #[test]
-fn fit_activation_message_overwrites_the_zoom_bound_message() {
+fn zoom_out_at_fit_is_silent_then_fit_width_announces() {
     let mut app = ImagesScrollerApp::empty_state();
     app.zoom_out_once();
-    assert_eq!(app.message_text, Some(zoom::ZOOM_AT_MINIMUM_MESSAGE));
+    assert!(app.message_text.is_none());
     app.set_fit_mode(crate::scaling::FitMode::FitWidth);
     assert_eq!(app.message_text, Some(zoom::FIT_WIDTH_MESSAGE));
 }
