@@ -128,49 +128,28 @@ impl FitButtonAction {
         } else {
             egui::vec2(0.0, FIT_ARROW_SPACING)
         };
+        let line_size = if horizontal {
+            egui::vec2(FIT_AXIS_LINE_LENGTH, FIT_AXIS_LINE_THICKNESS)
+        } else {
+            egui::vec2(FIT_AXIS_LINE_THICKNESS, FIT_AXIS_LINE_LENGTH)
+        };
         let (minus_facing, plus_facing) = if horizontal {
             (ArrowDirection::Left, ArrowDirection::Right)
         } else {
             (ArrowDirection::Up, ArrowDirection::Down)
         };
+        let line_rect = egui::Rect::from_center_size(glyph_center, line_size);
+        let outlined_triangle_at = |triangle_center: egui::Pos2, facing: ArrowDirection| {
+            pill_style::outlined_triangle_shape(pill_style::TriangularGlyphSpec {
+                rect: egui::Rect::from_center_size(triangle_center, FIT_ARROW_TRIANGLE_SIZE),
+                rotation: facing.paint_rotation(),
+                fill_color: glyph_color,
+            })
+        };
         vec![
-            if horizontal {
-                horizontal_axis_line_shape(glyph_center, glyph_color)
-            } else {
-                vertical_axis_line_shape(glyph_center, glyph_color)
-            },
-            pill_style::outlined_triangle_shape(pill_style::TriangularGlyphSpec {
-                rect: egui::Rect::from_center_size(
-                    glyph_center - axis_offset,
-                    FIT_ARROW_TRIANGLE_SIZE,
-                ),
-                rotation: minus_facing.paint_rotation(),
-                fill_color: glyph_color,
-            }),
-            pill_style::outlined_triangle_shape(pill_style::TriangularGlyphSpec {
-                rect: egui::Rect::from_center_size(
-                    glyph_center + axis_offset,
-                    FIT_ARROW_TRIANGLE_SIZE,
-                ),
-                rotation: plus_facing.paint_rotation(),
-                fill_color: glyph_color,
-            }),
+            pill_style::outlined_rect_shape(line_rect, glyph_color),
+            outlined_triangle_at(glyph_center - axis_offset, minus_facing),
+            outlined_triangle_at(glyph_center + axis_offset, plus_facing),
         ]
     }
-}
-
-fn horizontal_axis_line_shape(glyph_center: egui::Pos2, glyph_color: egui::Color32) -> egui::Shape {
-    let line_rect = egui::Rect::from_center_size(
-        glyph_center,
-        egui::Vec2::new(FIT_AXIS_LINE_LENGTH, FIT_AXIS_LINE_THICKNESS),
-    );
-    pill_style::outlined_rect_shape(line_rect, glyph_color)
-}
-
-fn vertical_axis_line_shape(glyph_center: egui::Pos2, glyph_color: egui::Color32) -> egui::Shape {
-    let line_rect = egui::Rect::from_center_size(
-        glyph_center,
-        egui::Vec2::new(FIT_AXIS_LINE_THICKNESS, FIT_AXIS_LINE_LENGTH),
-    );
-    pill_style::outlined_rect_shape(line_rect, glyph_color)
 }

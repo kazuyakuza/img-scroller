@@ -164,6 +164,8 @@ mod zoom;
 mod zoom_button;
 
 #[cfg(test)]
+mod button_hint_tests;
+#[cfg(test)]
 mod fit_one_shot_tests;
 #[cfg(test)]
 mod floating_controls_tests;
