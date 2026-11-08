@@ -20,9 +20,13 @@
 //! rect (`viewport_rect().size()`; spec §5: one-shot display lands within a
 //! few px of a full-window span). Fit actions are SILENT.
 //!
-//! The '+/-' aliases are strictly shift-gated: Shift+'+'/Shift+'-' fire,
-//! plain '='/'+'/'-' do nothing (Wave 4.1 Task 6); keyboard-layout variance
-//! is the OPERATOR-RUN note, not a code fallback.
+//! The '+/-' aliases are strictly shift-gated PER MEMBER over both the egui key
+//! resolutions (`Equals`/`Plus` zoom in, `Minus` zooms out) and the typed
+//! character deliveries ('+'/'=' zoom in; '-', the true minus sign U+2212, and
+//! '_' zoom out); plain (unshifted) '+', '=', '-' do nothing for every keyboard
+//! layout (Wave 4.1 Task 6 strictness preserved; Wave 4.2 A-Task 3 broadened the
+//! member set to what real egui-winit can deliver -- layout/typing variance is
+//! still an OPERATOR-RUN gate).
 //!
 //! AI Agents: this app seam (`super::zoom`) is a separate module from the
 //! pure-math `crate::zoom` even though both share the leaf name `zoom`; keep the
@@ -32,6 +36,7 @@
 use eframe::egui;
 
 use super::ImagesScrollerApp;
+use super::zoom_alias;
 use crate::zoom;
 
 /// Zoom-in hotkey `I` (alias family: the Shift+'+' chord below).
@@ -130,31 +135,7 @@ pub(super) fn zoom_in_chord_was_pressed(chord_context: &egui::Context) -> bool {
     if chord_context.input(|input| input.key_pressed(ZOOM_IN_KEY)) {
         return true;
     }
-    zoom_in_shift_alias_was_pressed(chord_context)
-}
-
-/// The strict-shift alias rule (Wave 4.1 Task 6): an alias fires ONLY when
-/// the alias key was pressed this frame AND Shift is held; the unshifted
-/// '='/'+'/'-' keys do NOTHING. Pure: no egui reading.
-pub(super) fn shift_alias_is_pressed(alias_key_was_pressed: bool, shift_held: bool) -> bool {
-    alias_key_was_pressed && shift_held
-}
-
-/// The zoom-in shift alias: the `=`/`+` row key WHILE Shift is held. BOTH
-/// egui logical resolutions of Shift+'+' are accepted (shift-gated):(a)
-/// `Key::Equals` (unshifted '=' resolution on some layouts), (b) `Key::Plus`
-/// (the reachable '+' resolution: shifted '=' on US layouts, unshifted '+'
-/// on e.g. German layouts, and the numpad fallback). OPERATOR-RUN note:
-/// keyboard-layout variance is operator-tested, not hidden in code.
-fn zoom_in_shift_alias_was_pressed(chord_context: &egui::Context) -> bool {
-    let shift_held = chord_context.input(|input| input.modifiers.shift);
-    shift_alias_is_pressed(
-        chord_context.input(|input| input.key_pressed(egui::Key::Equals)),
-        shift_held,
-    ) || shift_alias_is_pressed(
-        chord_context.input(|input| input.key_pressed(egui::Key::Plus)),
-        shift_held,
-    )
+    zoom_alias::zoom_in_alias_was_pressed(chord_context)
 }
 
 /// The zoom-out chord set: hotkey `O`, or the Shift-gated '-' resolution only
@@ -163,16 +144,5 @@ pub(super) fn zoom_out_chord_was_pressed(chord_context: &egui::Context) -> bool 
     if chord_context.input(|input| input.key_pressed(ZOOM_OUT_KEY)) {
         return true;
     }
-    zoom_out_shift_alias_was_pressed(chord_context)
-}
-
-/// The zoom-out shift alias: `-` WHILE Shift is held (`Key::Minus` is the
-/// only egui resolution of the '-' key; the shifted '_' press resolves by
-/// physical position back to `Key::Minus` per the egui-winit fallback).
-fn zoom_out_shift_alias_was_pressed(chord_context: &egui::Context) -> bool {
-    let shift_held = chord_context.input(|input| input.modifiers.shift);
-    shift_alias_is_pressed(
-        chord_context.input(|input| input.key_pressed(egui::Key::Minus)),
-        shift_held,
-    )
+    zoom_alias::zoom_out_alias_was_pressed(chord_context)
 }

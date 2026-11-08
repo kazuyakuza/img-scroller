@@ -161,6 +161,7 @@ mod fullscreen_button;
 mod keyboard_intake;
 mod pill_style;
 mod zoom;
+mod zoom_alias;
 mod zoom_button;
 
 #[cfg(test)]
@@ -181,5 +182,7 @@ mod last_viewed_tests;
 mod pill_style_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod zoom_alias_tests;
 #[cfg(test)]
 mod zoom_tests;

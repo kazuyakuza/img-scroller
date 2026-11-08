@@ -123,35 +123,3 @@ fn zoom_button_accessible_labels_are_pinned() {
     assert_eq!(zoom_button::RESTORE_FIT_BUTTON_LABEL, "Restore zoom to fit");
 }
 
-/// Shorthand: the alias key press and the shift state, directly as booleans.
-fn alias(alias_key_was_pressed: bool, shift_held: bool) -> bool {
-    zoom::shift_alias_is_pressed(alias_key_was_pressed, shift_held)
-}
-
-#[test]
-fn zoom_in_shift_alias_matches_shift_equals() {
-    assert!(alias(true, true)); // Shift+'=' resolution fires
-}
-
-#[test]
-fn zoom_in_shift_alias_matches_shift_plus() {
-    assert!(alias(true, true)); // the '+' resolution (US shifted '=', numpad) fires
-    // same predicate, distinct named resolution; both shift-gated paths accept
-}
-
-#[test]
-fn zoom_in_shift_alias_rejects_the_plain_keys() {
-    assert!(!alias(true, false)); // plain Equals AND plain Plus: no shift → NOTHING
-    assert!(!alias(false, true)); // shift held, no '='/'+' press → nothing
-}
-
-#[test]
-fn zoom_out_shift_alias_matches_shift_minus() {
-    assert!(alias(true, true)); // Shift+'-' fires
-}
-
-#[test]
-fn zoom_out_shift_alias_rejects_the_plain_keys() {
-    assert!(!alias(true, false)); // plain Minus: no shift → nothing
-    assert!(!alias(false, true)); // shift held, no '-' press → nothing
-}
