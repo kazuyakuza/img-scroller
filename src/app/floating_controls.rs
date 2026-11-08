@@ -5,6 +5,8 @@
 //! the keyboard seam per frame; the caller keeps the pill-visibility gate.
 //! Every button paints inside a top-aligned vertical column; the six
 //! keyboard-distinct buttons carry their 9 pt hotkey caption (Wave-4.1 Task 2).
+//! (Wave-4.2 Task 2:) every painted glyph carries the shared 1-point BLACK
+//! pill outline (`src/app/pill_style.rs`); enabled glyphs + captions are WHITE.
 
 use eframe::egui;
 
@@ -12,6 +14,7 @@ use super::arrow_direction::ArrowControl;
 use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
 use super::fit_button;
 use super::fullscreen_button;
+use super::pill_style;
 use super::zoom_button;
 use super::{ImagesScrollerApp, NavigationDirection};
 
@@ -129,7 +132,8 @@ impl ArrowButtonSpec {
         let placement = PillButtonPlacement::for_button(
             PillButton::from_arrow_control(self.control),
             ARROW_BUTTON_SIZE,
-        );
+        )
+        .with_enabled(self.enabled);
         let button_column = ButtonColumnSite::new(row_ui, placement);
         let button_response = show_button_column(button_column, |column_ui| {
             self.allocate_and_paint(column_ui)
@@ -169,23 +173,12 @@ impl ArrowButtonSpec {
     fn paint_triangle(&self, row_ui: &egui::Ui, button_response: &egui::Response) {
         let triangle_rect =
             egui::Rect::from_center_size(button_response.rect.center(), ARROW_TRIANGLE_SIZE);
-        let triangle = egui::Shape::rotated_triangle(
-            triangle_rect,
-            self.control.painted_direction().paint_rotation(),
-            self.arrow_color(row_ui, button_response),
-        );
+        let glyph_state = pill_style::glyph_state_for(self.enabled, button_response.hovered());
+        let triangle = pill_style::outlined_triangle_shape(pill_style::TriangularGlyphSpec {
+            rect: triangle_rect,
+            rotation: self.control.painted_direction().paint_rotation(),
+            fill_color: pill_style::glyph_state_color(glyph_state, row_ui),
+        });
         row_ui.painter().add(triangle);
-    }
-
-    /// Default egui button-text palette: idle in `inactive`, brightened on
-    /// hover, dimmed in `noninteractive` while disabled (exact visual states).
-    fn arrow_color(&self, row_ui: &egui::Ui, button_response: &egui::Response) -> egui::Color32 {
-        if !self.enabled {
-            return row_ui.visuals().widgets.noninteractive.fg_stroke.color;
-        }
-        if button_response.hovered() {
-            return row_ui.visuals().widgets.hovered.fg_stroke.color;
-        }
-        row_ui.visuals().widgets.inactive.fg_stroke.color
     }
 }

@@ -159,6 +159,7 @@ mod folder_navigation;
 mod fullscreen;
 mod fullscreen_button;
 mod keyboard_intake;
+mod pill_style;
 mod zoom;
 mod zoom_button;
 
@@ -174,6 +175,8 @@ mod folder_navigation_tests;
 mod fullscreen_tests;
 #[cfg(test)]
 mod last_viewed_tests;
+#[cfg(test)]
+mod pill_style_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]

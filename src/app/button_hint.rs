@@ -2,14 +2,15 @@
 //! hotkey captions and the hover tooltip strings are keyed here, keyed by
 //! button, so no pill button module duplicates them; the shared vertical
 //! button-column layout wraps every pill button's paint code.
+//! Captions render through the shared pill_style outlined-caption paint (WHITE).
 
 use eframe::egui;
 
 use super::arrow_direction::ArrowControl;
 use super::fit_button::FitButtonAction;
+use super::pill_style;
 use super::zoom_button::ZoomButtonAction;
 
-const CAPTION_TEXT_SIZE: f32 = 9.0;
 const CAPTION_TEXT_GAP: f32 = 2.0;
 
 #[derive(Clone, Copy)]
@@ -86,11 +87,13 @@ fn tooltip_text(button: PillButton) -> &'static str {
 }
 
 /// What the shared column helper needs about one pill button: which button
-/// (caption + tooltip source) and its painted size (the column's width; the
-/// size consts stay in the button modules, single-source per module).
+/// (caption + tooltip source), its painted size (the column's width; the
+/// size consts stay in the button modules, single-source per module), and
+/// its enablement (the caption fill color derives from it).
 pub(super) struct PillButtonPlacement {
     button: PillButton,
     button_size: egui::Vec2,
+    enabled: bool,
 }
 
 impl PillButtonPlacement {
@@ -98,7 +101,14 @@ impl PillButtonPlacement {
         Self {
             button,
             button_size,
+            enabled: true,
         }
+    }
+
+    /// Sets the painted enablement the caption color derives from
+    /// (painted-disabled buttons keep the dimmed caption).
+    pub(super) fn with_enabled(self, enabled: bool) -> Self {
+        Self { enabled, ..self }
     }
 }
 
@@ -136,10 +146,16 @@ pub(super) fn show_button_column(
                 .on_hover_text(tooltip)
                 .on_disabled_hover_text(tooltip);
             if let Some(reference) = hotkey_reference(button) {
-                column_ui.label(
-                    egui::RichText::new(reference)
-                        .size(CAPTION_TEXT_SIZE)
-                        .color(column_ui.visuals().text_color()),
+                let caption_glyph_state =
+                    pill_style::glyph_state_for(placement.enabled, painted_button.hovered());
+                let caption_fill_color =
+                    pill_style::glyph_state_color(caption_glyph_state, column_ui);
+                pill_style::paint_outlined_caption(
+                    column_ui,
+                    pill_style::OutlinedCaption {
+                        text: reference,
+                        fill_color: caption_fill_color,
+                    },
                 );
             }
             painted_button

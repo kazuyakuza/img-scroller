@@ -3,11 +3,13 @@
 //! and restore-zoom-to-fit -- painted rectangle-shape glyphs, no font glyphs.
 //! Enablement follows the at-bound scheme (D3); the restore-fit marker is a
 //! stroked (unfilled) square to stay distinct from the fullscreen filled one.
+//! Wave-4.2 Task 2: every glyph carries the shared 1-point black pill outline.
 
 use eframe::egui;
 
 use super::ImagesScrollerApp;
 use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
+use super::pill_style;
 
 const ZOOM_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(36.0, 32.0);
 const ZOOM_GROUP_GAP: f32 = 16.0;
@@ -60,7 +62,8 @@ impl ZoomButtonSpec {
         let placement = PillButtonPlacement::for_button(
             PillButton::from_zoom_action(self.action),
             ZOOM_BUTTON_SIZE,
-        );
+        )
+        .with_enabled(self.enabled);
         let button_column = ButtonColumnSite::new(row_ui, placement);
         let button_response = show_button_column(button_column, |column_ui| {
             self.allocate_and_paint(column_ui)
@@ -102,25 +105,12 @@ impl ZoomButtonSpec {
         }
     }
 
-    fn zoom_glyph_color(
-        &self,
-        row_ui: &egui::Ui,
-        button_response: &egui::Response,
-    ) -> egui::Color32 {
-        if !self.enabled {
-            return row_ui.visuals().widgets.noninteractive.fg_stroke.color;
-        }
-        if button_response.hovered() {
-            return row_ui.visuals().widgets.hovered.fg_stroke.color;
-        }
-        row_ui.visuals().widgets.inactive.fg_stroke.color
-    }
-
     /// Paints the button's per-action glyph (zoom icons are rects/outline
     /// only, D8) at the disabled/idle/hovered palette.
     fn paint_glyph(&self, row_ui: &egui::Ui, button_response: &egui::Response) {
         let glyph_center = button_response.rect.center();
-        let glyph_color = self.zoom_glyph_color(row_ui, button_response);
+        let glyph_state = pill_style::glyph_state_for(self.enabled, button_response.hovered());
+        let glyph_color = pill_style::glyph_state_color(glyph_state, row_ui);
         let glyph_shapes = match self.action {
             ZoomButtonAction::ZoomIn => self.crossed_bar_shapes(glyph_center, glyph_color),
             ZoomButtonAction::ZoomOut => self.single_bar_shapes(glyph_center, glyph_color),
@@ -137,23 +127,18 @@ impl ZoomButtonSpec {
         glyph_center: egui::Pos2,
         glyph_color: egui::Color32,
     ) -> Vec<egui::Shape> {
-        let horizontal = egui::Shape::rect_filled(
-            egui::Rect::from_center_size(
-                glyph_center,
-                egui::Vec2::new(GLYPH_BAR_LENGTH, GLYPH_BAR_THICKNESS),
-            ),
-            egui::CornerRadius::ZERO,
-            glyph_color,
+        let horizontal_rect = egui::Rect::from_center_size(
+            glyph_center,
+            egui::Vec2::new(GLYPH_BAR_LENGTH, GLYPH_BAR_THICKNESS),
         );
-        let vertical = egui::Shape::rect_filled(
-            egui::Rect::from_center_size(
-                glyph_center,
-                egui::Vec2::new(GLYPH_BAR_THICKNESS, GLYPH_BAR_LENGTH),
-            ),
-            egui::CornerRadius::ZERO,
-            glyph_color,
+        let vertical_rect = egui::Rect::from_center_size(
+            glyph_center,
+            egui::Vec2::new(GLYPH_BAR_THICKNESS, GLYPH_BAR_LENGTH),
         );
-        vec![horizontal, vertical]
+        vec![
+            pill_style::outlined_rect_shape(horizontal_rect, glyph_color),
+            pill_style::outlined_rect_shape(vertical_rect, glyph_color),
+        ]
     }
 
     /// Zoom-out [−]: one horizontal filled bar.
@@ -162,20 +147,18 @@ impl ZoomButtonSpec {
         glyph_center: egui::Pos2,
         glyph_color: egui::Color32,
     ) -> Vec<egui::Shape> {
-        let bar = egui::Shape::rect_filled(
-            egui::Rect::from_center_size(
-                glyph_center,
-                egui::Vec2::new(GLYPH_BAR_LENGTH, GLYPH_BAR_THICKNESS),
-            ),
-            egui::CornerRadius::ZERO,
-            glyph_color,
+        let bar_rect = egui::Rect::from_center_size(
+            glyph_center,
+            egui::Vec2::new(GLYPH_BAR_LENGTH, GLYPH_BAR_THICKNESS),
         );
-        vec![bar]
+        vec![pill_style::outlined_rect_shape(bar_rect, glyph_color)]
     }
 
     /// Restore-fit icon: a stroked square outline (fit marker; distinct from
     /// the fullscreen button's FILLED square). `rect_stroke` REQUIRES an
     /// explicit `StrokeKind` (mandatory since egui 0.31) -- keep that argument.
+    /// Wave-4.2: the marker squares gain a black outline painted OUTSIDE of
+    /// the marker rect; the glyph-colored marker stroke itself is unchanged.
     fn stroked_square_shapes(
         &self,
         glyph_center: egui::Pos2,
@@ -185,12 +168,19 @@ impl ZoomButtonSpec {
             glyph_center,
             egui::Vec2::new(FIT_MARKER_SIDE, FIT_MARKER_SIDE),
         );
+        let outline_rect = marker_rect.expand(pill_style::OUTLINE_STROKE_WIDTH);
+        let outline = egui::Shape::rect_stroke(
+            outline_rect,
+            egui::CornerRadius::ZERO,
+            egui::Stroke::new(pill_style::OUTLINE_STROKE_WIDTH, pill_style::OUTLINE_COLOR),
+            egui::StrokeKind::Outside,
+        );
         let marker = egui::Shape::rect_stroke(
             marker_rect,
             egui::CornerRadius::ZERO,
             egui::Stroke::new(FIT_MARKER_STROKE_WIDTH, glyph_color),
             egui::StrokeKind::Inside,
         );
-        vec![marker]
+        vec![outline, marker]
     }
 }
