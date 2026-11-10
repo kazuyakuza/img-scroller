@@ -37,9 +37,11 @@ fn run_intake_frame(app: &mut ImagesScrollerApp, events: Vec<egui::Event>) {
         ..Default::default()
     };
     let context = egui::Context::default();
-    context.run(frame_input, |frame_context| {
-        app.read_and_dispatch_keystrokes(frame_context);
-    });
+    context
+        .run_pass(frame_input, |frame_context| {
+            app.read_and_dispatch_keystrokes(frame_context);
+        })
+        .drop_without_applying_deltas();
 }
 
 #[test]
@@ -54,7 +56,10 @@ fn arm_makes_popup_visible() {
     let mut app = ImagesScrollerApp::empty_state();
     app.arm_esc_close_popup_at(ARM_TIME);
     assert!(app.esc_close_popup_is_visible());
-    assert_eq!(app.esc_close_popup_expires_at, Some(ARM_TIME + POPUP_VISIBLE_SECONDS));
+    assert_eq!(
+        app.esc_close_popup_expires_at,
+        Some(ARM_TIME + POPUP_VISIBLE_SECONDS)
+    );
 }
 
 #[test]
@@ -63,7 +68,10 @@ fn update_before_deadline_keeps_popup_visible() {
     app.arm_esc_close_popup_at(ARM_TIME);
     app.update_esc_close_popup_at(ARM_TIME + POPUP_VISIBLE_SECONDS - 0.5);
     assert!(app.esc_close_popup_is_visible());
-    assert_eq!(app.esc_close_popup_expires_at, Some(ARM_TIME + POPUP_VISIBLE_SECONDS));
+    assert_eq!(
+        app.esc_close_popup_expires_at,
+        Some(ARM_TIME + POPUP_VISIBLE_SECONDS)
+    );
 }
 
 #[test]
@@ -79,20 +87,31 @@ fn update_at_deadline_clears_popup() {
 
 #[test]
 fn non_repeat_escape_press_detected() {
-    assert!(non_repeat_escape_press_occurred(&[escape_key_event(true, false)]));
-    assert!(!non_repeat_escape_press_occurred(&[escape_key_event(false, false)]));
+    assert!(non_repeat_escape_press_occurred(&[escape_key_event(
+        true, false
+    )]));
+    assert!(!non_repeat_escape_press_occurred(&[escape_key_event(
+        false, false
+    )]));
     assert!(!non_repeat_escape_press_occurred(&[]));
 }
 
 #[test]
 fn repeat_escape_press_is_ignored() {
-    assert!(!non_repeat_escape_press_occurred(&[escape_key_event(true, true)]));
-    assert!(non_repeat_escape_press_occurred(&[escape_key_event(true, false)]));
+    assert!(!non_repeat_escape_press_occurred(&[escape_key_event(
+        true, true
+    )]));
+    assert!(non_repeat_escape_press_occurred(&[escape_key_event(
+        true, false
+    )]));
 }
 
 #[test]
 fn distinct_second_press_closes_when_popup_visible() {
-    assert_eq!(esc_close_action(true, true), EscCloseAction::CloseApplication);
+    assert_eq!(
+        esc_close_action(true, true),
+        EscCloseAction::CloseApplication
+    );
     assert_eq!(esc_close_action(true, false), EscCloseAction::StayIdle);
     assert_eq!(esc_close_action(false, true), EscCloseAction::ShowPopup);
     assert_eq!(esc_close_action(false, false), EscCloseAction::StayIdle);

@@ -26,9 +26,8 @@ impl ImagesScrollerApp {
             self.fullscreen_on,
             was_pressed(screen_context, fullscreen::FULLSCREEN_EXIT_KEY),
         );
-        let non_repeat_escape_pressed = screen_context.input(|input| {
-            esc_close_confirm::non_repeat_escape_press_occurred(&input.events)
-        });
+        let non_repeat_escape_pressed = screen_context
+            .input(|input| esc_close_confirm::non_repeat_escape_press_occurred(&input.events));
         let zoom_in_pressed = zoom::zoom_in_chord_was_pressed(screen_context);
         let zoom_out_pressed = zoom::zoom_out_chord_was_pressed(screen_context);
         let restore_fit_pressed = was_pressed(screen_context, zoom::RESTORE_FIT_KEY);

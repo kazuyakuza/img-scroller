@@ -34,15 +34,21 @@ fn caption_outline_offsets_match_the_one_point_neighbors() {
 #[test]
 fn glyph_state_resolves_the_enabled_white_and_disabled_theme_palette() {
     let context = egui::Context::default();
-    context.run(Default::default(), |run_context| {
-        egui::Area::new(egui::Id::new("pill_style_palette_test")).show(run_context, |test_ui| {
-            let enabled_idle = glyph_state_color(glyph_state_for(true, false), test_ui);
-            let enabled_hovered = glyph_state_color(glyph_state_for(true, true), test_ui);
-            let disabled = glyph_state_color(glyph_state_for(false, true), test_ui);
-            assert_eq!(enabled_idle, PILL_GLYPH_COLOR);
-            assert_eq!(enabled_hovered, PILL_GLYPH_COLOR);
-            let noninteractive_color = test_ui.visuals().widgets.noninteractive.fg_stroke.color;
-            assert_eq!(disabled, noninteractive_color);
-        });
-    });
+    context
+        .run_pass(Default::default(), |run_context| {
+            egui::Area::new(egui::Id::unique("pill_style_palette_test")).show(
+                run_context,
+                |test_ui| {
+                    let enabled_idle = glyph_state_color(glyph_state_for(true, false), test_ui);
+                    let enabled_hovered = glyph_state_color(glyph_state_for(true, true), test_ui);
+                    let disabled = glyph_state_color(glyph_state_for(false, true), test_ui);
+                    assert_eq!(enabled_idle, PILL_GLYPH_COLOR);
+                    assert_eq!(enabled_hovered, PILL_GLYPH_COLOR);
+                    let noninteractive_color =
+                        test_ui.visuals().widgets.noninteractive.fg_stroke.color;
+                    assert_eq!(disabled, noninteractive_color);
+                },
+            );
+        })
+        .drop_without_applying_deltas();
 }

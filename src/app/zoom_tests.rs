@@ -122,4 +122,3 @@ fn zoom_button_accessible_labels_are_pinned() {
     assert_eq!(zoom_button::ZOOM_OUT_BUTTON_LABEL, "Zoom out");
     assert_eq!(zoom_button::RESTORE_FIT_BUTTON_LABEL, "Restore zoom to fit");
 }
-

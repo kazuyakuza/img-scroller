@@ -74,7 +74,7 @@ pub(super) struct TriangularGlyphSpec {
 /// `Shape::rotated_triangle` (same three corners, same center rotation),
 /// rendered through `convex_polygon` with an outside `PathStroke`.
 pub(super) fn outlined_triangle_shape(glyph: TriangularGlyphSpec) -> egui::Shape {
-    let rotation = egui::Rot2::from_angle(glyph.rotation);
+    let rotation = egui::emath::Rot2::from_angle(glyph.rotation);
     let corner_points = [
         glyph.rect.left_top(),
         glyph.rect.right_top(),
@@ -87,7 +87,7 @@ pub(super) fn outlined_triangle_shape(glyph: TriangularGlyphSpec) -> egui::Shape
     egui::Shape::convex_polygon(
         rotated_points,
         glyph.fill_color,
-        egui::PathStroke::new(OUTLINE_STROKE_WIDTH, OUTLINE_COLOR).outside(),
+        egui::epaint::PathStroke::new(OUTLINE_STROKE_WIDTH, OUTLINE_COLOR).outside(),
     )
 }
 

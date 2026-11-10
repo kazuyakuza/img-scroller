@@ -61,7 +61,7 @@ fn alias_shift_held(chord_context: &egui::Context) -> bool {
 fn typed_alias_character_was_seen(chord_context: &egui::Context, alias_character: char) -> bool {
     chord_context.input(|input| {
         input.events.iter().any(|event| match event {
-            egui::Event::Text(typed_text) => typed_text.chars().next() == Some(alias_character),
+            egui::Event::Text(typed_text) => typed_text.starts_with(alias_character),
             _ => false,
         })
     })

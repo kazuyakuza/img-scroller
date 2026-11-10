@@ -7,8 +7,8 @@ use eframe::egui;
 
 use super::zoom::{zoom_in_chord_was_pressed, zoom_out_chord_was_pressed};
 use super::zoom_alias::{
-    shift_alias_is_pressed, ZOOM_IN_ALIAS_CHARACTERS, ZOOM_IN_ALIAS_KEYS, ZOOM_OUT_ALIAS_CHARACTERS,
-    ZOOM_OUT_ALIAS_KEYS,
+    ZOOM_IN_ALIAS_CHARACTERS, ZOOM_IN_ALIAS_KEYS, ZOOM_OUT_ALIAS_CHARACTERS, ZOOM_OUT_ALIAS_KEYS,
+    shift_alias_is_pressed,
 };
 
 fn frame_events(events: Vec<egui::Event>) -> egui::RawInput {
@@ -26,7 +26,11 @@ fn shift() -> egui::Modifiers {
 }
 
 fn pressed_key_events(alias_key: egui::Key, shift_held: bool) -> Vec<egui::Event> {
-    let event_modifiers = if shift_held { shift() } else { egui::Modifiers::default() };
+    let event_modifiers = if shift_held {
+        shift()
+    } else {
+        egui::Modifiers::default()
+    };
     vec![
         egui::Event::ModifiersChanged(event_modifiers),
         egui::Event::Key {
@@ -40,7 +44,11 @@ fn pressed_key_events(alias_key: egui::Key, shift_held: bool) -> Vec<egui::Event
 }
 
 fn typed_text_events(typed_text: &str, shift_held: bool) -> Vec<egui::Event> {
-    let event_modifiers = if shift_held { shift() } else { egui::Modifiers::default() };
+    let event_modifiers = if shift_held {
+        shift()
+    } else {
+        egui::Modifiers::default()
+    };
     vec![
         egui::Event::ModifiersChanged(event_modifiers),
         egui::Event::Text(typed_text.to_owned()),
@@ -52,12 +60,14 @@ fn typed_text_events(typed_text: &str, shift_held: bool) -> Vec<egui::Event> {
 fn one_frame_chords(events: Vec<egui::Event>) -> (bool, bool) {
     let frame_chords = std::cell::Cell::new((false, false));
     let context = egui::Context::default();
-    context.run(frame_events(events), |frame_context| {
-        frame_chords.set((
-            zoom_in_chord_was_pressed(frame_context),
-            zoom_out_chord_was_pressed(frame_context),
-        ));
-    });
+    context
+        .run_pass(frame_events(events), |frame_context| {
+            frame_chords.set((
+                zoom_in_chord_was_pressed(frame_context),
+                zoom_out_chord_was_pressed(frame_context),
+            ));
+        })
+        .drop_without_applying_deltas();
     frame_chords.get()
 }
 
@@ -83,27 +93,42 @@ fn shift_alias_is_pressed_matrix() {
 
 #[test]
 fn shift_plus_key_event_zooms_in() {
-    assert_eq!(one_frame_chords(pressed_key_events(egui::Key::Plus, true)), (true, false));
+    assert_eq!(
+        one_frame_chords(pressed_key_events(egui::Key::Plus, true)),
+        (true, false)
+    );
 }
 
 #[test]
 fn shift_equals_key_event_zooms_in() {
-    assert_eq!(one_frame_chords(pressed_key_events(egui::Key::Equals, true)), (true, false));
+    assert_eq!(
+        one_frame_chords(pressed_key_events(egui::Key::Equals, true)),
+        (true, false)
+    );
 }
 
 #[test]
 fn plain_equals_key_is_inert() {
-    assert_eq!(one_frame_chords(pressed_key_events(egui::Key::Equals, false)), (false, false));
+    assert_eq!(
+        one_frame_chords(pressed_key_events(egui::Key::Equals, false)),
+        (false, false)
+    );
 }
 
 #[test]
 fn plain_plus_key_is_inert() {
-    assert_eq!(one_frame_chords(pressed_key_events(egui::Key::Plus, false)), (false, false));
+    assert_eq!(
+        one_frame_chords(pressed_key_events(egui::Key::Plus, false)),
+        (false, false)
+    );
 }
 
 #[test]
 fn plain_minus_key_is_inert() {
-    assert_eq!(one_frame_chords(pressed_key_events(egui::Key::Minus, false)), (false, false));
+    assert_eq!(
+        one_frame_chords(pressed_key_events(egui::Key::Minus, false)),
+        (false, false)
+    );
 }
 
 #[test]
@@ -114,34 +139,67 @@ fn shift_only_frame_is_inert() {
 
 #[test]
 fn typed_plus_with_shift_zooms_in() {
-    assert_eq!(one_frame_chords(typed_text_events("+", true)), (true, false));
+    assert_eq!(
+        one_frame_chords(typed_text_events("+", true)),
+        (true, false)
+    );
 }
 
 #[test]
 fn typed_equals_with_shift_zooms_in() {
-    assert_eq!(one_frame_chords(typed_text_events("=", true)), (true, false));
+    assert_eq!(
+        one_frame_chords(typed_text_events("=", true)),
+        (true, false)
+    );
 }
 
 #[test]
 fn typed_minus_variants_with_shift_zoom_out() {
-    assert_eq!(one_frame_chords(typed_text_events("-", true)), (false, true));
-    assert_eq!(one_frame_chords(typed_text_events("\u{2212}", true)), (false, true));
-    assert_eq!(one_frame_chords(typed_text_events("_", true)), (false, true));
+    assert_eq!(
+        one_frame_chords(typed_text_events("-", true)),
+        (false, true)
+    );
+    assert_eq!(
+        one_frame_chords(typed_text_events("\u{2212}", true)),
+        (false, true)
+    );
+    assert_eq!(
+        one_frame_chords(typed_text_events("_", true)),
+        (false, true)
+    );
 }
 
 #[test]
 fn typed_alias_chars_without_shift_are_inert() {
-    assert_eq!(one_frame_chords(typed_text_events("+", false)), (false, false));
-    assert_eq!(one_frame_chords(typed_text_events("=", false)), (false, false));
-    assert_eq!(one_frame_chords(typed_text_events("-", false)), (false, false));
-    assert_eq!(one_frame_chords(typed_text_events("\u{2212}", false)), (false, false));
-    assert_eq!(one_frame_chords(typed_text_events("_", false)), (false, false));
+    assert_eq!(
+        one_frame_chords(typed_text_events("+", false)),
+        (false, false)
+    );
+    assert_eq!(
+        one_frame_chords(typed_text_events("=", false)),
+        (false, false)
+    );
+    assert_eq!(
+        one_frame_chords(typed_text_events("-", false)),
+        (false, false)
+    );
+    assert_eq!(
+        one_frame_chords(typed_text_events("\u{2212}", false)),
+        (false, false)
+    );
+    assert_eq!(
+        one_frame_chords(typed_text_events("_", false)),
+        (false, false)
+    );
 }
 
 #[test]
 fn numpad_names_resolve_into_the_pinned_family_members() {
     assert_eq!(egui::Key::from_name("NumpadAdd"), Some(egui::Key::Plus));
-    assert_eq!(egui::Key::from_name("NumpadSubtract"), Some(egui::Key::Minus));
+    assert_eq!(
+        egui::Key::from_name("NumpadSubtract"),
+        Some(egui::Key::Minus)
+    );
     assert_eq!(egui::Key::from_name("NumpadEqual"), Some(egui::Key::Equals));
     assert_eq!(egui::Key::from_name("\u{2212}"), Some(egui::Key::Minus));
 }
