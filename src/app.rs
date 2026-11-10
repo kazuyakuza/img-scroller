@@ -35,6 +35,10 @@ pub struct ImagesScrollerApp {
     /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the display
     /// path; reset on every successful open; never persisted.
     zoom_factor: f32,
+    /// Popup expiry deadline for the fullscreen-OFF ESC double-press close
+    /// affordance (Wave 4.2 A-Task 4): `None` = popup not visible; the value is
+    /// the absolute `InputState::time` (seconds) when the popup dismisses.
+    esc_close_popup_expires_at: Option<f64>,
 }
 
 use folder_navigation::NavigationDirection;
@@ -56,6 +60,7 @@ impl ImagesScrollerApp {
             current_display: CurrentImageDisplay::initial(),
             fullscreen_on: false,
             zoom_factor: crate::zoom::RESTORE_TO_FIT_FACTOR,
+            esc_close_popup_expires_at: None,
         }
     }
 
@@ -128,6 +133,7 @@ impl ImagesScrollerApp {
         } else {
             self.show_empty_state_layout(frame, ui);
         }
+        esc_close_confirm::show_esc_close_popup(self, ui.ctx());
     }
 }
 
@@ -153,6 +159,7 @@ mod button_hint;
 mod central_surface;
 mod empty_folder_view;
 mod empty_state_view;
+mod esc_close_confirm;
 mod fit_button;
 mod floating_controls;
 mod folder_navigation;
@@ -166,6 +173,8 @@ mod zoom_button;
 
 #[cfg(test)]
 mod button_hint_tests;
+#[cfg(test)]
+mod esc_close_confirm_tests;
 #[cfg(test)]
 mod fit_one_shot_tests;
 #[cfg(test)]

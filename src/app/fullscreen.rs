@@ -2,6 +2,7 @@
 //! viewport-command toggle, the ONE control-visibility gate, and the
 //! fullscreen-only central surface. OFF restores all controls, image central.
 //! Wave-4.1 Task 3 addition: fullscreen exits via F11 OR ESC; nothing else changes.
+//! Wave-4.2 Task 4 addition: every toggle disarms the ESC-close popup.
 
 use eframe::egui;
 
@@ -27,6 +28,7 @@ impl ImagesScrollerApp {
     /// in the frame the flag flips.
     pub(super) fn toggle_fullscreen_and_send_command(&mut self, screen_context: &egui::Context) {
         let fullscreen_after_toggle = self.toggle_fullscreen();
+        self.disarm_esc_close_popup();
         screen_context
             .send_viewport_cmd(egui::ViewportCommand::Fullscreen(fullscreen_after_toggle));
     }
