@@ -1,8 +1,10 @@
 //! Wave-5 pan math: per-axis overflow, clamped offsets, at-edge predicates,
-//! the pan step, and the arrow pan-or-navigate decision. Authoritative for the
-//! MATH only; the reset policy lives in the app (`src/app.rs` and
-//! `src/app/pan.rs`), and the paint consumes this module in
-//! `src/app_display.rs`.
+//! the pan step, and the arrow pan-or-navigate decision: an axis that fits
+//! entirely navigates directly; an overflowing axis pans on every press
+//! (auto-repeats included) until its edge, where only a distinct non-repeat
+//! press navigates. Authoritative for the MATH only; the reset policy lives in
+//! the app (`src/app.rs` and `src/app/pan.rs`), and the paint consumes this
+//! module in `src/app_display.rs`.
 
 use eframe::egui;
 

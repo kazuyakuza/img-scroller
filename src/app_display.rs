@@ -1,5 +1,6 @@
 //! Display state and paint step of the central image surface: texture lifecycle
-//! (one upload per successful decode) and the fit-scaled centered render.
+//! (one upload per successful decode) and the fit-scaled paint composed with
+//! the clamped pan offset.
 
 use eframe::egui;
 
