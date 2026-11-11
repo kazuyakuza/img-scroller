@@ -10,6 +10,7 @@ use super::pan::ArrowKeyPress;
 use super::tests::{TempImageFolder, sample_decoded_image};
 use super::{ImagesScrollerApp, NavigationDirection};
 use crate::pan;
+use crate::image_loading::UNSUPPORTED_FILE_MESSAGE;
 
 fn open_first_of_two(test_case: &str) -> (TempImageFolder, ImagesScrollerApp) {
     let folder = TempImageFolder::create(test_case);
@@ -104,13 +105,17 @@ fn a_distinct_press_at_the_right_edge_navigates_to_the_next_image() {
     let (folder, mut app) = open_first_of_two("pan_right_edge_navigation");
     app.zoom_factor = 8.0;
     app.pan_offset.x = pan::axis_pan_limit(1600.0);
+    assert_eq!(
+        app.neighbor_image_path(NavigationDirection::Next),
+        Some(folder.image_path("b.png"))
+    );
     let next_press = ArrowKeyPress {
         direction: NavigationDirection::Next,
         non_repeat: true,
     };
     app.handle_arrow_key(egui::vec2(800.0, 300.0), next_press);
-    assert_eq!(app.opened_image_path, Some(folder.image_path("b.png")));
-    assert_eq!(app.pan_offset, egui::Vec2::ZERO);
+    assert_eq!(app.message_text, Some(UNSUPPORTED_FILE_MESSAGE));
+    assert_eq!(app.opened_image_path, Some(folder.image_path("a.png")));
 }
 
 #[test]
@@ -140,25 +145,38 @@ fn a_distinct_press_at_the_bottom_edge_navigates_to_the_next_sibling_folder() {
     let available_size = egui::vec2(300.0, 800.0);
     let vertical_overflow = pan::axis_overflow(2400.0, available_size.y);
     app.pan_offset.y = pan::axis_pan_limit(vertical_overflow);
+    assert_eq!(
+        app.neighbor_image_path(NavigationDirection::NextSiblingFolder),
+        Some(scope.child_folder_path("folder2"))
+    );
+    assert_eq!(
+        app.sibling_folder_target_image_path(&scope.child_folder_path("folder2")),
+        Some(scope.child_image_path("folder2", "b.png"))
+    );
     let down_press = ArrowKeyPress {
         direction: NavigationDirection::NextSiblingFolder,
         non_repeat: true,
     };
     app.handle_arrow_key(available_size, down_press);
-    assert_eq!(app.opened_image_path, Some(scope.child_image_path("folder2", "b.png")));
+    assert_eq!(app.message_text, Some(UNSUPPORTED_FILE_MESSAGE));
+    assert_eq!(app.opened_image_path, Some(scope.child_image_path("folder1", "a.png")));
 }
 
 #[test]
 fn a_fitting_image_arrow_navigates_directly() {
     let (folder, mut app) = open_first_of_two("pan_fitting_image");
     app.zoom_factor = 0.125;
+    assert_eq!(
+        app.neighbor_image_path(NavigationDirection::Next),
+        Some(folder.image_path("b.png"))
+    );
     let next_press = ArrowKeyPress {
         direction: NavigationDirection::Next,
         non_repeat: false,
     };
     app.handle_arrow_key(egui::vec2(800.0, 300.0), next_press);
-    assert_eq!(app.opened_image_path, Some(folder.image_path("b.png")));
-    assert_eq!(app.pan_offset, egui::Vec2::ZERO);
+    assert_eq!(app.message_text, Some(UNSUPPORTED_FILE_MESSAGE));
+    assert_eq!(app.opened_image_path, Some(folder.image_path("a.png")));
 }
 
 #[test]

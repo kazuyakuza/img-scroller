@@ -13,6 +13,7 @@ use crate::pan;
 
 /// One arrow-key press handed to the controller: the navigation direction the
 /// key maps to and whether the event is a DISTINCT (non-repeat) press.
+#[derive(Clone, Copy)]
 pub(super) struct ArrowKeyPress {
     pub(super) direction: NavigationDirection,
     pub(super) non_repeat: bool,

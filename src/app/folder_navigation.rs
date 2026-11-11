@@ -21,6 +21,7 @@ const LISTING_ANCHOR_FILE_PLACEHOLDER: &str = "listing_anchor.bin";
 /// Arrow directions of the shared navigation seam: the image axis steps the
 /// current folder's sibling images; the folder axis steps the sibling folders
 /// under the same parent.
+#[derive(Clone, Copy)]
 pub(super) enum NavigationDirection {
     Previous,
     Next,
