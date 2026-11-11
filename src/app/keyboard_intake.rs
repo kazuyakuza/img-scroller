@@ -1,7 +1,7 @@
 //! Per-frame keyboard intake: every edge-triggered chord of the app (the
 //! fullscreen F11 toggle and the ESC-while-ON exit, the ESC-close arm/close
-//! branch and the per-frame popup-expiry update, the four navigation arrows,
-//! the zoom `I`/`O`/`0` chords, and the
+//! branch and the per-frame popup-expiry update, the four pan-or-navigate
+//! arrows, the zoom `I`/`O`/`0` chords, and the
 //! one-shot fit `W`/`H` keys) is read once per frame and dispatched; the
 //! intake runs in EVERY mode (fullscreen included) and always
 //! BEFORE the layout dispatch.
@@ -16,6 +16,7 @@ use super::ImagesScrollerApp;
 use super::NavigationDirection;
 use super::esc_close_confirm;
 use super::fullscreen;
+use super::pan;
 use super::zoom;
 
 impl ImagesScrollerApp {
@@ -38,6 +39,18 @@ impl ImagesScrollerApp {
         let right_pressed = was_pressed(screen_context, egui::Key::ArrowRight);
         let up_pressed = was_pressed(screen_context, egui::Key::ArrowUp);
         let down_pressed = was_pressed(screen_context, egui::Key::ArrowDown);
+        let left_non_repeat = screen_context.input(|input| {
+            pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowLeft)
+        });
+        let right_non_repeat = screen_context.input(|input| {
+            pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowRight)
+        });
+        let up_non_repeat = screen_context.input(|input| {
+            pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowUp)
+        });
+        let down_non_repeat = screen_context.input(|input| {
+            pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowDown)
+        });
         self.update_esc_close_popup(screen_context);
         if fullscreen_pressed {
             self.toggle_fullscreen_and_send_command(screen_context);
@@ -63,16 +76,40 @@ impl ImagesScrollerApp {
             self.set_zoom_to_fit_height(screen_context.viewport_rect().size());
         }
         if left_pressed {
-            self.navigate(NavigationDirection::Previous);
+            self.handle_arrow_key(
+                screen_context.viewport_rect().size(),
+                pan::ArrowKeyPress {
+                    direction: NavigationDirection::Previous,
+                    non_repeat: left_non_repeat,
+                },
+            );
         }
         if right_pressed {
-            self.navigate(NavigationDirection::Next);
+            self.handle_arrow_key(
+                screen_context.viewport_rect().size(),
+                pan::ArrowKeyPress {
+                    direction: NavigationDirection::Next,
+                    non_repeat: right_non_repeat,
+                },
+            );
         }
         if up_pressed {
-            self.navigate(NavigationDirection::PreviousSiblingFolder);
+            self.handle_arrow_key(
+                screen_context.viewport_rect().size(),
+                pan::ArrowKeyPress {
+                    direction: NavigationDirection::PreviousSiblingFolder,
+                    non_repeat: up_non_repeat,
+                },
+            );
         }
         if down_pressed {
-            self.navigate(NavigationDirection::NextSiblingFolder);
+            self.handle_arrow_key(
+                screen_context.viewport_rect().size(),
+                pan::ArrowKeyPress {
+                    direction: NavigationDirection::NextSiblingFolder,
+                    non_repeat: down_non_repeat,
+                },
+            );
         }
     }
 

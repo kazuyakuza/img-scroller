@@ -60,7 +60,7 @@ pub(crate) fn zoom_factor_is_off_restore_target(factor: f32) -> bool {
 }
 
 /// The per-frame draw size of the image at `fit_size` scaled by the zoom factor
-/// (Wave-5 pan composes its offsets on this size; no scroll/pan this wave).
+/// (Wave-5 pan composes its clamped offsets on this size).
 pub(crate) fn zoomed_draw_size(fit_size: egui::Vec2, zoom_factor: f32) -> egui::Vec2 {
     fit_size * zoom_factor
 }

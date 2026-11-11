@@ -71,6 +71,7 @@ impl ImagesScrollerApp {
     /// Hotkey `0` and the restore button: back to the neutral fit factor (1.0). Silent.
     pub(super) fn restore_zoom_to_fit(&mut self) {
         self.zoom_factor = crate::zoom::RESTORE_TO_FIT_FACTOR;
+        self.reset_pan_offset();
     }
 
     /// One-shot fit-width set (Wave 4.1 Task 7): the zoom factor ONLY -- the

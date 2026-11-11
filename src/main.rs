@@ -9,6 +9,7 @@ mod folder_listing;
 mod image_loading;
 mod last_viewed_images;
 mod name_collation;
+mod pan;
 mod platform;
 mod scaling;
 mod sibling_folder_listing;
@@ -16,11 +17,23 @@ mod zoom;
 
 use std::path::PathBuf;
 
+use eframe::egui;
+
+fn window_options() -> eframe::NativeOptions {
+    eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default()
+            .with_title(app::APP_WINDOW_TITLE)
+            .with_resizable(true)
+            .with_maximized(true),
+        ..eframe::NativeOptions::default()
+    }
+}
+
 fn main() -> eframe::Result {
     let cli_image_path = cli_image_path();
     eframe::run_native(
         app::APP_WINDOW_TITLE,
-        app::window_options(),
+        window_options(),
         Box::new(move |creation_context| {
             let mut application = app::ImagesScrollerApp::new(creation_context);
             if let Some(image_path) = cli_image_path {

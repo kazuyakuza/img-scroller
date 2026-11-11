@@ -39,6 +39,9 @@ pub struct ImagesScrollerApp {
     /// affordance (Wave 4.2 A-Task 4): `None` = popup not visible; the value is
     /// the absolute `InputState::time` (seconds) when the popup dismisses.
     esc_close_popup_expires_at: Option<f64>,
+    /// Pan offset of the visible viewport from the centered position (Wave 5);
+    /// zeroed on every successful open and on restore-to-fit; never persisted.
+    pan_offset: egui::Vec2,
 }
 
 use folder_navigation::NavigationDirection;
@@ -61,6 +64,7 @@ impl ImagesScrollerApp {
             fullscreen_on: false,
             zoom_factor: crate::zoom::RESTORE_TO_FIT_FACTOR,
             esc_close_popup_expires_at: None,
+            pan_offset: egui::Vec2::ZERO,
         }
     }
 
@@ -88,6 +92,7 @@ impl ImagesScrollerApp {
                 self.decoded_image = Some(decoded_image);
                 self.message_text = None;
                 self.zoom_factor = crate::zoom::RESTORE_TO_FIT_FACTOR;
+                self.pan_offset = egui::Vec2::ZERO;
                 self.current_display.accept_decoded_image();
             }
             Err(_failure) => {
@@ -144,16 +149,6 @@ impl eframe::App for ImagesScrollerApp {
     }
 }
 
-pub fn window_options() -> eframe::NativeOptions {
-    eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_title(APP_WINDOW_TITLE)
-            .with_resizable(true)
-            .with_maximized(true),
-        ..eframe::NativeOptions::default()
-    }
-}
-
 mod arrow_direction;
 mod button_hint;
 mod central_surface;
@@ -166,6 +161,7 @@ mod folder_navigation;
 mod fullscreen;
 mod fullscreen_button;
 mod keyboard_intake;
+mod pan;
 mod pill_style;
 mod zoom;
 mod zoom_alias;
@@ -187,6 +183,8 @@ mod folder_navigation_tests;
 mod fullscreen_tests;
 #[cfg(test)]
 mod last_viewed_tests;
+#[cfg(test)]
+mod pan_tests;
 #[cfg(test)]
 mod pill_style_tests;
 #[cfg(test)]

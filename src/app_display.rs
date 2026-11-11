@@ -4,17 +4,19 @@
 use eframe::egui;
 
 use crate::image_loading::DecodedImage;
+use crate::pan;
 use crate::scaling;
 use crate::zoom;
 
 const CURRENT_IMAGE_TEXTURE_NAME: &str = "current_image";
 
-/// The 2-argument paint request (project max-args rule): WHICH decoded image
-/// is on screen and WHAT zoom factor scales the whole-image fit base into the
-/// draw size.
+/// The 3-argument paint request (project max-args rule): WHICH decoded image
+/// is on screen, WHAT zoom factor scales the whole-image fit base into the
+/// draw size, and the session pan offset composed onto that draw rect.
 pub(crate) struct ImagePainting<'a> {
     pub(crate) decoded_image: &'a DecodedImage,
     pub(crate) zoom_factor: f32,
+    pub(crate) pan_offset: egui::Vec2,
 }
 
 /// Texture state of the image shown in the central surface. A successful open
@@ -37,27 +39,27 @@ impl CurrentImageDisplay {
         self.texture_upload_pending = true;
     }
 
-    /// Paints the decoded image at `fit * zoom` (recomposed every frame); size
-    /// overflow is clipped by the panel's default clip rect (center-region
-    /// visible). No pan or scroll this wave -- Wave 5 composes its offsets onto
-    /// this same fit-scaled size.
+    /// Paints the decoded image at `fit * zoom`, repositioned by the clamped
+    /// pan offset. The offset is clamped per axis so an overflowing axis never
+    /// shows a gap or overscan; a fitting axis stays centered; the panel clip
+    /// rect hides anything beyond. No texture re-upload: the offset only
+    /// repositions the rect (one upload per successful decode remains).
     pub(crate) fn paint(&mut self, panel_ui: &mut egui::Ui, painting: ImagePainting) {
         self.ensure_current_image_texture(panel_ui.ctx(), painting.decoded_image);
         let Some(image_texture) = self.image_texture.as_ref() else {
             return;
         };
-        let Some(fit_size) =
-            scaling::fitted_size(panel_ui.available_size(), painting.decoded_image.size())
+        let panel_rect = panel_ui.available_rect_before_wrap();
+        let Some(fit_size) = scaling::fitted_size(panel_rect.size(), painting.decoded_image.size())
         else {
             return;
         };
         let display_size = zoom::zoomed_draw_size(fit_size, painting.zoom_factor);
-        panel_ui.with_layout(
-            egui::Layout::centered_and_justified(egui::Direction::TopDown),
-            |image_ui| {
-                image_ui.add(egui::Image::new(image_texture).fit_to_exact_size(display_size));
-            },
-        );
+        let overflow = pan::axis_overflow_pair(display_size, panel_rect.size());
+        let clamped_offset = pan::clamped_pan_offset(painting.pan_offset, overflow);
+        let centered_min = panel_rect.center() - display_size * 0.5;
+        let image_rect = egui::Rect::from_min_size(centered_min - clamped_offset, display_size);
+        panel_ui.put(image_rect, egui::Image::new(image_texture).fit_to_exact_size(display_size));
     }
 
     /// Uploads the decoded pixels as a texture only while a new decode is pending,
