@@ -1,4 +1,4 @@
-//! Application shell: the resizable viewer window of Images Scroller, maximized at every launch.
+//! Application shell of the Images Scroller viewer (the resizable, always-maximized viewer-window options moved to `src/main.rs` in Wave 5).
 
 use std::path::PathBuf;
 
