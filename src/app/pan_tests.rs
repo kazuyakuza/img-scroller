@@ -9,8 +9,8 @@ use super::folder_navigation_tests::{TempParentScope, app_opened_in};
 use super::pan::ArrowKeyPress;
 use super::tests::{TempImageFolder, sample_decoded_image};
 use super::{ImagesScrollerApp, NavigationDirection};
-use crate::pan;
 use crate::image_loading::UNSUPPORTED_FILE_MESSAGE;
+use crate::pan;
 
 fn open_first_of_two(test_case: &str) -> (TempImageFolder, ImagesScrollerApp) {
     let folder = TempImageFolder::create(test_case);
@@ -159,7 +159,10 @@ fn a_distinct_press_at_the_bottom_edge_navigates_to_the_next_sibling_folder() {
     };
     app.handle_arrow_key(available_size, down_press);
     assert_eq!(app.message_text, Some(UNSUPPORTED_FILE_MESSAGE));
-    assert_eq!(app.opened_image_path, Some(scope.child_image_path("folder1", "a.png")));
+    assert_eq!(
+        app.opened_image_path,
+        Some(scope.child_image_path("folder1", "a.png"))
+    );
 }
 
 #[test]

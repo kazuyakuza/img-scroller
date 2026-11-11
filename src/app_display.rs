@@ -60,7 +60,10 @@ impl CurrentImageDisplay {
         let clamped_offset = pan::clamped_pan_offset(painting.pan_offset, overflow);
         let centered_min = panel_rect.center() - display_size * 0.5;
         let image_rect = egui::Rect::from_min_size(centered_min - clamped_offset, display_size);
-        panel_ui.put(image_rect, egui::Image::new(image_texture).fit_to_exact_size(display_size));
+        panel_ui.put(
+            image_rect,
+            egui::Image::new(image_texture).fit_to_exact_size(display_size),
+        );
     }
 
     /// Uploads the decoded pixels as a texture only while a new decode is pending,

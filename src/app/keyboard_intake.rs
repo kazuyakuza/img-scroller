@@ -45,9 +45,8 @@ impl ImagesScrollerApp {
         let right_non_repeat = screen_context.input(|input| {
             pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowRight)
         });
-        let up_non_repeat = screen_context.input(|input| {
-            pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowUp)
-        });
+        let up_non_repeat = screen_context
+            .input(|input| pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowUp));
         let down_non_repeat = screen_context.input(|input| {
             pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowDown)
         });
