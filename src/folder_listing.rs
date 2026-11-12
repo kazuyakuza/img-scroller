@@ -1,6 +1,7 @@
 //! Folder listing for horizontal image navigation: the file-sibling images of
 //! one folder only -- non-recursive, whitelisted-extension-filtered, and
-//! sorted by the fixed v1 alphanumeric collation (folded name + exact tie-break).
+//! sorted through the shared EntryNameOrder seam (the system name order; the
+//! pure collation fallback in container builds and on system failures).
 
 use crate::name_collation::EntryNameOrder;
 use std::ffi::OsStr;
@@ -63,8 +64,8 @@ impl FolderListing {
         self.image_paths.len()
     }
 
-    /// The FIRST whitelisted image in the fixed collation (the vertical
-    /// navigation's new-folder target); None for an empty listing.
+    /// The FIRST whitelisted image in the system entry-name order (the
+    /// vertical navigation's new-folder target); None for an empty listing.
     pub(crate) fn first_listed_image(&self) -> Option<PathBuf> {
         self.image_paths.first().cloned()
     }

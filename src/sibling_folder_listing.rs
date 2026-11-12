@@ -1,8 +1,9 @@
 //! Sibling-folder listing for vertical navigation: the DIRECTORY entries of the
 //! parent of the opened image's folder only, from one non-recursive read -- an
 //! unreadable scope parent yields an empty listing -- with the current folder
-//! excluded from the destinations and sorted by the fixed v1 collation shared
-//! with the image listing.
+//! excluded from the destinations and sorted through the shared EntryNameOrder
+//! seam (the system name order); the anchor position is read against the same
+//! stored order.
 
 use crate::name_collation::EntryNameOrder;
 use std::cmp::Ordering;

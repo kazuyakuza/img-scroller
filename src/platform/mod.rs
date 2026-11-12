@@ -1,5 +1,6 @@
-//! OS-bound facade for the native open dialog and image decoding.
-//! Both target sides expose the same signatures; see the Task-2 plan §1.1-h.
+//! OS-bound facade for the native open dialog, image decoding and the system
+//! entry-name order. Both target sides expose the same signatures; see the
+//! Task-2 plan §1.1-h.
 
 #[cfg(target_os = "windows")]
 mod windows;

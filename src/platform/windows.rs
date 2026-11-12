@@ -1,6 +1,8 @@
-//! Windows implementation of the platform facade: native open dialog and WIC
-//! decoding. Compiled only on Windows targets; first-compile validation is the
-//! cross-target check step of this task's implementation.
+//! Windows implementation of the platform facade: native open dialog, WIC
+//! decoding and the system entry-name order through windows_collation (any
+//! system-call failure falls back to the pure collation). Compiled only on
+//! Windows targets; first-compile validation is the cross-target check step
+//! of this task's implementation.
 
 use std::cmp::Ordering;
 use std::os::windows::ffi::OsStrExt;

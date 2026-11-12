@@ -1,7 +1,8 @@
-//! Fixed v1 alphanumeric entry-name collation shared by the image and folder
-//! listings: compare by lowercase form first, tie-break by exact characters
-//! (tech.md -> Horizontal Navigation Mechanism, Wave-2 decision; brief
-//! `## Sorting Order`: one fixed order for files AND folders).
+//! Entry-name ordering shared by the image and folder listings: EntryNameOrder
+//! is the comparator-as-data seam resolving through the platform facade to the
+//! system name order; compare_entry_names (lowercase form first, exact-character
+//! tie-break -- the fixed v1 alphanumeric rule) is the pure fallback on any
+//! system-collation failure and in container/stub builds.
 
 use std::cmp::Ordering;
 

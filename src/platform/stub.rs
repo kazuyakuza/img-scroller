@@ -1,6 +1,7 @@
 //! Non-Windows fallback of the platform facade: keeps container checks and
 //! container test runs compiling and lets the app-level failure transition
-//! stay testable on the Linux host target (decode always fails here).
+//! stay testable on the Linux host target (decode always fails here; the
+//! system entry-name order resolves to the pure name_collation fallback).
 
 use std::cmp::Ordering;
 use std::path::{Path, PathBuf};

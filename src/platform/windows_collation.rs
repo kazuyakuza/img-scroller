@@ -1,6 +1,7 @@
 //! Windows collation helpers behind the platform facade's system entry-name
-//! order: the user-default locale's `CompareStringEx` result mapped to a
-//! standard order, with any system-call failure surfaced as `None`.
+//! order: the user-default locale's `CompareStringEx` result compared
+//! case-insensitively (`NORM_IGNORECASE`) and mapped to a standard order,
+//! with any system-call failure surfaced as `None`.
 
 use std::cmp::Ordering;
 
