@@ -1,49 +1,18 @@
-//! Windows collation helpers behind the platform facade's system entry-name
-//! order: the user-default locale's `CompareStringEx` result compared
-//! case-insensitively (`NORM_IGNORECASE`) and mapped to a standard order,
-//! with any system-call failure surfaced as `None`.
+//! Windows collation helper behind the platform facade's system entry-name
+//! order: the system file manager's logical name comparison (`StrCmpLogicalW`,
+//! shlwapi) -- digit-aware natural ordering (1, 2, ..., 9, 10, 11 ...) and
+//! case-insensitive; the comparison never fails.
 
 use std::cmp::Ordering;
 
-use windows::Win32::Globalization::{
-    COMPARESTRING_RESULT, CSTR_EQUAL, CSTR_GREATER_THAN, CSTR_LESS_THAN, CompareStringEx,
-    GetUserDefaultLocaleName, NORM_IGNORECASE,
-};
-use windows::Win32::System::SystemServices::LOCALE_NAME_MAX_LENGTH;
 use windows::core::PCWSTR;
+use windows::Win32::UI::Shell::StrCmpLogicalW;
 
-pub(super) fn system_collation_order(left_name: &str, right_name: &str) -> Option<Ordering> {
-    let locale_name = user_locale_name()?;
-    let left_units: Vec<u16> = left_name.encode_utf16().collect();
-    let right_units: Vec<u16> = right_name.encode_utf16().collect();
+pub(super) fn system_collation_order(left_name: &str, right_name: &str) -> Ordering {
+    let left_units: Vec<u16> = left_name.encode_utf16().chain([0]).collect();
+    let right_units: Vec<u16> = right_name.encode_utf16().chain([0]).collect();
     let result = unsafe {
-        CompareStringEx(
-            PCWSTR(locale_name.as_ptr()),
-            NORM_IGNORECASE,
-            &left_units,
-            &right_units,
-            None,
-            None,
-            None,
-        )
+        StrCmpLogicalW(PCWSTR(left_units.as_ptr()), PCWSTR(right_units.as_ptr()))
     };
-    collation_result_order(result)
-}
-
-fn user_locale_name() -> Option<Vec<u16>> {
-    let mut buffer = [0u16; LOCALE_NAME_MAX_LENGTH as usize];
-    let written = unsafe { GetUserDefaultLocaleName(&mut buffer) };
-    if written <= 0 {
-        return None;
-    }
-    Some(buffer[..written as usize].to_vec())
-}
-
-fn collation_result_order(result: COMPARESTRING_RESULT) -> Option<Ordering> {
-    match result {
-        CSTR_LESS_THAN => Some(Ordering::Less),
-        CSTR_EQUAL => Some(Ordering::Equal),
-        CSTR_GREATER_THAN => Some(Ordering::Greater),
-        _ => None,
-    }
+    result.cmp(&0)
 }

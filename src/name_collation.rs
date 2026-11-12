@@ -1,8 +1,8 @@
 //! Entry-name ordering shared by the image and folder listings: EntryNameOrder
 //! is the comparator-as-data seam resolving through the platform facade to the
 //! system name order; compare_entry_names (lowercase form first, exact-character
-//! tie-break -- the fixed v1 alphanumeric rule) is the pure fallback on any
-//! system-collation failure and in container/stub builds.
+//! tie-break -- the fixed v1 alphanumeric rule) is the pure fallback used in
+//! container/stub builds (the Windows side resolves the system comparator).
 
 use std::cmp::Ordering;
 

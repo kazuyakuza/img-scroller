@@ -1,6 +1,6 @@
 //! Windows implementation of the platform facade: native open dialog, WIC
-//! decoding and the system entry-name order through windows_collation (any
-//! system-call failure falls back to the pure collation). Compiled only on
+//! decoding and the system entry-name order through windows_collation (the
+//! system file manager's logical name comparison). Compiled only on
 //! Windows targets; first-compile validation is the cross-target check step
 //! of this task's implementation.
 
@@ -27,7 +27,6 @@ use windows::Win32::UI::Shell::{
 use windows::core::{Error, PCWSTR};
 
 use crate::image_loading::{DecodedImage, ImageLoadFailure, pixel_buffer_size};
-use crate::name_collation::compare_entry_names;
 
 pub(crate) fn show_open_image_dialog(frame: &eframe::Frame) -> Option<PathBuf> {
     if !ensure_com_initialized() {
@@ -153,10 +152,8 @@ fn classify_failure(error: Error) -> ImageLoadFailure {
     }
 }
 
-/// The system entry-name order (brief addendum item 8): the user-default
-/// locale's collation, case-insensitive; any system-call failure falls back
-/// to the pure collation so the total order stays defined.
+/// The system entry-name order (brief addendum item 8): the system file
+/// manager's logical name comparison through windows_collation.
 pub(crate) fn compare_entry_names_system(left_name: &str, right_name: &str) -> Ordering {
     super::windows_collation::system_collation_order(left_name, right_name)
-        .unwrap_or_else(|| compare_entry_names(left_name, right_name))
 }

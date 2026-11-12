@@ -1,7 +1,7 @@
 //! Folder listing for horizontal image navigation: the file-sibling images of
 //! one folder only -- non-recursive, whitelisted-extension-filtered, and
-//! sorted through the shared EntryNameOrder seam (the system name order; the
-//! pure collation fallback in container builds and on system failures).
+//! sorted through the shared EntryNameOrder seam (the system name order on
+//! Windows; the pure fallback in container/stub builds).
 
 use crate::name_collation::EntryNameOrder;
 use std::ffi::OsStr;
