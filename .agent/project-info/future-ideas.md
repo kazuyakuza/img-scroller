@@ -67,6 +67,16 @@ Behavior as given by the user (2026-11-02):
 - The ZOOM level is remembered BY FOLDER for the current app session only (RAM).
 - Arriving at a NEVER-visited folder opens its image at fit size.
 
+## Idea 7 — Pan-related enhancements beyond the current keyboard pan
+
+**Status:** Parked idea — NOT scheduled into any wave (Wave 5.1 fix-wave scope at `.agent/todos/20261112/20261112-todo-1.md` is unaffected). Date recorded: 2026-11-12, reporter: user. Recorded AFTER the Wave-5 pan gate FULLY PASSED on the 0.5.0 exe; the user chose to leave the working keyboard pan as-is for now. Related earlier record: Idea 4 (the pre-Wave-5 pan refinement) — left untouched.
+
+Behavior as given by the user (2026-11-12):
+
+- Pan-related enhancements (e.g., beyond the current keyboard pan) are a FUTURE idea, NOT to implement now — the user's wording: "now that it's working, just let it be".
+
+**Open details (PENDING user details):** none supplied — the user asked to record the idea only. This record is a commit point only and changes no wave's scope.
+
 ## Recording rule
 
 An idea enters scope only when the user schedules it into a future TODO wave via the Critical Workflow ([`../../.kilo/commands/critical-workflow.md`](../../.kilo/commands/critical-workflow.md)). Until then it stays parked in this file and has no effect on the requirements source of truth ([brief.md](brief.md)).
