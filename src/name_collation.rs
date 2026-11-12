@@ -13,9 +13,35 @@ pub(crate) fn compare_entry_names(left_name: &str, right_name: &str) -> Ordering
     left_name.cmp(right_name)
 }
 
+pub(crate) type EntryNameCompare = fn(&str, &str) -> Ordering;
+
+/// The active entry-name order carried as data: `system()` resolves through
+/// the platform facade (the system collation on Windows, the pure fallback
+/// elsewhere); `with_comparator` lets container tests inject synthetic
+/// comparators to prove the listing modules sort through the seam.
+#[derive(Clone, Copy)]
+pub(crate) struct EntryNameOrder {
+    entry_name_compare: EntryNameCompare,
+}
+
+impl EntryNameOrder {
+    pub(crate) fn system() -> Self {
+        Self {
+            entry_name_compare: crate::platform::compare_entry_names_system,
+        }
+    }
+    #[allow(dead_code)]
+    pub(crate) fn with_comparator(entry_name_compare: EntryNameCompare) -> Self {
+        Self { entry_name_compare }
+    }
+    pub(crate) fn compare(&self, left_name: &str, right_name: &str) -> Ordering {
+        (self.entry_name_compare)(left_name, right_name)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::compare_entry_names;
+    use super::{EntryNameOrder, compare_entry_names};
     use std::cmp::Ordering;
 
     #[test]
@@ -34,5 +60,26 @@ mod tests {
             Ordering::Less
         );
         assert_eq!(compare_entry_names("ALPHA", "Alpha"), Ordering::Less);
+    }
+
+    #[test]
+    fn system_order_matches_the_pure_fallback_for_ascii_names() {
+        let entry_order = EntryNameOrder::system();
+        assert_eq!(entry_order.compare("alpha.gif", "ALPHA.jpg"), Ordering::Less);
+        assert_eq!(
+            entry_order.compare("zeta.jpg", "alpha.gif"),
+            Ordering::Greater
+        );
+        assert_eq!(entry_order.compare("ALPHA", "Alpha"), Ordering::Less);
+    }
+
+    #[test]
+    fn injected_comparator_decides_the_entry_order() {
+        fn reversed_entry_names(left_name: &str, right_name: &str) -> Ordering {
+            compare_entry_names(right_name, left_name)
+        }
+        let entry_order = EntryNameOrder::with_comparator(reversed_entry_names);
+        assert_eq!(entry_order.compare("a", "b"), Ordering::Greater);
+        assert_eq!(entry_order.compare("b", "a"), Ordering::Less);
     }
 }

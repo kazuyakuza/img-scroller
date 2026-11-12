@@ -2,12 +2,12 @@ use super::{FolderListing, ListedNeighbor};
 use std::fs;
 use std::path::Path;
 
-struct TempFolder {
+pub(super) struct TempFolder {
     folder_path: std::path::PathBuf,
 }
 
 impl TempFolder {
-    fn create(test_case: &str) -> Self {
+    pub(super) fn create(test_case: &str) -> Self {
         let folder_path = std::env::temp_dir().join(format!(
             "img_scroller_folder_listing_{}_{}",
             test_case,
@@ -17,11 +17,11 @@ impl TempFolder {
         Self { folder_path }
     }
 
-    fn create_file(&self, file_name: &str) {
+    pub(super) fn create_file(&self, file_name: &str) {
         fs::write(self.folder_path.join(file_name), b"x").expect("fixture file written");
     }
 
-    fn image_path(&self, file_name: &str) -> std::path::PathBuf {
+    pub(super) fn image_path(&self, file_name: &str) -> std::path::PathBuf {
         self.folder_path.join(file_name)
     }
 }

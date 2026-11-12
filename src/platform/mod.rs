@@ -4,6 +4,9 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
+#[cfg(target_os = "windows")]
+mod windows_collation;
+
 #[cfg(not(target_os = "windows"))]
 mod stub;
 
@@ -12,3 +15,9 @@ pub(crate) use windows::{decode_image, show_open_image_dialog};
 
 #[cfg(not(target_os = "windows"))]
 pub(crate) use stub::{decode_image, show_open_image_dialog};
+
+#[cfg(target_os = "windows")]
+pub(crate) use windows::compare_entry_names_system;
+
+#[cfg(not(target_os = "windows"))]
+pub(crate) use stub::compare_entry_names_system;

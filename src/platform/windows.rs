@@ -2,6 +2,7 @@
 //! decoding. Compiled only on Windows targets; first-compile validation is the
 //! cross-target check step of this task's implementation.
 
+use std::cmp::Ordering;
 use std::os::windows::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 
@@ -24,6 +25,7 @@ use windows::Win32::UI::Shell::{
 use windows::core::{Error, PCWSTR};
 
 use crate::image_loading::{DecodedImage, ImageLoadFailure, pixel_buffer_size};
+use crate::name_collation::compare_entry_names;
 
 pub(crate) fn show_open_image_dialog(frame: &eframe::Frame) -> Option<PathBuf> {
     if !ensure_com_initialized() {
@@ -147,4 +149,12 @@ fn classify_failure(error: Error) -> ImageLoadFailure {
         WINCODEC_ERR_COMPONENTNOTFOUND => ImageLoadFailure::Unsupported,
         _ => ImageLoadFailure::Unloadable,
     }
+}
+
+/// The system entry-name order (brief addendum item 8): the user-default
+/// locale's collation, case-insensitive; any system-call failure falls back
+/// to the pure collation so the total order stays defined.
+pub(crate) fn compare_entry_names_system(left_name: &str, right_name: &str) -> Ordering {
+    super::windows_collation::system_collation_order(left_name, right_name)
+        .unwrap_or_else(|| compare_entry_names(left_name, right_name))
 }

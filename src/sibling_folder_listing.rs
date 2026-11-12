@@ -4,7 +4,7 @@
 //! excluded from the destinations and sorted by the fixed v1 collation shared
 //! with the image listing.
 
-use crate::name_collation::compare_entry_names;
+use crate::name_collation::EntryNameOrder;
 use std::cmp::Ordering;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -30,12 +30,31 @@ pub(crate) enum ListedFolderNeighbor {
 
 pub(crate) struct SiblingFolderListing {
     sibling_folder_paths: Vec<PathBuf>,
+    entry_order: EntryNameOrder,
+}
+
+struct SortScope<'a> {
+    current_folder: &'a Path,
+    entry_order: EntryNameOrder,
 }
 
 impl SiblingFolderListing {
     /// Build the listing from the opened image path; `None` if folder or parent is unresolvable.
     pub(crate) fn from_opened_image(opened_image_path: &Path) -> Option<Self> {
-        Self::from_opened_image_with_scope_entries(opened_image_path, &read_scope_entries)
+        Self::from_opened_image_with_order(opened_image_path, EntryNameOrder::system())
+    }
+    pub(crate) fn from_opened_image_with_order(
+        opened_image_path: &Path,
+        entry_order: EntryNameOrder,
+    ) -> Option<Self> {
+        let resolved_current_folder = resolve_current_folder(opened_image_path)?;
+        let scope_parent_path = resolved_current_folder.parent()?;
+        let scope_entries = read_scope_entries(scope_parent_path).unwrap_or_default();
+        let sort_scope = SortScope {
+            current_folder: &resolved_current_folder,
+            entry_order,
+        };
+        Some(Self::sorted_scope_folders(scope_entries, sort_scope))
     }
     /// Number of listed sibling destination folders (the current folder is excluded).
     #[allow(dead_code)]
@@ -64,31 +83,35 @@ impl SiblingFolderListing {
         }
         Some(self.neighbor_at(position))
     }
+    #[allow(dead_code)]
     fn from_opened_image_with_scope_entries(
         opened_image_path: &Path,
         read_scope_entries: &ScopeEntriesReader<'_>,
     ) -> Option<Self> {
-        let current_folder_path = opened_image_path.parent()?;
-        let resolved_current_folder = fs::canonicalize(current_folder_path).ok()?;
+        let resolved_current_folder = resolve_current_folder(opened_image_path)?;
         let scope_parent_path = resolved_current_folder.parent()?;
         let scope_entries = read_scope_entries(scope_parent_path).unwrap_or_default();
-        Some(Self::sorted_scope_folders(
-            scope_entries,
-            &resolved_current_folder,
-        ))
+        let sort_scope = SortScope {
+            current_folder: &resolved_current_folder,
+            entry_order: EntryNameOrder::system(),
+        };
+        Some(Self::sorted_scope_folders(scope_entries, sort_scope))
     }
-    fn sorted_scope_folders(entries: Vec<ScopeEntry>, current_folder: &Path) -> Self {
+    fn sorted_scope_folders(entries: Vec<ScopeEntry>, sort_scope: SortScope<'_>) -> Self {
         let mut sibling_folder_paths: Vec<PathBuf> = entries
             .into_iter()
             .filter(|entry| entry.is_directory)
             .map(|entry| entry.path)
-            .filter(|folder_path| folder_path != current_folder)
+            .filter(|folder_path| folder_path != sort_scope.current_folder)
             .collect();
         sibling_folder_paths.sort_by(|left_path, right_path| {
-            compare_entry_names(&left_path.to_string_lossy(), &right_path.to_string_lossy())
+            sort_scope
+                .entry_order
+                .compare(&left_path.to_string_lossy(), &right_path.to_string_lossy())
         });
         Self {
             sibling_folder_paths,
+            entry_order: sort_scope.entry_order,
         }
     }
     fn position_of_current_folder(&self, anchor_image_path: &Path) -> Option<usize> {
@@ -98,9 +121,18 @@ impl SiblingFolderListing {
         let preceding_folder_count = self
             .sibling_folder_paths
             .iter()
-            .take_while(|listed_path| preceding_folder_name(listed_path.as_path(), &current_name))
+            .take_while(|listed_path| {
+                self.listed_folder_name_precedes(listed_path.as_path(), &current_name)
+            })
             .count();
         Some(preceding_folder_count)
+    }
+    fn listed_folder_name_precedes(&self, listed_path: &Path, current_name: &str) -> bool {
+        let listed_name = listed_path
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy();
+        self.entry_order.compare(&listed_name, current_name) == Ordering::Less
     }
     fn neighbor_at(&self, listed_index: usize) -> ListedFolderNeighbor {
         ListedFolderNeighbor::At {
@@ -110,12 +142,9 @@ impl SiblingFolderListing {
     }
 }
 
-fn preceding_folder_name(listed_path: &Path, current_name: &str) -> bool {
-    let listed_name = listed_path
-        .file_name()
-        .unwrap_or_default()
-        .to_string_lossy();
-    compare_entry_names(&listed_name, current_name) == Ordering::Less
+fn resolve_current_folder(opened_image_path: &Path) -> Option<PathBuf> {
+    let current_folder_path = opened_image_path.parent()?;
+    fs::canonicalize(current_folder_path).ok()
 }
 
 fn read_scope_entries(folder_path: &Path) -> Option<Vec<ScopeEntry>> {
@@ -140,3 +169,6 @@ mod tests;
 
 #[cfg(test)]
 mod neighbor_tests;
+
+#[cfg(test)]
+mod collation_tests;

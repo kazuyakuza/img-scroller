@@ -2,7 +2,7 @@
 //! one folder only -- non-recursive, whitelisted-extension-filtered, and
 //! sorted by the fixed v1 alphanumeric collation (folded name + exact tie-break).
 
-use crate::name_collation::compare_entry_names;
+use crate::name_collation::EntryNameOrder;
 use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -29,23 +29,31 @@ pub(crate) enum ListedNeighbor {
 
 impl FolderListing {
     pub(crate) fn from_opened_image(opened_image_path: &Path) -> Option<Self> {
-        let folder_path = opened_image_path.parent()?;
-        Self::from_folder(folder_path)
+        Self::from_opened_image_with_order(opened_image_path, EntryNameOrder::system())
     }
 
-    fn from_folder(folder_path: &Path) -> Option<Self> {
+    /// Test-visible seam: sorts with the injected order (container tests prove
+    /// the listing sorts through the EntryNameOrder seam).
+    pub(crate) fn from_opened_image_with_order(
+        opened_image_path: &Path,
+        entry_order: EntryNameOrder,
+    ) -> Option<Self> {
+        let folder_path = opened_image_path.parent()?;
         let resolved_folder = fs::canonicalize(folder_path).ok()?;
-        let image_paths = Self::collect_folder_images(&resolved_folder)?;
+        let image_paths = Self::collect_folder_images(&resolved_folder, entry_order)?;
         Some(Self { image_paths })
     }
 
-    fn collect_folder_images(resolved_folder: &Path) -> Option<Vec<PathBuf>> {
+    fn collect_folder_images(
+        resolved_folder: &Path,
+        entry_order: EntryNameOrder,
+    ) -> Option<Vec<PathBuf>> {
         let dir_entries = fs::read_dir(resolved_folder).ok()?;
         let mut image_paths: Vec<PathBuf> = dir_entries
             .filter_map(|dir_entry| listed_image_entry_path(dir_entry.ok()?))
             .collect();
         image_paths.sort_by(|left_path, right_path| {
-            compare_entry_names(&left_path.to_string_lossy(), &right_path.to_string_lossy())
+            entry_order.compare(&left_path.to_string_lossy(), &right_path.to_string_lossy())
         });
         Some(image_paths)
     }
@@ -121,3 +129,6 @@ fn is_listed_image_extension(extension: &OsStr) -> bool {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod collation_tests;
