@@ -26,7 +26,10 @@
 //! '_' zoom out); plain (unshifted) '+', '=', '-' do nothing for every keyboard
 //! layout (Wave 4.1 Task 6 strictness preserved; Wave 4.2 A-Task 3 broadened the
 //! member set to what real egui-winit can deliver -- layout/typing variance is
-//! still an OPERATOR-RUN gate).
+//! still an OPERATOR-RUN gate). Round 2 (Wave 5.1) adds the shifted '+'-key
+//! variant '*' (Spanish-class layouts) as a shift-gated text member, keeping the
+//! alias set layout-agnostic; on US-like layouts Shift+8 ('*') is then also a
+//! zoom-in alias (accepted, documented).
 //!
 //! AI Agents: this app seam (`super::zoom`) is a separate module from the
 //! pure-math `crate::zoom` even though both share the leaf name `zoom`; keep the

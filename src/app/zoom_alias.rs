@@ -6,6 +6,15 @@
 //! layout. Real Windows may deliver the chord as key members, alternate/physical
 //! resolutions, typed text, or none of these; the OPERATOR-RUN re-check (A-Task 5,
 //! checklist item 11) is the acceptance gate.
+//!
+//! Round 2 (Wave 5.1): on Spanish-class layouts '+' is unshifted on its own key and
+//! SHIFT produces the typed text '*', so the zoom-in text set also accepts that
+//! shifted '+'-key variant. egui 0.37 has no asterisk key member and `from_name("*")`
+//! has no arm, so the delivery arrives as `Event::Text("*")` with the key member
+//! falling back to the physical `CloseBracket`. The set stays layout-agnostic: no
+//! layout detection, and for each glyph key the character its SHIFTED state produces
+//! is accepted. Accepted side effect: on US-like layouts Shift+8 also types '*' and
+//! therefore zooms in; unshifted '*' stays inert like every other plain key.
 
 use eframe::egui;
 
@@ -13,7 +22,7 @@ const TRUE_MINUS_SIGN: char = '\u{2212}';
 
 pub(super) const ZOOM_IN_ALIAS_KEYS: [egui::Key; 2] = [egui::Key::Equals, egui::Key::Plus];
 pub(super) const ZOOM_OUT_ALIAS_KEYS: [egui::Key; 1] = [egui::Key::Minus];
-pub(super) const ZOOM_IN_ALIAS_CHARACTERS: [char; 2] = ['+', '='];
+pub(super) const ZOOM_IN_ALIAS_CHARACTERS: [char; 3] = ['+', '=', '*'];
 pub(super) const ZOOM_OUT_ALIAS_CHARACTERS: [char; 3] = ['-', TRUE_MINUS_SIGN, '_'];
 
 pub(super) fn shift_alias_is_pressed(alias_member_was_seen: bool, shift_held: bool) -> bool {

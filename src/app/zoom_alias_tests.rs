@@ -79,7 +79,7 @@ fn alias_key_sets_are_pinned() {
 
 #[test]
 fn alias_characters_are_pinned() {
-    assert_eq!(ZOOM_IN_ALIAS_CHARACTERS, ['+', '=']);
+    assert_eq!(ZOOM_IN_ALIAS_CHARACTERS, ['+', '=', '*']);
     assert_eq!(ZOOM_OUT_ALIAS_CHARACTERS, ['-', '\u{2212}', '_']);
 }
 
@@ -150,6 +150,37 @@ fn typed_equals_with_shift_zooms_in() {
     assert_eq!(
         one_frame_chords(typed_text_events("=", true)),
         (true, false)
+    );
+}
+
+#[test]
+fn shift_star_text_zooms_in() {
+    assert_eq!(
+        one_frame_chords(typed_text_events("*", true)),
+        (true, false)
+    );
+}
+
+#[test]
+fn plain_star_text_is_inert() {
+    assert_eq!(
+        one_frame_chords(typed_text_events("*", false)),
+        (false, false)
+    );
+}
+
+#[test]
+fn spanish_shift_plus_delivery_zooms_in() {
+    let mut events = pressed_key_events(egui::Key::CloseBracket, true);
+    events.push(egui::Event::Text("*".to_owned()));
+    assert_eq!(one_frame_chords(events), (true, false));
+}
+
+#[test]
+fn spanish_plus_key_member_alone_is_inert() {
+    assert_eq!(
+        one_frame_chords(pressed_key_events(egui::Key::CloseBracket, true)),
+        (false, false)
     );
 }
 
