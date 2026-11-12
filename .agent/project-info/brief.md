@@ -129,6 +129,12 @@ The 2026-11-07 operator chat additions supersede any contradicting sentence of t
 
 7. **ESC double-press close while fullscreen OFF** (additional to item 5; the exact popup wording, lifetime, and fullscreen interplay were decided in the Wave-4.2 architector step): while fullscreen is OFF, the FIRST ESC press shows a CENTERED confirmation popup with the message "Press ESC again to close" for 2 seconds; the application closes ONLY when a SECOND DISTINCT ESC press arrives while the popup is visible — two presses, NEVER held/autorepeated; an expired popup re-arms on the next press; while fullscreen is ON, ESC exits fullscreen only (item 5's rule — no popup, no close).
 
+## Addendum — Operator Corrections (2026-11-12, BINDING)
+
+The 2026-11-12 operator chat corrections supersede any contradicting sentence of this brief wherever it appears; everything not contradicted below stays byte-identical. Source: [`.agent/todos/20261112/20261112-todo-1.md`](../todos/20261112/20261112-todo-1.md) (Wave 5.1).
+
+8. **Navigation order follows the system name order** (refines `## Sorting Order`'s alphanumeric rule for non-ASCII names; the exact mechanism was decided in the Wave-5.1 architector step): BOTH navigation axes (sibling images in a folder; sibling folders under the same parent) order entry names by the names' expected Unicode/system order — the order the Windows system (e.g. the file manager) shows for those names, including non-ASCII/Japanese names; the first-image rule and the last-viewed revisit priority read from the same order.
+
 <!-- DO NOT DELETE NEXT SECTION -->
 
 ## Important Note for AI Agents
