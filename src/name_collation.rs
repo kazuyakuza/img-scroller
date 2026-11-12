@@ -65,7 +65,10 @@ mod tests {
     #[test]
     fn system_order_matches_the_pure_fallback_for_ascii_names() {
         let entry_order = EntryNameOrder::system();
-        assert_eq!(entry_order.compare("alpha.gif", "ALPHA.jpg"), Ordering::Less);
+        assert_eq!(
+            entry_order.compare("alpha.gif", "ALPHA.jpg"),
+            Ordering::Less
+        );
         assert_eq!(
             entry_order.compare("zeta.jpg", "alpha.gif"),
             Ordering::Greater

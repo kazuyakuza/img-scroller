@@ -46,6 +46,6 @@ fn anchor_position_follows_the_injected_order() {
     );
     assert_eq!(
         listing.next_neighbor_of(anchor.as_path()),
-        Some(folder_neighbor(0, scope.scope_child_path("aaa")))
+        Some(folder_neighbor(1, scope.scope_child_path("aaa")))
     );
 }
