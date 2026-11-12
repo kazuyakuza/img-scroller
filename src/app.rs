@@ -172,6 +172,8 @@ mod button_hint_tests;
 #[cfg(test)]
 mod esc_close_confirm_tests;
 #[cfg(test)]
+mod esc_close_expiry_tests;
+#[cfg(test)]
 mod fit_one_shot_tests;
 #[cfg(test)]
 mod floating_controls_tests;

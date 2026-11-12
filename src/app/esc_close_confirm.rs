@@ -11,6 +11,14 @@
 //! exit path in `keyboard_intake.rs` has priority) and every fullscreen toggle
 //! disarms the popup. Only the intake arms/closes; only timeout, the
 //! fullscreen toggle, and the second press remove the popup.
+//!
+//! Expiry needs a SCHEDULED PASS: eframe sleeps at `ControlFlow::Wait` between
+//! events (`run.rs:297-299`), so arming alone never re-evaluates the deadline.
+//! The per-frame update wrapper therefore schedules the egui wake
+//! (`request_repaint_after`) at `deadline + POPUP_EXPIRY_WAKE_MARGIN_SECONDS`,
+//! re-requested every pass while armed (egui coalesces to the smallest delay,
+//! so the wake converges onto the deadline). `input.time` stays the single
+//! clock for arm AND expiry (same-source shape unchanged).
 
 use eframe::egui;
 
@@ -22,6 +30,11 @@ pub(super) const POPUP_MESSAGE_TEXT: &str = "Press ESC again to close";
 
 /// Popup lifetime in seconds, then it dismisses itself (operator: 2 seconds).
 pub(super) const POPUP_VISIBLE_SECONDS: f64 = 2.0;
+
+/// Extra delay past the deadline for the scheduled egui wake, so the waking
+/// pass's `input.time` is safely past the deadline (OS timers may fire early
+/// and f64 rounding must never defeat `now >= deadline`).
+pub(super) const POPUP_EXPIRY_WAKE_MARGIN_SECONDS: f64 = 0.05;
 
 /// Distinct Area salt (spec §6.4: no collision with "floating_navigation_pill"
 /// or "empty_state_open_button").
@@ -100,6 +113,7 @@ impl ImagesScrollerApp {
     /// Expires the popup if its deadline has passed (the per-frame update).
     pub(super) fn update_esc_close_popup(&mut self, screen_context: &egui::Context) {
         let now = current_time(screen_context);
+        self.request_expiry_wake(screen_context, now);
         self.update_esc_close_popup_at(now);
     }
 
@@ -111,6 +125,30 @@ impl ImagesScrollerApp {
         if now >= deadline {
             self.esc_close_popup_expires_at = None;
         }
+    }
+
+    /// Keeps an egui wake scheduled at the popup deadline so the expiry is
+    /// re-evaluated even while the eframe event loop sleeps at
+    /// `ControlFlow::Wait` (`run.rs:297-299` - the 0.5.0 defect: passes only
+    /// run on redraws, so without a wake the deadline comparison never
+    /// executes). Re-requested every pass while armed: egui coalesces to the
+    /// smallest pending delay (`request_repaint_after`), and passes that begin
+    /// with a pending immediate repaint reset their delay to ZERO
+    /// (`begin_pass_repaint_logic`), swallowing timed requests - but those
+    /// passes always fire a zero-delay wake, so the next pass (delay = MAX)
+    /// accepts the re-request and the wake converges onto the deadline. The
+    /// margin keeps the waking pass's `input.time` safely past the deadline.
+    fn request_expiry_wake(&mut self, screen_context: &egui::Context, now: f64) {
+        let Some(deadline) = self.esc_close_popup_expires_at else {
+            return;
+        };
+        let remaining_seconds = deadline - now;
+        if remaining_seconds <= 0.0 {
+            return;
+        }
+        screen_context.request_repaint_after(std::time::Duration::from_secs_f64(
+            remaining_seconds + POPUP_EXPIRY_WAKE_MARGIN_SECONDS,
+        ));
     }
 }
 
