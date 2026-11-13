@@ -38,17 +38,15 @@ pub(super) fn show_open_with_pill_button(app: &mut ImagesScrollerApp, row_ui: &m
     button_spec.show_and_open_menu(app, row_ui);
 }
 
-/// Per-frame button request: painted enablement plus the disabled-tooltip override.
+/// Per-frame button request: the painted enablement. Buttons store no state between frames.
 struct OpenWithButtonSpec {
     enabled: bool,
-    disabled_tooltip: Option<&'static str>,
 }
 
 impl OpenWithButtonSpec {
     fn for_app(app: &ImagesScrollerApp) -> Self {
         Self {
             enabled: app.open_with_menu_is_available(),
-            disabled_tooltip: no_programs_tooltip_for(app),
         }
     }
 
@@ -58,7 +56,7 @@ impl OpenWithButtonSpec {
         let placement =
             PillButtonPlacement::for_button(PillButton::OpenWith, OPEN_WITH_BUTTON_SIZE)
                 .with_enabled(self.enabled)
-                .with_disabled_tooltip(self.disabled_tooltip);
+                .with_disabled_tooltip(no_programs_tooltip_for(app));
         let button_response =
             show_button_column(ButtonColumnSite::new(row_ui, placement), |column_ui| {
                 self.allocate_and_paint(column_ui)
@@ -185,10 +183,8 @@ impl ImagesScrollerApp {
 
     fn show_menu_entry_buttons(&mut self, scroll_ui: &mut egui::Ui) {
         for program_index in 0..self.open_with_programs.len() {
-            let entry_response = {
-                let display_name = self.open_with_programs[program_index].display_name.as_str();
-                scroll_ui.button(display_name)
-            };
+            let entry_response =
+                scroll_ui.button(self.open_with_programs[program_index].display_name.as_str());
             if entry_response.clicked() {
                 self.launch_open_with_program(program_index);
             }
