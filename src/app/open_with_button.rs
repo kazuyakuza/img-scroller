@@ -1,12 +1,18 @@
-//! The floating pill's 11th button (Wave-6 Task 3, user-approved Option A):
-//! "Open with...", painted as a square-with-emerging-arrow glyph. The enabled
-//! button opens an upward `egui::Popup::menu` listing the programs the system
-//! registered for the current file's type (display names verbatim in a
-//! 300-point scroll area). A click hands the CURRENT canonical file to the
-//! launcher keyed by `launch_index`; a failure surfaces
-//! `OPEN_WITH_LAUNCH_FAILURE_MESSAGE`. The display list refreshes on every
-//! successful open and on the popup-opening click (no per-frame OS
-//! enumeration); empty list = disabled no-programs tooltip; no hotkey in v1.
+//! The floating pill's 11th button (Wave-6 Task 3, user-approved Option A),
+//! rightmost after the fit group: "Open with...", a square-with-emerging-
+//! arrow glyph. The enabled button opens an upward `egui::Popup::menu`
+//! (egui 0.37 `RectAlign::TOP`) above the pill, listing the programs the
+//! system registered for the current file's type (display names verbatim,
+//! 300-point ScrollArea cap). A click hands the CURRENT canonical file to
+//! the launcher keyed by `launch_index`; failure surfaces
+//! `OPEN_WITH_LAUNCH_FAILURE_MESSAGE` on the pill's message line. The
+//! stored list refreshes ONLY at the two decided points (every successful
+//! open; the popup-opening click) — the popup never enumerates per frame.
+//! Empty = disabled button, "No programs registered for this file type"
+//! tooltip; no hotkey in v1. For future AI agents: mechanism decisions are
+//! recorded in the implementation plan + frontend spec at
+//! .kilo/plans/20261112-wave6-task3-open-with-menu-*.md; the user-facing
+//! wave documentation lands in tech.md (Wave 6, Task 5).
 
 use crate::open_with_listing::OPEN_WITH_LAUNCH_FAILURE_MESSAGE;
 use crate::platform;

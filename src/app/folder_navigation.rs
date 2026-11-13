@@ -95,11 +95,11 @@ impl ImagesScrollerApp {
     }
 
     /// Empty-folder mode (D2-final): the browsed folder replaces the open
-    /// image -- opened path, decoded payload, horizontal listing and message
-    /// released; the vertical sibling list re-anchors ON the browsed folder by
-    /// passing `folder.join(placeholder)` verbatim to the Task-1 API; no
-    /// last-viewed entry is recorded. (A vanished browsed folder yields an
-    /// empty listing: both vertical arrows disable, no message.)
+    /// image -- opened path, decoded payload, horizontal listing, open-with
+    /// list and message released; the vertical sibling list re-anchors ON
+    /// the browsed folder by passing `folder.join(placeholder)` verbatim to
+    /// the Task-1 API; no last-viewed entry is recorded. (A vanished browsed
+    /// folder yields an empty listing: both vertical arrows disable, no message.)
     fn enter_empty_folder_mode(&mut self, folder_path: PathBuf) {
         let anchor = folder_path.join(LISTING_ANCHOR_FILE_PLACEHOLDER);
         self.browsed_folder_context = Some(folder_path);

@@ -55,7 +55,8 @@ impl PillButton {
 }
 
 /// The hotkey reference caption under the glyph (`None` for the four arrows:
-/// each arrow is painted as the arrow key itself).
+/// each arrow is painted as the arrow key itself; `None` for open-with too:
+/// no hotkey in v1).
 pub(super) fn hotkey_reference(button: PillButton) -> Option<&'static str> {
     match button {
         PillButton::ImagePrevious
