@@ -7,6 +7,13 @@ fn names_and_indices(programs: &[RegisteredProgram]) -> Vec<(&str, usize)> {
         .collect()
 }
 
+fn display_names(programs: &[RegisteredProgram]) -> Vec<&str> {
+    programs
+        .iter()
+        .map(|program| program.display_name.as_str())
+        .collect()
+}
+
 #[test]
 fn empty_input_yields_no_programs() {
     let programs = programs_from_handler_names(&Vec::new());
@@ -21,11 +28,10 @@ fn handler_names_map_to_programs_in_system_order() {
         "Photos".to_string(),
     ];
     let programs = programs_from_handler_names(&handler_names);
-    let display_names: Vec<&str> = programs
-        .iter()
-        .map(|program| program.display_name.as_str())
-        .collect();
-    assert_eq!(display_names, ["Zed Viewer", "Alpha Paint", "Photos"]);
+    assert_eq!(
+        display_names(&programs),
+        ["Zed Viewer", "Alpha Paint", "Photos"]
+    );
 }
 
 #[test]
@@ -63,9 +69,5 @@ fn duplicate_display_names_dedup_case_insensitively_keeping_first() {
 fn non_ascii_display_names_are_preserved_verbatim() {
     let handler_names = vec!["写真ビューア".to_string(), "Photos".to_string()];
     let programs = programs_from_handler_names(&handler_names);
-    let display_names: Vec<&str> = programs
-        .iter()
-        .map(|program| program.display_name.as_str())
-        .collect();
-    assert_eq!(display_names, ["写真ビューア", "Photos"]);
+    assert_eq!(display_names(&programs), ["写真ビューア", "Photos"]);
 }
