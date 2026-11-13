@@ -6,7 +6,13 @@
 //! pure open_with_listing seam). The launcher re-enumerates FRESH per call —
 //! launch_index addresses that fresh list; nothing is cached or persisted
 //! across calls — and launches the selected handler via IAssocHandler::Invoke
-//! with an IDataObject built from the current canonical file. COM init reuses
+//! with an IDataObject built from the current canonical file via
+//! IShellItem::BindToHandler(BHID_DataObject) — the documented way to obtain
+//! an item's data object; the removed SHCreateShellItemArrayFromShellItem
+//! route requested IID_IDataObject off-contract from a shell item array and
+//! failed on real Windows (Wave 6.1 D1 root cause — see
+//! .kilo/plans/20261113-wave6-1-task1-launcher-fix-implementation-plan.md
+//! §0/§1). COM init reuses
 //! the shared ensure_com_initialized discipline from windows.rs; every failure
 //! path returns the empty/default value, never panics. Compiled only on
 //! Windows targets; first-compile validation is the cross-target check step.
@@ -18,10 +24,10 @@
 use std::os::windows::ffi::OsStrExt;
 use std::path::Path;
 
-use windows::Win32::System::Com::{CoTaskMemFree, IDataObject};
+use windows::Win32::System::Com::{CoTaskMemFree, IBindCtx, IDataObject};
 use windows::Win32::UI::Shell::{
-    ASSOC_FILTER_NONE, IAssocHandler, IEnumAssocHandlers, IShellItem, SHAssocEnumHandlers,
-    SHCreateItemFromParsingName, SHCreateShellItemArrayFromShellItem,
+    ASSOC_FILTER_NONE, BHID_DataObject, IAssocHandler, IEnumAssocHandlers, IShellItem,
+    SHAssocEnumHandlers, SHCreateItemFromParsingName,
 };
 use windows::core::PCWSTR;
 
@@ -110,7 +116,8 @@ unsafe fn file_data_object(file_path: &Path) -> windows::core::Result<IDataObjec
     unsafe {
         let wide_path: Vec<u16> = file_path.as_os_str().encode_wide().chain([0]).collect();
         let shell_item: IShellItem = SHCreateItemFromParsingName(PCWSTR(wide_path.as_ptr()), None)?;
-        let data_object: IDataObject = SHCreateShellItemArrayFromShellItem(&shell_item)?;
+        let data_object: IDataObject =
+            shell_item.BindToHandler(None::<&IBindCtx>, &BHID_DataObject)?;
         Ok(data_object)
     }
 }
