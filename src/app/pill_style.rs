@@ -1,8 +1,8 @@
-//! Shared pill-styling primitives (Wave 4.2 Task 2): the enabled glyph and
-//! caption color (WHITE) with the theme-dimmed disabled palette, the 1-point
-//! black outline constants every painted pill shape outlines itself with,
-//! the outlined shape builders for the painted glyphs, and the outlined
-//! hotkey-caption paint (the offset-copy outline technique).
+//! Shared pill-styling primitives (Wave 4.2 Task 2, extended Wave 6.1 Task 4):
+//! the enabled glyph and caption color (WHITE) with the theme-dimmed disabled
+//! palette, the warning-color message-line paint for open-with failures, the
+//! 1-point black outline constants, the outlined shape builders, and the
+//! outlined hotkey-caption paint (the offset-copy outline technique).
 
 use eframe::egui;
 

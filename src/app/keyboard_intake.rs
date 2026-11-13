@@ -1,14 +1,22 @@
 //! Per-frame keyboard intake: every edge-triggered chord of the app (the
 //! fullscreen F11 toggle and the ESC-while-ON exit, the ESC-close arm/close
 //! branch and the per-frame popup-expiry update, the four pan-or-navigate
-//! arrows, the zoom `I`/`O`/`0` chords, and the
-//! one-shot fit `W`/`H` keys) is read once per frame and dispatched; the
+//! arrows, the zoom `I`/`O`/`0` chords, the one-shot fit `W`/`H` keys, and
+//! the open-with `Q` toggle) is read once per frame and dispatched; the
 //! intake runs in EVERY mode (fullscreen included) and always
 //! BEFORE the layout dispatch.
 //!
+//! Wave-6.1 Task 3 (modal gate): while the open-with menu popup is open,
+//! ONLY the Q-close and ESC-close reads run; every other chord is skipped.
+//! ESC-while-open closes the menu only — it never arms the ESC-close popup
+//! and never exits fullscreen. The guard sits AFTER
+//! `update_esc_close_popup` (deviation D6) so a previously armed popup
+//! expires on schedule even while the menu holds input focus.
+//!
 //! AI Agents: this block was moved verbatim out of `src/app.rs` (held at the
 //! 200-line cap) -- do NOT re-inline it; keep all reads collected before the
-//! dispatch chain.
+//! dispatch chain. Decisions D1–D12:
+//! .kilo/plans/20261113-wave6-1-tasks2-4-ui-feedback-implementation-plan.md.
 
 use eframe::egui;
 

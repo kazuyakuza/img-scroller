@@ -2,9 +2,13 @@
 //! group: "Open with...", a square-with-emerging-arrow glyph with the `Q`
 //! hotkey caption under it (Wave-6.1 Task 2). The button opens an upward
 //! MODAL `egui::Popup::menu` listing the programs registered for the current
-//! file (all other functionalities OFF while open; `ESC` or `Q` closes it --
+//! file (all other functionalities OFF while open; `ESC` or `Q` closes --
 //! Wave-6.1 Task 3); launch failures render warning-colored (Task 4).
-//! Decisions: .kilo/plans/20261113-wave6-1-*.
+//! `open_with_menu_is_open` is the single modal-state query the intake guard
+//! AND the five pill-row button modules' click gates (D2) consult; the Q-open
+//! path opens programmatically via `Popup::open_id` (D1).
+//! AI Agents: Decisions D1–D12: .kilo/plans/20261113-wave6-1-tasks2-4-*.md;
+//! full behavior doc in tech.md (Task 6).
 
 use crate::open_with_listing::OPEN_WITH_LAUNCH_FAILURE_MESSAGE;
 use crate::platform;
