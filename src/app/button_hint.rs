@@ -25,6 +25,7 @@ pub(super) enum PillButton {
     RestoreFit,
     FitWidth,
     FitHeight,
+    OpenWith,
 }
 
 impl PillButton {
@@ -60,7 +61,8 @@ pub(super) fn hotkey_reference(button: PillButton) -> Option<&'static str> {
         PillButton::ImagePrevious
         | PillButton::ImageNext
         | PillButton::FolderUp
-        | PillButton::FolderDown => None,
+        | PillButton::FolderDown
+        | PillButton::OpenWith => None,
         PillButton::Fullscreen => Some("F11"),
         PillButton::ZoomIn => Some("I"),
         PillButton::ZoomOut => Some("O"),
@@ -83,6 +85,7 @@ pub(super) fn tooltip_text(button: PillButton) -> &'static str {
         PillButton::RestoreFit => "Restore fit (0)",
         PillButton::FitWidth => "Fit width (W)",
         PillButton::FitHeight => "Fit height (H)",
+        PillButton::OpenWith => "Open with...",
     }
 }
 
@@ -94,6 +97,7 @@ pub(super) struct PillButtonPlacement {
     button: PillButton,
     button_size: egui::Vec2,
     enabled: bool,
+    disabled_tooltip: Option<&'static str>,
 }
 
 impl PillButtonPlacement {
@@ -102,6 +106,7 @@ impl PillButtonPlacement {
             button,
             button_size,
             enabled: true,
+            disabled_tooltip: None,
         }
     }
 
@@ -109,6 +114,15 @@ impl PillButtonPlacement {
     /// (painted-disabled buttons keep the dimmed caption).
     pub(super) fn with_enabled(self, enabled: bool) -> Self {
         Self { enabled, ..self }
+    }
+
+    /// Overrides the disabled-hover tooltip (the no-programs empty-result
+    /// case); `None` keeps the button's standard tooltip in both states.
+    pub(super) fn with_disabled_tooltip(self, disabled_tooltip: Option<&'static str>) -> Self {
+        Self {
+            disabled_tooltip,
+            ..self
+        }
     }
 }
 
@@ -142,9 +156,14 @@ pub(super) fn show_button_column(
             column_ui.spacing_mut().item_spacing.y = CAPTION_TEXT_GAP;
             let painted_button = paint_button(column_ui);
             let tooltip = tooltip_text(button);
+            let painted_tooltip = if placement.enabled {
+                tooltip
+            } else {
+                placement.disabled_tooltip.unwrap_or(tooltip)
+            };
             let painted_button = painted_button
-                .on_hover_text(tooltip)
-                .on_disabled_hover_text(tooltip);
+                .on_hover_text(painted_tooltip)
+                .on_disabled_hover_text(painted_tooltip);
             if let Some(reference) = hotkey_reference(button) {
                 let caption_glyph_state =
                     pill_style::glyph_state_for(placement.enabled, painted_button.hovered());

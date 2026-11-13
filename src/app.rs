@@ -8,6 +8,7 @@ use crate::app_display::CurrentImageDisplay;
 use crate::folder_listing::FolderListing;
 use crate::image_loading::{self, DecodedImage, ImageLoadFailure};
 use crate::last_viewed_images::LastViewedImages;
+use crate::open_with_listing::RegisteredProgram;
 use crate::platform;
 use crate::sibling_folder_listing::SiblingFolderListing;
 
@@ -17,8 +18,7 @@ pub const APP_WINDOW_TITLE: &str = "Images Scroller";
 pub struct ImagesScrollerApp {
     /// Path of the last successfully opened image (anchor of both navigation-seam axes).
     opened_image_path: Option<PathBuf>,
-    /// Sibling-image listing of the opened image's folder in folder-listing order
-    /// (rebuilt on every successful open; released when empty-folder mode is entered).
+    /// Sibling-image listing of the opened image's folder (rebuilt on every successful open).
     current_folder_listing: Option<FolderListing>,
     /// Session memory: the last displayed image of every folder visited in-session.
     last_viewed_images: LastViewedImages,
@@ -29,19 +29,17 @@ pub struct ImagesScrollerApp {
     message_text: Option<&'static str>,
     /// Texture state of the central image display (spec §4 "small wrapper" clause).
     current_display: CurrentImageDisplay,
-    /// Session fullscreen flag (Wave-4 Task 1): ON hides the native chrome AND
-    /// all UI controls; never persisted; read by the fullscreen modules.
+    /// Session fullscreen flag: ON hides the native chrome and ALL UI controls; never persisted.
     fullscreen_on: bool,
-    /// Session zoom factor (Wave-4 Task 2): 1.0 = whole-image fit; read by the display
-    /// path; reset on every successful open; never persisted.
+    /// Session zoom factor (1.0 = whole-image fit); reset on every successful open; never persisted.
     zoom_factor: f32,
-    /// Popup expiry deadline for the fullscreen-OFF ESC double-press close
-    /// affordance (Wave 4.2 A-Task 4): `None` = popup not visible; the value is
-    /// the absolute `InputState::time` (seconds) when the popup dismisses.
+    /// ESC-close popup expiry deadline (Wave 4.2): `None` = hidden, else the absolute dismiss time.
     esc_close_popup_expires_at: Option<f64>,
-    /// Pan offset of the visible viewport from the centered position (Wave 5);
-    /// zeroed on every successful open and on restore-to-fit; never persisted.
+    /// Pan offset from the centered position (Wave 5); reset on open and restore-to-fit.
     pan_offset: egui::Vec2,
+    /// Open-with display list for the current file (Wave-6 Task 3); refreshed on every
+    /// successful open and on the popup-opening click.
+    open_with_programs: Vec<RegisteredProgram>,
 }
 
 use folder_navigation::NavigationDirection;
@@ -65,6 +63,7 @@ impl ImagesScrollerApp {
             zoom_factor: crate::zoom::RESTORE_TO_FIT_FACTOR,
             esc_close_popup_expires_at: None,
             pan_offset: egui::Vec2::ZERO,
+            open_with_programs: Vec::new(),
         }
     }
 
@@ -88,6 +87,7 @@ impl ImagesScrollerApp {
                 self.current_sibling_folders =
                     SiblingFolderListing::from_opened_image(path.as_path());
                 self.browsed_folder_context = None;
+                self.open_with_programs = platform::enumerate_open_with_programs(&path);
                 self.opened_image_path = Some(path);
                 self.decoded_image = Some(decoded_image);
                 self.message_text = None;
@@ -161,6 +161,7 @@ mod folder_navigation;
 mod fullscreen;
 mod fullscreen_button;
 mod keyboard_intake;
+mod open_with_button;
 mod pan;
 mod pill_style;
 mod zoom;
@@ -185,6 +186,8 @@ mod folder_navigation_tests;
 mod fullscreen_tests;
 #[cfg(test)]
 mod last_viewed_tests;
+#[cfg(test)]
+mod open_with_button_tests;
 #[cfg(test)]
 mod pan_tests;
 #[cfg(test)]

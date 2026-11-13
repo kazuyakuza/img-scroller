@@ -107,6 +107,7 @@ impl ImagesScrollerApp {
         self.decoded_image = None;
         self.message_text = None;
         self.current_folder_listing = None;
+        self.open_with_programs.clear();
         self.current_sibling_folders = SiblingFolderListing::from_opened_image(anchor.as_path());
     }
 }
