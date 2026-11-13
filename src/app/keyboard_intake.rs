@@ -28,12 +28,7 @@ impl ImagesScrollerApp {
         if self.handle_modal_open_with_menu_keys(screen_context) {
             return;
         }
-        let q_pressed = screen_context.input(|input| {
-            esc_close_confirm::non_repeat_key_press_occurred(
-                &input.events,
-                open_with_button::OPEN_WITH_MENU_KEY,
-            )
-        });
+        let q_pressed = open_with_menu_key_pressed(screen_context);
         let fullscreen_pressed = was_pressed(screen_context, fullscreen::FULLSCREEN_TOGGLE_KEY);
         let escape_exit_fullscreen_pressed = fullscreen::escape_exits_fullscreen(
             self.fullscreen_on,
@@ -134,18 +129,7 @@ impl ImagesScrollerApp {
         if !open_with_button::open_with_menu_is_open(screen_context) {
             return false;
         }
-        let q_pressed = screen_context.input(|input| {
-            esc_close_confirm::non_repeat_key_press_occurred(
-                &input.events,
-                open_with_button::OPEN_WITH_MENU_KEY,
-            )
-        });
-        let non_repeat_escape_pressed = screen_context
-            .input(|input| esc_close_confirm::non_repeat_escape_press_occurred(&input.events));
-        if q_pressed {
-            egui::Popup::close_id(screen_context, open_with_button::open_with_menu_id());
-        }
-        if non_repeat_escape_pressed {
+        if open_with_menu_close_pressed(screen_context) {
             egui::Popup::close_id(screen_context, open_with_button::open_with_menu_id());
         }
         true
@@ -176,4 +160,23 @@ impl ImagesScrollerApp {
 /// The read entry every plain chord funnels through (module-local helper).
 fn was_pressed(screen_context: &egui::Context, pressed_key: egui::Key) -> bool {
     screen_context.input(|input| input.key_pressed(pressed_key))
+}
+
+/// The non-repeat read of the open-with menu hotkey (shared by the Q-open
+/// path and the modal close read).
+fn open_with_menu_key_pressed(screen_context: &egui::Context) -> bool {
+    screen_context.input(|input| {
+        esc_close_confirm::non_repeat_key_press_occurred(
+            &input.events,
+            open_with_button::OPEN_WITH_MENU_KEY,
+        )
+    })
+}
+
+/// The modal menu's close-key read: a non-repeat Q or a non-repeat ESC
+/// (binding decision: ONLY these two keys act while the menu is open).
+fn open_with_menu_close_pressed(screen_context: &egui::Context) -> bool {
+    open_with_menu_key_pressed(screen_context)
+        || screen_context
+            .input(|input| esc_close_confirm::non_repeat_escape_press_occurred(&input.events))
 }

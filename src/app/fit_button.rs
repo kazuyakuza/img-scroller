@@ -84,12 +84,9 @@ impl FitButtonSpec {
     /// A disabled fit button never fires (the disabled-arrow pattern); the
     /// open-with menu also suppresses the row dispatch (Wave-6.1 Task 3).
     fn accepts_click(&self, button_response: &egui::Response, row_ui: &egui::Ui) -> bool {
-        self.enabled_click_would_fire(button_response)
+        self.enabled
+            && button_response.clicked()
             && !open_with_button::open_with_menu_is_open(row_ui.ctx())
-    }
-
-    fn enabled_click_would_fire(&self, button_response: &egui::Response) -> bool {
-        self.enabled && button_response.clicked()
     }
 
     fn apply_action(&self, app: &mut ImagesScrollerApp, row_ui: &egui::Ui) {
