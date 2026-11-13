@@ -9,6 +9,7 @@ mod folder_listing;
 mod image_loading;
 mod last_viewed_images;
 mod name_collation;
+mod open_with_listing;
 mod pan;
 mod platform;
 mod scaling;

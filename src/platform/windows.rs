@@ -42,7 +42,7 @@ pub(crate) fn decode_image(path: &Path) -> Result<DecodedImage, ImageLoadFailure
     decode_with_factory(path)
 }
 
-fn ensure_com_initialized() -> bool {
+pub(super) fn ensure_com_initialized() -> bool {
     let com_state = unsafe { CoInitializeEx(None, COINIT_APARTMENTTHREADED) };
     match com_state {
         S_OK | S_FALSE | RPC_E_CHANGED_MODE => true,
