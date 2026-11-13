@@ -1077,7 +1077,7 @@ dependencies = [
 
 [[package]]
 name = "img-scroller"
-version = "0.5.2"
+version = "0.6.0"
 dependencies = [
  "eframe",
  "raw-window-handle",
