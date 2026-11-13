@@ -158,6 +158,6 @@ Produced in plain form (§9 of the verification plan). Manual UX is OPERATOR-RUN
 
 ## Verdict
 
-**STOPPED** — one pinned sweep outcome missed: Step 5 check 1b (`rg -n "SHCreateShellItemArrayFromShellItem" src`) is pinned to zero matches in the whole tree but the tree contains one doc-comment mention at `src/platform/windows_open_with.rs:11`. There is no import and no code usage (the D1 array route is removed), and plan §0 cites lines 9–15 as the verified D1 fix state. Awaiting the caller's decision: accept the doc-comment mention as non-residue, or authorize its removal (an application-file edit, outside this cycle's scope).
+**VERIFIED** — Step 5 check 1b (`rg -n "SHCreateShellItemArrayFromShellItem" src`) passes on intent: zero import and zero code residue (the D1 array route is removed); the single tree match is the intentional root-cause doc comment at `src/platform/windows_open_with.rs:11`, prescribed by the Task-1 plan §3.2c (committed at `befcf9e`, verified accurate by the T1 4.4 docs step). The literal pin "zero matches in the whole tree" was in conflict with that prescribed doc comment; adjudicated as non-residue by the Planner 2026-11-13. No application-file edit is required and none was made.
 
 All other pinned outcomes: PASS (dev-checks 189/0 + census, windows-target compile, rebuild byte size, 22-DLL set-equal audit, sweep checks 1a and 2–6, git segmentation).
