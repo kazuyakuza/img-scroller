@@ -2,6 +2,21 @@
 //! menu-list data. The OS-bound enumeration (platform facade) feeds it the
 //! handlers' display names in the system's enumeration order; container tests
 //! feed synthetic fixtures through the same function.
+//!
+//! Pinned rules (enforced by the tests module): blank names are dropped, the
+//! system enumeration order is preserved verbatim (no re-sort), and display
+//! names dedup case-insensitively keeping the FIRST occurrence — its raw
+//! input position survives as launch_index. Launch-index contract: the index
+//! addresses a FRESH re-enumeration of the same system query, performed by
+//! the launcher at hand-off time; handler objects are never persisted and no
+//! internal program database exists anywhere. Every launch hand-off failure
+//! collapses into OPEN_WITH_LAUNCH_FAILURE_MESSAGE, the single static
+//! message (the app's only message surface takes &'static str).
+//!
+//! For future AI agents: mechanism decisions are recorded in
+//! .kilo/plans/20261112-wave6-tasks1-2-enumeration-launcher-implementation-plan.md
+//! (§1, Decisions 2 and 4); the user-facing wave documentation lands in
+//! tech.md (Wave 6, Task 5).
 
 pub(crate) const OPEN_WITH_LAUNCH_FAILURE_MESSAGE: &str =
     "Windows could not open this file with the selected program.";

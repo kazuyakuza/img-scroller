@@ -1,9 +1,19 @@
 //! Windows implementation of the open-with enumeration and launcher (Tasks 1+2):
 //! SHAssocEnumHandlers queries the system's registered handlers for the current
-//! file's extension; IAssocHandler::GetUIName yields display names (fed to the
-//! pure open_with_listing seam) and IAssocHandler::Invoke launches the selected
-//! handler with the current file's data object. Compiled only on Windows
-//! targets; first-compile validation is the cross-target check step.
+//! file's extension with ASSOC_FILTER_NONE — no app-side filter, so UWP/Store
+//! apps are included by design; IEnumAssocHandlers is drained into the raw
+//! handler list and IAssocHandler::GetUIName yields display names (fed to the
+//! pure open_with_listing seam). The launcher re-enumerates FRESH per call —
+//! launch_index addresses that fresh list; nothing is cached or persisted
+//! across calls — and launches the selected handler via IAssocHandler::Invoke
+//! with an IDataObject built from the current canonical file. COM init reuses
+//! the shared ensure_com_initialized discipline from windows.rs; every failure
+//! path returns the empty/default value, never panics. Compiled only on
+//! Windows targets; first-compile validation is the cross-target check step.
+//! For future AI agents: mechanism decisions are recorded in
+//! .kilo/plans/20261112-wave6-tasks1-2-enumeration-launcher-implementation-plan.md
+//! (§1, Decisions 1–3); the user-facing wave documentation lands in tech.md
+//! (Wave 6, Task 5).
 
 use std::os::windows::ffi::OsStrExt;
 use std::path::Path;
