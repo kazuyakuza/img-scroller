@@ -68,10 +68,17 @@ fn show_pill_contents(app: &mut ImagesScrollerApp, area_ui: &mut egui::Ui) {
         });
 }
 
-/// Shows the literal-K3 message: the failure text when Some, empty otherwise.
+/// Shows the message line: the open-with launch failure renders in the
+/// warning color (Wave-6.1 Task 4), every other state the default color.
 fn show_message_line(message: Option<&'static str>, pill_ui: &mut egui::Ui) {
+    let text_color =
+        pill_style::message_text_color(open_with_button::message_line_is_warning(message), pill_ui);
     pill_ui.with_layout(egui::Layout::top_down(egui::Align::Center), |line_ui| {
-        line_ui.label(egui::RichText::new(message.unwrap_or("")).size(MESSAGE_TEXT_SIZE));
+        line_ui.label(
+            egui::RichText::new(message.unwrap_or(""))
+                .size(MESSAGE_TEXT_SIZE)
+                .color(text_color),
+        );
     });
 }
 
@@ -140,7 +147,7 @@ impl ArrowButtonSpec {
         let button_response = show_button_column(button_column, |column_ui| {
             self.allocate_and_paint(column_ui)
         });
-        if let Some(direction) = self.click_direction(&button_response) {
+        if let Some(direction) = self.click_direction(&button_response, row_ui) {
             app.navigate(direction);
         }
     }
@@ -160,16 +167,23 @@ impl ArrowButtonSpec {
         button_response
     }
 
-    fn click_direction(&self, button_response: &egui::Response) -> Option<NavigationDirection> {
-        if !self.accepts_click(button_response) {
+    fn click_direction(
+        &self,
+        button_response: &egui::Response,
+        row_ui: &egui::Ui,
+    ) -> Option<NavigationDirection> {
+        if !self.accepts_click(button_response, row_ui) {
             return None;
         }
         self.control.navigation_direction()
     }
 
-    /// A disabled arrow never navigates (a disabled arrow stays handler-free).
-    fn accepts_click(&self, button_response: &egui::Response) -> bool {
-        self.enabled && button_response.clicked()
+    /// A disabled arrow never navigates (a disabled arrow stays handler-free);
+    /// the open-with menu also suppresses every row dispatch (Wave-6.1 Task 3).
+    fn accepts_click(&self, button_response: &egui::Response, row_ui: &egui::Ui) -> bool {
+        self.enabled
+            && button_response.clicked()
+            && !open_with_button::open_with_menu_is_open(row_ui.ctx())
     }
 
     fn paint_triangle(&self, row_ui: &egui::Ui, button_response: &egui::Response) {

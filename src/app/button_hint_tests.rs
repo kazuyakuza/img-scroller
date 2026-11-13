@@ -15,7 +15,7 @@ fn hotkey_reference_matches_the_spec() {
     assert_eq!(hotkey_reference(RestoreFit), Some("0"));
     assert_eq!(hotkey_reference(FitWidth), Some("W"));
     assert_eq!(hotkey_reference(FitHeight), Some("H"));
-    assert_eq!(hotkey_reference(OpenWith), None);
+    assert_eq!(hotkey_reference(OpenWith), Some("Q"));
 }
 
 #[test]
@@ -31,5 +31,5 @@ fn tooltip_text_matches_the_spec() {
     assert_eq!(tooltip_text(RestoreFit), "Restore fit (0)");
     assert_eq!(tooltip_text(FitWidth), "Fit width (W)");
     assert_eq!(tooltip_text(FitHeight), "Fit height (H)");
-    assert_eq!(tooltip_text(OpenWith), "Open with...");
+    assert_eq!(tooltip_text(OpenWith), "Open with... (Q)");
 }

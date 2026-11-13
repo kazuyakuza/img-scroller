@@ -16,6 +16,7 @@ use super::ImagesScrollerApp;
 use super::NavigationDirection;
 use super::esc_close_confirm;
 use super::fullscreen;
+use super::open_with_button;
 use super::pan;
 use super::zoom;
 
@@ -23,6 +24,16 @@ impl ImagesScrollerApp {
     /// Reads every chord for this frame and dispatches its shared action.
     /// One `key_pressed` read per chord key (no hidden chained collisions).
     pub(super) fn read_and_dispatch_keystrokes(&mut self, screen_context: &egui::Context) {
+        self.update_esc_close_popup(screen_context);
+        if self.handle_modal_open_with_menu_keys(screen_context) {
+            return;
+        }
+        let q_pressed = screen_context.input(|input| {
+            esc_close_confirm::non_repeat_key_press_occurred(
+                &input.events,
+                open_with_button::OPEN_WITH_MENU_KEY,
+            )
+        });
         let fullscreen_pressed = was_pressed(screen_context, fullscreen::FULLSCREEN_TOGGLE_KEY);
         let escape_exit_fullscreen_pressed = fullscreen::escape_exits_fullscreen(
             self.fullscreen_on,
@@ -50,8 +61,9 @@ impl ImagesScrollerApp {
         let down_non_repeat = screen_context.input(|input| {
             pan::non_repeat_arrow_press_occurred(&input.events, egui::Key::ArrowDown)
         });
-        self.update_esc_close_popup(screen_context);
-        if fullscreen_pressed {
+        if self.open_with_menu_should_open_on_q(q_pressed) {
+            self.open_with_menu_from_q_press(screen_context);
+        } else if fullscreen_pressed {
             self.toggle_fullscreen_and_send_command(screen_context);
         }
         if escape_exit_fullscreen_pressed {
@@ -110,6 +122,33 @@ impl ImagesScrollerApp {
                 },
             );
         }
+    }
+
+    /// The modal gate (Wave-6.1 Task 3): while the open-with menu is open ONLY
+    /// the Q toggle and the ESC close run this frame — every other app action is
+    /// skipped, the ESC-close contract cannot arm, and the fullscreen exit never
+    /// fires. Returns true when the menu was open (the caller skips the normal
+    /// intake; the reads never consume events, so the menu's own keyboard
+    /// navigation keeps working).
+    fn handle_modal_open_with_menu_keys(&mut self, screen_context: &egui::Context) -> bool {
+        if !open_with_button::open_with_menu_is_open(screen_context) {
+            return false;
+        }
+        let q_pressed = screen_context.input(|input| {
+            esc_close_confirm::non_repeat_key_press_occurred(
+                &input.events,
+                open_with_button::OPEN_WITH_MENU_KEY,
+            )
+        });
+        let non_repeat_escape_pressed = screen_context
+            .input(|input| esc_close_confirm::non_repeat_escape_press_occurred(&input.events));
+        if q_pressed {
+            egui::Popup::close_id(screen_context, open_with_button::open_with_menu_id());
+        }
+        if non_repeat_escape_pressed {
+            egui::Popup::close_id(screen_context, open_with_button::open_with_menu_id());
+        }
+        true
     }
 
     /// The ESC-close branch: runs ONLY when the fullscreen-exit ESC path did

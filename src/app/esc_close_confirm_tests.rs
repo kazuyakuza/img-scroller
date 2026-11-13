@@ -9,6 +9,7 @@ use eframe::egui;
 
 use super::esc_close_confirm::{
     EscCloseAction, POPUP_VISIBLE_SECONDS, esc_close_action, non_repeat_escape_press_occurred,
+    non_repeat_key_press_occurred,
 };
 use super::folder_navigation_tests::{TempParentScope, app_opened_in};
 use super::fullscreen::FULLSCREEN_TOGGLE_KEY;
@@ -16,16 +17,20 @@ use super::{ImagesScrollerApp, NavigationDirection};
 
 const ARM_TIME: f64 = 1.0;
 
-/// ESC key event builder: `pressed` + `repeat` flag it as a distinct press,
-/// a held-key autorepeat, or a release.
-fn escape_key_event(pressed: bool, repeat: bool) -> egui::Event {
+/// Generalized key event builder (`pressed` + `repeat` = distinct/repeat/release).
+pub(super) fn key_event(key: egui::Key, pressed: bool, repeat: bool) -> egui::Event {
     egui::Event::Key {
-        key: egui::Key::Escape,
-        physical_key: Some(egui::Key::Escape),
+        key,
+        physical_key: Some(key),
         pressed,
         repeat,
         modifiers: egui::Modifiers::default(),
     }
+}
+
+/// ESC key event builder (the generalized builder pinned to Escape).
+fn escape_key_event(pressed: bool, repeat: bool) -> egui::Event {
+    key_event(egui::Key::Escape, pressed, repeat)
 }
 
 /// Runs ONE production intake frame for the app with the given events (the
@@ -104,6 +109,20 @@ fn repeat_escape_press_is_ignored() {
     assert!(non_repeat_escape_press_occurred(&[escape_key_event(
         true, false
     )]));
+}
+
+#[test]
+fn non_repeat_key_press_occurred_filters_repeats_and_foreign_keys() {
+    let q_press = |repeat: bool| key_event(egui::Key::Q, true, repeat);
+    let is_q_press = |events: &[egui::Event]| non_repeat_key_press_occurred(events, egui::Key::Q);
+    assert!(is_q_press(&[q_press(false)]));
+    assert!(!is_q_press(&[q_press(true)]));
+    assert!(!is_q_press(&[]));
+    assert!(!is_q_press(&[key_event(egui::Key::F11, true, false)]));
+    assert_eq!(
+        non_repeat_escape_press_occurred(&[escape_key_event(true, false)]),
+        non_repeat_key_press_occurred(&[escape_key_event(true, false)], egui::Key::Escape)
+    );
 }
 
 #[test]

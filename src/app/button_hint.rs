@@ -55,15 +55,15 @@ impl PillButton {
 }
 
 /// The hotkey reference caption under the glyph (`None` for the four arrows:
-/// each arrow is painted as the arrow key itself; `None` for open-with too:
-/// no hotkey in v1).
+/// each arrow is painted as the arrow key itself; open-with is `Q`, the
+/// Wave-6.1 Task 2 operator decision).
 pub(super) fn hotkey_reference(button: PillButton) -> Option<&'static str> {
     match button {
         PillButton::ImagePrevious
         | PillButton::ImageNext
         | PillButton::FolderUp
-        | PillButton::FolderDown
-        | PillButton::OpenWith => None,
+        | PillButton::FolderDown => None,
+        PillButton::OpenWith => Some("Q"),
         PillButton::Fullscreen => Some("F11"),
         PillButton::ZoomIn => Some("I"),
         PillButton::ZoomOut => Some("O"),
@@ -86,7 +86,7 @@ pub(super) fn tooltip_text(button: PillButton) -> &'static str {
         PillButton::RestoreFit => "Restore fit (0)",
         PillButton::FitWidth => "Fit width (W)",
         PillButton::FitHeight => "Fit height (H)",
-        PillButton::OpenWith => "Open with...",
+        PillButton::OpenWith => "Open with... (Q)",
     }
 }
 

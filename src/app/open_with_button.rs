@@ -1,18 +1,10 @@
-//! The floating pill's 11th button (Wave-6 Task 3, user-approved Option A),
-//! rightmost after the fit group: "Open with...", a square-with-emerging-
-//! arrow glyph. The enabled button opens an upward `egui::Popup::menu`
-//! (egui 0.37 `RectAlign::TOP`) above the pill, listing the programs the
-//! system registered for the current file's type (display names verbatim,
-//! 300-point ScrollArea cap). A click hands the CURRENT canonical file to
-//! the launcher keyed by `launch_index`; failure surfaces
-//! `OPEN_WITH_LAUNCH_FAILURE_MESSAGE` on the pill's message line. The
-//! stored list refreshes ONLY at the two decided points (every successful
-//! open; the popup-opening click) — the popup never enumerates per frame.
-//! Empty = disabled button, "No programs registered for this file type"
-//! tooltip; no hotkey in v1. For future AI agents: mechanism decisions are
-//! recorded in the implementation plan + frontend spec at
-//! .kilo/plans/20261112-wave6-task3-open-with-menu-*.md; the user-facing
-//! wave documentation lands in tech.md (Wave 6, Task 5).
+//! The floating pill's 11th button (Wave-6 Task 3), rightmost after the fit
+//! group: "Open with...", a square-with-emerging-arrow glyph with the `Q`
+//! hotkey caption under it (Wave-6.1 Task 2). The button opens an upward
+//! MODAL `egui::Popup::menu` listing the programs registered for the current
+//! file (all other functionalities OFF while open; `ESC` or `Q` closes it --
+//! Wave-6.1 Task 3); launch failures render warning-colored (Task 4).
+//! Decisions: .kilo/plans/20261113-wave6-1-*.
 
 use crate::open_with_listing::OPEN_WITH_LAUNCH_FAILURE_MESSAGE;
 use crate::platform;
@@ -24,18 +16,28 @@ use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show
 use super::pill_style;
 
 pub(super) const NO_PROGRAMS_TOOLTIP_TEXT: &str = "No programs registered for this file type";
+
+/// The menu popup's stable identity: the ONE id the intake guard, the Q
+/// toggle, and the row gates consult (`Id::unique` hashes with FIXED seeds,
+/// so every call yields the same id; `Id::new` is deprecated in egui 0.37).
+pub(super) fn open_with_menu_id() -> egui::Id {
+    egui::Id::unique("open_with_menu_popup")
+}
+
+/// The open-with button's keyboard hotkey (Wave-6.1 Task 2; read by the
+/// intake's non-repeat filter for BOTH the open and the close toggle).
+pub(super) const OPEN_WITH_MENU_KEY: egui::Key = egui::Key::Q;
+
+/// True while the open-with menu popup is open (the ONE modal-state query:
+/// the intake guard AND the row click gates consult it).
+pub(super) fn open_with_menu_is_open(screen_context: &egui::Context) -> bool {
+    egui::Popup::is_id_open(screen_context, open_with_menu_id())
+}
+
 const OPEN_WITH_BUTTON_LABEL: &str = "Open with...";
 const OPEN_WITH_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(36.0, 32.0);
 const OPEN_WITH_GROUP_GAP: f32 = 16.0;
 const OPEN_WITH_MENU_MAX_HEIGHT: f32 = 300.0;
-const OPEN_WITH_SQUARE_SIDE: f32 = 10.0;
-const OPEN_WITH_SQUARE_CENTER_OFFSET: egui::Vec2 = egui::Vec2::new(-4.0, 4.0);
-const OPEN_WITH_ARROW_LENGTH: f32 = 7.0;
-const OPEN_WITH_ARROW_TRIANGLE_SIZE: egui::Vec2 = egui::Vec2::new(6.0, 6.0);
-const OPEN_WITH_ARROW_SHAFT_THICKNESS: f32 = 2.5;
-const OPEN_WITH_ARROW_SHAFT_OUTLINE_WIDTH: f32 =
-    OPEN_WITH_ARROW_SHAFT_THICKNESS + 2.0 * pill_style::OUTLINE_STROKE_WIDTH;
-const OPEN_WITH_ARROW_HEAD_ROTATION: f32 = -std::f32::consts::TAU / 8.0;
 
 /// Appends the open-with button to the pill row after the fit group, with the standard group gap.
 pub(super) fn show_open_with_pill_button(app: &mut ImagesScrollerApp, row_ui: &mut egui::Ui) {
@@ -67,13 +69,29 @@ impl OpenWithButtonSpec {
             show_button_column(ButtonColumnSite::new(row_ui, placement), |column_ui| {
                 self.allocate_and_paint(column_ui)
             });
-        self.enumerate_when_menu_opens(app, &button_response);
-        if self.enabled {
+        if self.accepts_click(&button_response, row_ui) {
+            app.refresh_open_with_programs();
+        }
+        if self.menu_popup_is_wanted(row_ui) {
             egui::Popup::menu(&button_response)
+                .id(open_with_menu_id())
                 .align(egui::RectAlign::TOP)
                 .accessible_name(OPEN_WITH_BUTTON_LABEL)
                 .show(|menu_ui| app.show_open_with_menu_entries(menu_ui));
         }
+    }
+
+    /// A disabled open-with button never fires, and a click while the menu is
+    /// open only closes it via the popup's own toggle (no refresh re-run).
+    fn accepts_click(&self, button_response: &egui::Response, row_ui: &egui::Ui) -> bool {
+        self.enabled && button_response.clicked() && !open_with_menu_is_open(row_ui.ctx())
+    }
+
+    /// The popup builder's gate: the painted enablement, OR an already-open
+    /// popup (once open it renders every frame until closed, even if a fresh
+    /// enumeration would flip the enablement — no invisible modal lock).
+    fn menu_popup_is_wanted(&self, row_ui: &egui::Ui) -> bool {
+        self.enabled || open_with_menu_is_open(row_ui.ctx())
     }
 
     fn allocate_and_paint(&self, column_ui: &mut egui::Ui) -> egui::Response {
@@ -87,69 +105,14 @@ impl OpenWithButtonSpec {
         button_response
     }
 
-    /// A disabled open-with button never fires (the disabled-arrow pattern).
-    fn accepts_click(&self, button_response: &egui::Response) -> bool {
-        self.enabled && button_response.clicked()
-    }
-
-    /// The decided refresh contract: on the click frame that opens the popup,
-    /// re-enumerate via the facade (no per-frame enumeration while it is open).
-    fn enumerate_when_menu_opens(
-        &self,
-        app: &mut ImagesScrollerApp,
-        button_response: &egui::Response,
-    ) {
-        if !self.accepts_click(button_response) {
-            return;
-        }
-        let Some(opened_path) = app.opened_image_path.clone() else {
-            return;
-        };
-        app.open_with_programs = platform::enumerate_open_with_programs(&opened_path);
-    }
-
     fn paint_glyph(&self, row_ui: &egui::Ui, button_response: &egui::Response) {
         let glyph_center = button_response.rect.center();
         let glyph_state = pill_style::glyph_state_for(self.enabled, button_response.hovered());
         let glyph_color = pill_style::glyph_state_color(glyph_state, row_ui);
-        for glyph_shape in open_with_glyph_shapes(glyph_center, glyph_color) {
+        for glyph_shape in pill_style::open_with_glyph_shapes(glyph_center, glyph_color) {
             row_ui.painter().add(glyph_shape);
         }
     }
-}
-
-/// A 10x10 square with a 7-point arrow from its top-right corner pointing
-/// up-right (shaft plus triangle head); paint order square, shaft (BLACK
-/// under-stroke then glyph stroke), head. The square shifts down-left.
-fn open_with_glyph_shapes(
-    glyph_center: egui::Pos2,
-    glyph_color: egui::Color32,
-) -> Vec<egui::Shape> {
-    let square_center = glyph_center + OPEN_WITH_SQUARE_CENTER_OFFSET;
-    let square_rect =
-        egui::Rect::from_center_size(square_center, egui::Vec2::splat(OPEN_WITH_SQUARE_SIDE));
-    let shaft_start = square_rect.right_top();
-    let shaft_rise = OPEN_WITH_ARROW_LENGTH * std::f32::consts::FRAC_1_SQRT_2;
-    let shaft_end = shaft_start + egui::vec2(shaft_rise, -shaft_rise);
-    vec![
-        pill_style::outlined_rect_shape(square_rect, glyph_color),
-        egui::Shape::line_segment(
-            [shaft_start, shaft_end],
-            egui::Stroke::new(
-                OPEN_WITH_ARROW_SHAFT_OUTLINE_WIDTH,
-                pill_style::OUTLINE_COLOR,
-            ),
-        ),
-        egui::Shape::line_segment(
-            [shaft_start, shaft_end],
-            egui::Stroke::new(OPEN_WITH_ARROW_SHAFT_THICKNESS, glyph_color),
-        ),
-        pill_style::outlined_triangle_shape(pill_style::TriangularGlyphSpec {
-            rect: egui::Rect::from_center_size(shaft_end, OPEN_WITH_ARROW_TRIANGLE_SIZE),
-            rotation: OPEN_WITH_ARROW_HEAD_ROTATION,
-            fill_color: glyph_color,
-        }),
-    ]
 }
 
 /// The no-programs tooltip applies ONLY while a file is open with an empty
@@ -161,7 +124,40 @@ pub(super) fn no_programs_tooltip_for(app: &ImagesScrollerApp) -> Option<&'stati
     None
 }
 
+/// True exactly while the message line shows the open-with launch failure —
+/// the ONLY warning-colored message (Wave-6.1 Task 4): the failure text is a
+/// unique constant, so equality with it is the lossless discriminator; the
+/// unsupported-file message and cleared states keep the default color.
+pub(super) fn message_line_is_warning(message: Option<&'static str>) -> bool {
+    message == Some(OPEN_WITH_LAUNCH_FAILURE_MESSAGE)
+}
+
 impl ImagesScrollerApp {
+    /// True exactly when a distinct Q press should OPEN the menu: the press, the
+    /// button's enablement (image open AND programs listed), and the pill chrome
+    /// visible (fullscreen ON hides the button; a disabled state stays inert).
+    pub(super) fn open_with_menu_should_open_on_q(&self, q_pressed: bool) -> bool {
+        q_pressed && self.open_with_menu_is_available() && self.full_ui_chrome_is_visible()
+    }
+
+    /// The refresh contract's Q-open point: re-enumerate for the CURRENT file,
+    /// then open the popup programmatically (the click path opens via the
+    /// Popup::menu builder's own click toggle — popup.rs:237-240, 556-577).
+    pub(super) fn open_with_menu_from_q_press(&mut self, screen_context: &egui::Context) {
+        self.refresh_open_with_programs();
+        egui::Popup::open_id(screen_context, open_with_menu_id());
+    }
+
+    /// Re-enumerates the programs registered for the CURRENT canonical file into
+    /// the stored list (the refresh contract: every successful open, the
+    /// popup-opening click, and the Q-open press).
+    pub(super) fn refresh_open_with_programs(&mut self) {
+        let Some(opened_path) = self.opened_image_path.clone() else {
+            return;
+        };
+        self.open_with_programs = platform::enumerate_open_with_programs(&opened_path);
+    }
+
     /// Available exactly while an image is open AND the stored enumeration found
     /// registered programs (the approved disabled-button empty-result behavior).
     pub(super) fn open_with_menu_is_available(&self) -> bool {

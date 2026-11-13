@@ -9,6 +9,7 @@ use eframe::egui;
 
 use super::ImagesScrollerApp;
 use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
+use super::open_with_button;
 use super::pill_style;
 
 const ZOOM_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(36.0, 32.0);
@@ -68,7 +69,7 @@ impl ZoomButtonSpec {
         let button_response = show_button_column(button_column, |column_ui| {
             self.allocate_and_paint(column_ui)
         });
-        if self.accepts_click(&button_response) {
+        if self.accepts_click(&button_response, row_ui) {
             self.apply_action(app);
         }
     }
@@ -84,9 +85,12 @@ impl ZoomButtonSpec {
         button_response
     }
 
-    /// A disabled zoom button never fires (the disabled-arrow pattern).
-    fn accepts_click(&self, button_response: &egui::Response) -> bool {
-        self.enabled && button_response.clicked()
+    /// A disabled zoom button never fires (the disabled-arrow pattern); the
+    /// open-with menu also suppresses the row dispatch (Wave-6.1 Task 3).
+    fn accepts_click(&self, button_response: &egui::Response, row_ui: &egui::Ui) -> bool {
+        self.enabled
+            && button_response.clicked()
+            && !open_with_button::open_with_menu_is_open(row_ui.ctx())
     }
 
     fn apply_action(&self, app: &mut ImagesScrollerApp) {

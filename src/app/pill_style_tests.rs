@@ -5,7 +5,8 @@ use eframe::egui;
 
 use super::pill_style::{
     CAPTION_OUTLINE_OFFSETS, CAPTION_TEXT_SIZE, OUTLINE_COLOR, OUTLINE_STROKE_WIDTH,
-    PILL_GLYPH_COLOR, glyph_state_color, glyph_state_for,
+    PILL_GLYPH_COLOR, WARNING_MESSAGE_COLOR, glyph_state_color, glyph_state_for,
+    message_text_color,
 };
 
 #[test]
@@ -29,6 +30,33 @@ fn caption_outline_offsets_match_the_one_point_neighbors() {
         egui::vec2(1.0, 1.0),
     ];
     assert_eq!(CAPTION_OUTLINE_OFFSETS, expected_offsets);
+}
+
+#[test]
+fn warning_message_color_is_distinct_and_fully_opaque() {
+    assert_eq!(WARNING_MESSAGE_COLOR, egui::Color32::from_rgb(255, 165, 0));
+    assert_ne!(WARNING_MESSAGE_COLOR, PILL_GLYPH_COLOR);
+    assert_ne!(WARNING_MESSAGE_COLOR, OUTLINE_COLOR);
+    assert_eq!(WARNING_MESSAGE_COLOR.a(), 255);
+}
+
+#[test]
+fn message_text_color_selects_the_warning_and_theme_colors() {
+    let context = egui::Context::default();
+    context
+        .run_pass(Default::default(), |run_context| {
+            egui::Area::new(egui::Id::unique("pill_style_message_color_test")).show(
+                run_context,
+                |test_ui| {
+                    assert_eq!(message_text_color(true, test_ui), WARNING_MESSAGE_COLOR);
+                    assert_eq!(
+                        message_text_color(false, test_ui),
+                        test_ui.visuals().text_color()
+                    );
+                },
+            );
+        })
+        .drop_without_applying_deltas();
 }
 
 #[test]

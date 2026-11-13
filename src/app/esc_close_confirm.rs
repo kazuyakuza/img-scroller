@@ -71,21 +71,27 @@ pub(super) fn esc_close_action(
     }
 }
 
-/// True exactly for a first-of-two DISTINCT ESC presses: a pressed Escape key
-/// event that is NOT a held-key autorepeat (spec §4.2; `key_pressed` alone
-/// would also fire on repeats).
-pub(super) fn non_repeat_escape_press_occurred(events: &[egui::Event]) -> bool {
+/// True exactly for a NON-REPEAT pressed `key` event in this frame's events
+/// (the generic distinct-press filter; the ESC-close filter delegates).
+pub(super) fn non_repeat_key_press_occurred(events: &[egui::Event], key: egui::Key) -> bool {
     events.iter().any(|event| {
         matches!(
             event,
             egui::Event::Key {
-                key: egui::Key::Escape,
+                key: matched_key,
                 pressed: true,
                 repeat: false,
                 ..
-            }
+            } if *matched_key == key
         )
     })
+}
+
+/// True exactly for a first-of-two DISTINCT ESC presses: a pressed Escape key
+/// event that is NOT a held-key autorepeat (spec §4.2; `key_pressed` alone
+/// would also fire on repeats).
+pub(super) fn non_repeat_escape_press_occurred(events: &[egui::Event]) -> bool {
+    non_repeat_key_press_occurred(events, egui::Key::Escape)
 }
 
 impl ImagesScrollerApp {

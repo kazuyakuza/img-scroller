@@ -9,6 +9,7 @@ use eframe::egui;
 
 use super::ImagesScrollerApp;
 use super::button_hint::{ButtonColumnSite, PillButton, PillButtonPlacement, show_button_column};
+use super::open_with_button;
 use super::pill_style;
 
 const FULLSCREEN_BUTTON_LABEL: &str = "Toggle fullscreen";
@@ -20,9 +21,15 @@ pub(super) fn show_fullscreen_pill_button(app: &mut ImagesScrollerApp, row_ui: &
     let placement = PillButtonPlacement::for_button(PillButton::Fullscreen, FULLSCREEN_BUTTON_SIZE);
     let button_column = ButtonColumnSite::new(row_ui, placement);
     let painted_button = show_button_column(button_column, allocate_and_paint);
-    if painted_button.clicked() {
+    if click_toggles_fullscreen(&painted_button, row_ui) {
         app.toggle_fullscreen_and_send_command(row_ui.ctx());
     }
+}
+
+/// The click toggles only while the open-with menu is closed (the modal
+/// menu suppresses the row's dispatches; Wave-6.1 Task 3).
+fn click_toggles_fullscreen(painted_button: &egui::Response, row_ui: &egui::Ui) -> bool {
+    painted_button.clicked() && !open_with_button::open_with_menu_is_open(row_ui.ctx())
 }
 
 fn allocate_and_paint(column_ui: &mut egui::Ui) -> egui::Response {

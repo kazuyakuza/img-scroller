@@ -32,6 +32,19 @@ pub(super) const CAPTION_OUTLINE_OFFSETS: [egui::Vec2; 8] = [
     egui::vec2(1.0, 1.0),
 ];
 
+/// The open-with launch-failure message color: classic warning ORANGE,
+/// high-luminance and readable on the pill's translucent dark frame
+/// `(20,20,20,180)` (Wave-6.1 Task 4; the ONLY warning-colored message).
+pub(super) const WARNING_MESSAGE_COLOR: egui::Color32 = egui::Color32::from_rgb(255, 165, 0);
+
+/// The message-line text color: warning color only for the open-with failure.
+pub(super) fn message_text_color(is_warning: bool, pill_ui: &egui::Ui) -> egui::Color32 {
+    if is_warning {
+        return WARNING_MESSAGE_COLOR;
+    }
+    pill_ui.visuals().text_color()
+}
+
 /// The painted visual state of one pill glyph/caption (which the shared
 /// palette resolves): DISABLED dimming, hovered, or enabled idle.
 pub(super) enum PillGlyphState {
@@ -143,4 +156,45 @@ pub(super) fn paint_outlined_caption(column_ui: &mut egui::Ui, caption: Outlined
         galley,
         caption.fill_color,
     ));
+}
+
+const OPEN_WITH_SQUARE_SIDE: f32 = 10.0;
+const OPEN_WITH_SQUARE_CENTER_OFFSET: egui::Vec2 = egui::Vec2::new(-4.0, 4.0);
+const OPEN_WITH_ARROW_LENGTH: f32 = 7.0;
+const OPEN_WITH_ARROW_TRIANGLE_SIZE: egui::Vec2 = egui::Vec2::new(6.0, 6.0);
+const OPEN_WITH_ARROW_SHAFT_THICKNESS: f32 = 2.5;
+const OPEN_WITH_ARROW_SHAFT_OUTLINE_WIDTH: f32 =
+    OPEN_WITH_ARROW_SHAFT_THICKNESS + 2.0 * OUTLINE_STROKE_WIDTH;
+const OPEN_WITH_ARROW_HEAD_ROTATION: f32 = -std::f32::consts::TAU / 8.0;
+
+/// The open-with button's composite glyph (a 10x10 square with a 7-point
+/// arrow from its top-right corner pointing up-right: shaft plus triangle
+/// head; paint order square, shaft BLACK under-stroke then glyph stroke,
+/// head; the square shifts down-left) — the painted pill-glyph builder home.
+pub(super) fn open_with_glyph_shapes(
+    glyph_center: egui::Pos2,
+    glyph_color: egui::Color32,
+) -> Vec<egui::Shape> {
+    let square_center = glyph_center + OPEN_WITH_SQUARE_CENTER_OFFSET;
+    let square_rect =
+        egui::Rect::from_center_size(square_center, egui::Vec2::splat(OPEN_WITH_SQUARE_SIDE));
+    let shaft_start = square_rect.right_top();
+    let shaft_rise = OPEN_WITH_ARROW_LENGTH * std::f32::consts::FRAC_1_SQRT_2;
+    let shaft_end = shaft_start + egui::vec2(shaft_rise, -shaft_rise);
+    vec![
+        outlined_rect_shape(square_rect, glyph_color),
+        egui::Shape::line_segment(
+            [shaft_start, shaft_end],
+            egui::Stroke::new(OPEN_WITH_ARROW_SHAFT_OUTLINE_WIDTH, OUTLINE_COLOR),
+        ),
+        egui::Shape::line_segment(
+            [shaft_start, shaft_end],
+            egui::Stroke::new(OPEN_WITH_ARROW_SHAFT_THICKNESS, glyph_color),
+        ),
+        outlined_triangle_shape(TriangularGlyphSpec {
+            rect: egui::Rect::from_center_size(shaft_end, OPEN_WITH_ARROW_TRIANGLE_SIZE),
+            rotation: OPEN_WITH_ARROW_HEAD_ROTATION,
+            fill_color: glyph_color,
+        }),
+    ]
 }
