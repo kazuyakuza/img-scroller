@@ -3,6 +3,10 @@ name = "img-scroller"
 version = "0.6.2"
 edition = "2024"
 
+[features]
+default = []
+diagnostic-launch-log = []
+
 [dependencies]
 eframe = { version = "=0.37.0", default-features = false, features = [
     "glow",

@@ -37,9 +37,12 @@ use crate::open_with_listing::{
 
 #[allow(dead_code)] // consumed by the Task-3 menu UI
 pub(crate) fn enumerate_open_with_programs(file_path: &Path) -> Vec<RegisteredProgram> {
-    raw_handlers(file_path)
+    let programs = raw_handlers(file_path)
         .map(|handlers| programs_from_handler_names(&handler_ui_names(&handlers)))
-        .unwrap_or_default()
+        .unwrap_or_default();
+    #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+    super::launch_log::enumeration_stored(&programs);
+    programs
 }
 
 #[allow(dead_code)] // consumed by the Task-3 menu UI
@@ -47,12 +50,27 @@ pub(crate) fn open_file_with_selected_program(
     file_path: &Path,
     program_index: usize,
 ) -> Result<(), OpenWithLaunchFailure> {
-    let handlers = raw_handlers(file_path).ok_or(OpenWithLaunchFailure::LaunchFailed)?;
+    let handlers = match raw_handlers(file_path) {
+        Some(handlers) => handlers,
+        None => {
+            #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+            super::launch_log::fresh_enumeration_failed();
+            return Err(OpenWithLaunchFailure::LaunchFailed);
+        }
+    };
+    #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+    super::launch_log::attempt_started(file_path, program_index);
+    #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+    super::launch_log::fresh_enumeration_drained(handlers.len(), &handler_ui_names(&handlers));
+    #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+    super::launch_log::launch_index_resolved(program_index, handlers.get(program_index).is_some());
     let handler = handlers
         .get(program_index)
         .ok_or(OpenWithLaunchFailure::LaunchFailed)?;
     let launch_outcome =
         unsafe { file_data_object(file_path).and_then(|data_object| handler.Invoke(&data_object)) };
+    #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+    super::launch_log::launch_finished(launch_outcome.is_ok(), error_code_of(&launch_outcome));
     launch_outcome.map_err(|_| OpenWithLaunchFailure::LaunchFailed)
 }
 
@@ -115,9 +133,20 @@ fn extension_query_string(file_path: &Path) -> Option<Vec<u16>> {
 unsafe fn file_data_object(file_path: &Path) -> windows::core::Result<IDataObject> {
     unsafe {
         let wide_path: Vec<u16> = file_path.as_os_str().encode_wide().chain([0]).collect();
-        let shell_item: IShellItem = SHCreateItemFromParsingName(PCWSTR(wide_path.as_ptr()), None)?;
-        let data_object: IDataObject =
-            shell_item.BindToHandler(None::<&IBindCtx>, &BHID_DataObject)?;
-        Ok(data_object)
+        let shell_item: windows::core::Result<IShellItem> =
+            SHCreateItemFromParsingName(PCWSTR(wide_path.as_ptr()), None);
+        #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+        super::launch_log::shell_item_created(shell_item.is_ok(), error_code_of(&shell_item));
+        let shell_item = shell_item?;
+        let bind_outcome: windows::core::Result<IDataObject> =
+            shell_item.BindToHandler(None::<&IBindCtx>, &BHID_DataObject);
+        #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+        super::launch_log::data_object_bound(bind_outcome.is_ok(), error_code_of(&bind_outcome));
+        Ok(bind_outcome?)
     }
+}
+
+#[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+fn error_code_of<T>(outcome: &windows::core::Result<T>) -> Option<i32> {
+    outcome.as_ref().err().map(|error| error.code().0)
 }

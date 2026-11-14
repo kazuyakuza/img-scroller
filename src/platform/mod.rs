@@ -12,6 +12,9 @@ mod windows_collation;
 #[cfg(target_os = "windows")]
 mod windows_open_with;
 
+#[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]
+pub(crate) mod launch_log;
+
 #[cfg(not(target_os = "windows"))]
 mod stub;
 
