@@ -16,6 +16,10 @@
 //! the shared ensure_com_initialized discipline from windows.rs; every failure
 //! path returns the empty/default value, never panics. Compiled only on
 //! Windows targets; first-compile validation is the cross-target check step.
+//! Each launch path also carries cfg-gated Wave-6.2 diagnostic hooks calling
+//! `super::launch_log`, compiled only when the `diagnostic-launch-log` feature
+//! is enabled — OFF by default, so normal builds and the release artifact see
+//! none of them.
 //! For future AI agents: mechanism decisions are recorded in
 //! .kilo/plans/20261112-wave6-tasks1-2-enumeration-launcher-implementation-plan.md
 //! (§1, Decisions 1–3); the user-facing wave documentation lands in tech.md

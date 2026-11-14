@@ -1,12 +1,16 @@
 //! OPTIONAL Wave-6.2 Task-1 diagnostic (caller-authorized 2026-11-13): records
 //! the runtime evidence of each "Open with..." launch into a plain `.log` file
-//! so the operator can report it back. Compiled ONLY when BOTH the `windows`
-//! target AND the `diagnostic-launch-log` Cargo feature are enabled; the release
-//! build never enables the feature, so the shipped artifact contains none of
-//! this code. The log file is created lazily on the first diagnostic write and
-//! appended to on every later write; any write failure (or an unresolvable
-//! target) is silently skipped — this module must never alter app behavior or
-//! panic. Task 2's root-cause consumes the resulting log.
+//! (created next to the executable, falling back to the temp directory) so the
+//! operator can report it back. Compiled ONLY when BOTH the `windows` target
+//! AND the `diagnostic-launch-log` Cargo feature are enabled; the feature is
+//! OFF by default, the release build never enables it, and dev-checks run the
+//! default config, so the shipped artifact contains none of this code. The log
+//! file is created lazily on the first diagnostic write and appended to on
+//! every later write; any write failure (or an unresolvable target) is silently
+//! skipped — this module must never alter app behavior or panic. Task 2's
+//! root-cause consumes the resulting log. For future AI agents: the diagnostic's
+//! recorded fields and this optional-feature packaging are pinned in
+//! .kilo/plans/20261113-wave6-2-task1-diagnostic-build-implementation-plan.md.
 
 use std::fs::OpenOptions;
 use std::io::Write;
