@@ -16,11 +16,15 @@
 //! The launcher's shell hand-off additionally converts the app's canonical
 //! opened-image path to its shell-parseable form (shell_parseable_path):
 //! SHCreateItemFromParsingName requires a shell parsing name and rejects the
-//! Windows extended-length \?\ verbatim prefix.
+//! fs::canonicalize `\\?\` verbatim prefix with E_INVALIDARG 0x80070057 (the
+//! diagnostic log's Wave 6.2 D1 root-cause evidence); the conversion happens
+//! ONLY at that hand-off — the stored canonical path is never rewritten.
 //!
 //! For future AI agents: mechanism decisions are recorded in
 //! .kilo/plans/20261112-wave6-tasks1-2-enumeration-launcher-implementation-plan.md
-//! (§1, Decisions 2 and 4); the user-facing wave documentation lands in
+//! (§1, Decisions 2 and 4); the Wave 6.2 shell_parseable_path is pinned in
+//! .kilo/plans/20261113-wave6-2-task2-launcher-fix-implementation-plan.md
+//! (§1 D1–D5); the user-facing wave documentation lands in
 //! tech.md (Wave 6, Task 5).
 
 use std::path::{Path, PathBuf};
@@ -82,6 +86,9 @@ fn handler_name_is_blank(raw_name: &str) -> bool {
 const VERBATIM_PATH_PREFIX: &str = r"\\?\";
 const VERBATIM_UNC_PATH_PREFIX: &str = r"\\?\UNC\";
 
+/// Shell hand-off form of a canonical path: strips the `\\?\` verbatim
+/// prefix (the `\\?\UNC\` device form maps to the `\\server\share\...`
+/// network form); every other path passes through unchanged.
 #[allow(dead_code)] // consumed by the Windows-side launcher (this target: stub path)
 pub(crate) fn shell_parseable_path(canonical_path: &Path) -> PathBuf {
     let path_text = canonical_path.as_os_str().to_string_lossy();

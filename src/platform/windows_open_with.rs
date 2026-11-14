@@ -6,10 +6,12 @@
 //! pure open_with_listing seam). The launcher re-enumerates FRESH per call —
 //! launch_index addresses that fresh list; nothing is cached or persisted
 //! across calls — and launches the selected handler via IAssocHandler::Invoke
-//! with an IDataObject built from the current canonical file — converted first
-//! to its shell-parseable form (`fs::canonicalize`'s \?\ verbatim prefix is
-//! not a shell parsing name; `SHCreateItemFromParsingName` rejects it with
-//! E_INVALIDARG — the Wave 6.2 D1 root cause) via
+//! with an IDataObject built from the current canonical file — converted at
+//! this ONE hand-off point to its shell-parseable form (`fs::canonicalize`'s
+//! `\\?\` verbatim prefix is not a shell parsing name; `SHCreateItemFromParsingName`
+//! rejects it with E_INVALIDARG 0x80070057 — the Wave 6.2 D1 root cause,
+//! proven on every attempt by the optional diagnostic log; the stored
+//! canonical path is never rewritten) via
 //! IShellItem::BindToHandler(BHID_DataObject) — the documented way to obtain
 //! an item's data object; the removed SHCreateShellItemArrayFromShellItem
 //! route requested IID_IDataObject off-contract from a shell item array and
@@ -25,7 +27,9 @@
 //! none of them.
 //! For future AI agents: mechanism decisions are recorded in
 //! .kilo/plans/20261112-wave6-tasks1-2-enumeration-launcher-implementation-plan.md
-//! (§1, Decisions 1–3); the user-facing wave documentation lands in tech.md
+//! (§1, Decisions 1–3); the Wave 6.2 shell-parseable hand-off is pinned in
+//! .kilo/plans/20261113-wave6-2-task2-launcher-fix-implementation-plan.md
+//! (§0 evidence, §1 D6); the user-facing wave documentation lands in tech.md
 //! (Wave 6, Task 5).
 
 use std::os::windows::ffi::OsStrExt;
