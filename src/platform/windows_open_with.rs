@@ -6,7 +6,10 @@
 //! pure open_with_listing seam). The launcher re-enumerates FRESH per call —
 //! launch_index addresses that fresh list; nothing is cached or persisted
 //! across calls — and launches the selected handler via IAssocHandler::Invoke
-//! with an IDataObject built from the current canonical file via
+//! with an IDataObject built from the current canonical file — converted first
+//! to its shell-parseable form (`fs::canonicalize`'s \?\ verbatim prefix is
+//! not a shell parsing name; `SHCreateItemFromParsingName` rejects it with
+//! E_INVALIDARG — the Wave 6.2 D1 root cause) via
 //! IShellItem::BindToHandler(BHID_DataObject) — the documented way to obtain
 //! an item's data object; the removed SHCreateShellItemArrayFromShellItem
 //! route requested IID_IDataObject off-contract from a shell item array and
@@ -36,7 +39,7 @@ use windows::Win32::UI::Shell::{
 use windows::core::PCWSTR;
 
 use crate::open_with_listing::{
-    OpenWithLaunchFailure, RegisteredProgram, programs_from_handler_names,
+    OpenWithLaunchFailure, RegisteredProgram, programs_from_handler_names, shell_parseable_path,
 };
 
 #[allow(dead_code)] // consumed by the Task-3 menu UI
@@ -136,7 +139,8 @@ fn extension_query_string(file_path: &Path) -> Option<Vec<u16>> {
 
 unsafe fn file_data_object(file_path: &Path) -> windows::core::Result<IDataObject> {
     unsafe {
-        let wide_path: Vec<u16> = file_path.as_os_str().encode_wide().chain([0]).collect();
+        let shell_path = shell_parseable_path(file_path);
+        let wide_path: Vec<u16> = shell_path.as_os_str().encode_wide().chain([0]).collect();
         let shell_item: windows::core::Result<IShellItem> =
             SHCreateItemFromParsingName(PCWSTR(wide_path.as_ptr()), None);
         #[cfg(all(target_os = "windows", feature = "diagnostic-launch-log"))]

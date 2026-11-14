@@ -13,10 +13,17 @@
 //! collapses into OPEN_WITH_LAUNCH_FAILURE_MESSAGE, the single static
 //! message (the app's only message surface takes &'static str).
 //!
+//! The launcher's shell hand-off additionally converts the app's canonical
+//! opened-image path to its shell-parseable form (shell_parseable_path):
+//! SHCreateItemFromParsingName requires a shell parsing name and rejects the
+//! Windows extended-length \?\ verbatim prefix.
+//!
 //! For future AI agents: mechanism decisions are recorded in
 //! .kilo/plans/20261112-wave6-tasks1-2-enumeration-launcher-implementation-plan.md
 //! (§1, Decisions 2 and 4); the user-facing wave documentation lands in
 //! tech.md (Wave 6, Task 5).
+
+use std::path::{Path, PathBuf};
 
 pub(crate) const OPEN_WITH_LAUNCH_FAILURE_MESSAGE: &str =
     "Windows could not open this file with the selected program.";
@@ -70,6 +77,21 @@ pub(crate) fn programs_from_handler_names(handler_names: &[String]) -> Vec<Regis
 
 fn handler_name_is_blank(raw_name: &str) -> bool {
     raw_name.trim().is_empty()
+}
+
+const VERBATIM_PATH_PREFIX: &str = r"\\?\";
+const VERBATIM_UNC_PATH_PREFIX: &str = r"\\?\UNC\";
+
+#[allow(dead_code)] // consumed by the Windows-side launcher (this target: stub path)
+pub(crate) fn shell_parseable_path(canonical_path: &Path) -> PathBuf {
+    let path_text = canonical_path.as_os_str().to_string_lossy();
+    if let Some(network_path) = path_text.strip_prefix(VERBATIM_UNC_PATH_PREFIX) {
+        return PathBuf::from(format!(r"\\{network_path}"));
+    }
+    if let Some(local_path) = path_text.strip_prefix(VERBATIM_PATH_PREFIX) {
+        return PathBuf::from(local_path);
+    }
+    canonical_path.to_path_buf()
 }
 
 #[cfg(test)]

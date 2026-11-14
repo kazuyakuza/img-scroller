@@ -1,4 +1,5 @@
-use super::{RegisteredProgram, programs_from_handler_names};
+use super::{RegisteredProgram, programs_from_handler_names, shell_parseable_path};
+use std::path::{Path, PathBuf};
 
 fn names_and_indices(programs: &[RegisteredProgram]) -> Vec<(&str, usize)> {
     programs
@@ -70,4 +71,58 @@ fn non_ascii_display_names_are_preserved_verbatim() {
     let handler_names = vec!["写真ビューア".to_string(), "Photos".to_string()];
     let programs = programs_from_handler_names(&handler_names);
     assert_eq!(display_names(&programs), ["写真ビューア", "Photos"]);
+}
+
+#[test]
+fn verbatim_prefixed_local_path_loses_the_prefix() {
+    let canonical_path = Path::new(r"\\?\C:\_kazuya\imgs\Chino_Kafuu__BOOTH_\Chino Kafuu 1.png");
+    assert_eq!(
+        shell_parseable_path(canonical_path),
+        PathBuf::from(r"C:\_kazuya\imgs\Chino_Kafuu__BOOTH_\Chino Kafuu 1.png")
+    );
+}
+
+#[test]
+fn verbatim_unc_path_maps_to_the_network_share_form() {
+    let canonical_path = Path::new(r"\\?\UNC\server\share\folder\f.png");
+    assert_eq!(
+        shell_parseable_path(canonical_path),
+        PathBuf::from(r"\\server\share\folder\f.png")
+    );
+}
+
+#[test]
+fn unprefixed_local_path_passes_through_unchanged() {
+    let canonical_path = Path::new(r"C:\x.png");
+    assert_eq!(
+        shell_parseable_path(canonical_path),
+        PathBuf::from(r"C:\x.png")
+    );
+}
+
+#[test]
+fn plain_unc_path_passes_through_unchanged() {
+    let canonical_path = Path::new(r"\\server\share\f.png");
+    assert_eq!(
+        shell_parseable_path(canonical_path),
+        PathBuf::from(r"\\server\share\f.png")
+    );
+}
+
+#[test]
+fn relative_path_passes_through_unchanged() {
+    let canonical_path = Path::new("photo.png");
+    assert_eq!(
+        shell_parseable_path(canonical_path),
+        PathBuf::from("photo.png")
+    );
+}
+
+#[test]
+fn verbatim_prefix_conversion_preserves_case_and_non_ascii_names() {
+    let canonical_path = Path::new(r"\\?\C:\智乃\Chino Kafuu 1.PNG");
+    assert_eq!(
+        shell_parseable_path(canonical_path),
+        PathBuf::from(r"C:\智乃\Chino Kafuu 1.PNG")
+    );
 }
