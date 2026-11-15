@@ -3,11 +3,13 @@
 # Runs inside the container:
 #   docker compose -f /img-scroller/docker-compose.yml run --rm rust sh scripts/package-windows.sh
 # Consumes the release exes produced by scripts/build-windows.sh plus the tracked
-# config file, and writes ONE zip per architecture into the gitignored dist/
-# tree. Zip layout is FLAT: the exe and the config file sit at the zip root, no
-# subfolders (the user extracts the zip into a destination folder of their
-# choice — that folder is the install folder). Zip artifacts are gitignored and
-# must NEVER be committed; this script never touches git.
+# packaged files (the config file, the default-viewer registration helper and
+# the viewer guidance text), and writes ONE zip per architecture into the
+# gitignored dist/ tree. Zip layout is FLAT: the exe, the config file, the
+# helper script and the guidance file sit at the zip root, no subfolders (the
+# user extracts the zip into a destination folder of their choice — that
+# folder is the install folder). Zip artifacts are gitignored and must NEVER
+# be committed; this script never touches git.
 # Typed failures: every failure line starts with the literal prefix
 # "package-windows: error:" and the script exits 1. A failed run never deletes
 # or modifies a previously installed zip; all transient files live under the
@@ -24,13 +26,15 @@ readonly X86_ARCH="x86"
 
 # The packaging manifest (the single source of packaged content): one line per
 # architecture and packaged file, format "<arch>|<source path>|<zip entry name>".
-# A later task (default-viewer helper/guidance) appends its entries here; no
-# other part of the script changes for that.
 package_manifest_entries() {
   printf '%s\n' "$X64_ARCH|dist/windows-x64/img-scroller.exe|img-scroller.exe"
   printf '%s\n' "$X64_ARCH|packaging/img-scroller.toml|img-scroller.toml"
+  printf '%s\n' "$X64_ARCH|packaging/register-default-viewer.cmd|register-default-viewer.cmd"
+  printf '%s\n' "$X64_ARCH|packaging/DEFAULT-VIEWER-GUIDE.txt|DEFAULT-VIEWER-GUIDE.txt"
   printf '%s\n' "$X86_ARCH|dist/windows-i686/img-scroller.exe|img-scroller.exe"
   printf '%s\n' "$X86_ARCH|packaging/img-scroller.toml|img-scroller.toml"
+  printf '%s\n' "$X86_ARCH|packaging/register-default-viewer.cmd|register-default-viewer.cmd"
+  printf '%s\n' "$X86_ARCH|packaging/DEFAULT-VIEWER-GUIDE.txt|DEFAULT-VIEWER-GUIDE.txt"
 }
 
 report_failure() {

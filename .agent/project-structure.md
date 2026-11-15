@@ -29,10 +29,10 @@
 - .agent/ - agent context: project-info/, todos/, rules/workflow indexes and the structure map
 - .kilo/ - Kilo Code integration: agents/, rules/, commands/ and plans/
 - .opencode/ - opencode integration: agents/, commands/ and opencode.json
-- packaging/ - distribution-shipped artifacts: img-scroller.toml (the application config file, TOML-style, header comments only in v1 — the v1 binary does not read it; the Wave-7 packaging step copies it verbatim next to the exe)
+- packaging/ - distribution-shipped artifacts: img-scroller.toml (the application config file, TOML-style, header comments only in v1 — the v1 binary does not read it), register-default-viewer.cmd (the default-viewer registration helper — a Windows batch script that registers the app HKCU-only: the ProgID, per-extension OpenWithProgids, Capabilities FileAssociations and RegisteredApplications entries for the 17 whitelisted extensions, then opens the Settings Default apps page; --unregister removes exactly those entries) and DEFAULT-VIEWER-GUIDE.txt (the packaged user guidance for the helper); the Wave-7 packaging step copies all three verbatim next to the exe
 - docs/ - Documentation files
 - scripts/ - container harness scripts: dev-checks, Windows x64/x86 release cross-build, and portable zip packaging (POSIX sh)
 
 # Other files (repository root)
 
-- .gitattributes - line-ending policy: `*.sh text eol=lf` forces LF working-tree checkouts for the shell scripts (added after a CRLF Windows checkout broke the container dev-checks)
+- .gitattributes - line-ending policy: `*.sh text eol=lf` (shell scripts, after a CRLF Windows checkout broke the container dev-checks), `packaging/*.toml text eol=lf` (config file), `packaging/*.txt text eol=lf` (guidance text) and `packaging/*.cmd text eol=crlf` (the batch helper — checked out CRLF so the packaged copy reaches the user with CRLF)

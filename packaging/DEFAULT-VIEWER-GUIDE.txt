@@ -1,0 +1,69 @@
+IMAGES SCROLLER - DEFAULT IMAGE VIEWER REGISTRATION
+===================================================
+
+This folder contains the Images Scroller application plus a small helper
+script that prepares Windows so you can choose Images Scroller as the
+default viewer for your image files.
+
+WHAT THE HELPER DOES
+--------------------
+
+Run "register-default-viewer.cmd" (double-click it) from inside this
+folder. The helper:
+
+1. Registers Images Scroller in YOUR Windows user profile only (HKCU
+   registry keys). It never needs administrator rights and never writes
+   outside your own user profile.
+2. Adds Images Scroller to the "Open with" list of the image file types
+   it supports (right-click an image file, choose "Open with").
+3. Makes Images Scroller visible in Windows Settings under
+   Apps > Default apps.
+4. Opens the Windows Settings "Default apps" page for you.
+
+Windows does not let any program set a default viewer silently - the
+final choice is always made by you in Settings. That is by design in
+Windows 10 and 11, so the helper registers the application and then
+hands you the page where you confirm the choice.
+
+WHAT YOU DO IN SETTINGS
+-----------------------
+
+On the "Default apps" page:
+
+- Windows 11: scroll the app list (or use the search box) for
+  "Images Scroller", click it, and click the button next to each file
+  type you want to open with Images Scroller.
+- Windows 10: click "Set defaults by app" (or "Default apps by file
+  type"), choose "Images Scroller", and set it as the default for each
+  file type you want.
+
+FILE TYPES COVERED
+------------------
+
+The helper registers Images Scroller for these 17 image file types:
+
+  .avif  .bmp  .dib  .gif  .heic  .heif  .ico  .jfif  .jpe  .jpeg
+  .jpg   .jxr  .png  .tif  .tiff  .webp  .wdp
+
+Whether a given file type can actually be decoded depends on the image
+codecs installed in your Windows system (Windows Imaging Component) -
+the same constraint the application itself has.
+
+NOTES
+-----
+
+- The helper is safe to run again at any time: it writes the same
+  registration values again. If you MOVE this folder somewhere else,
+  run the helper once more so the registration points at the new
+  location.
+- To undo the registration, run the helper with the --unregister
+  option: open a command prompt in this folder and run
+
+      register-default-viewer.cmd --unregister
+
+  It removes only the registry entries Images Scroller created for this
+  user; it never deletes your files, your configuration, or another
+  program's registration. If Images Scroller is currently the default
+  for a file type, change that file type's default in Settings first -
+  Windows keeps the final say on defaults.
+- No administrator rights are needed for registering or unregistering.
