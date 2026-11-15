@@ -16,7 +16,7 @@ It is **NOT** a Linux release-build guide: the project ships **no Linux artifact
 
 Builds the pinned Rust image (`img-scroller-rust:latest`) that contains: rustfmt, clippy, the
 MinGW-w64 x86-64 GNU cross toolchain (linker + `x86_64-w64-mingw32-objdump` for the Windows import
-audit), and the `x86_64-pc-windows-gnu` target. Rebuild only after a Dockerfile change; toolchain
+audit), and the `x86_64-pc-windows-gnu` target. Since Wave 7 the image also contains the MinGW-w64 i686 cross toolchain (linker + `i686-w64-mingw32-objdump`), the `i686-pc-windows-gnu` target, and the `zip`/`unzip` packaging tooling. Rebuild only after a Dockerfile change; toolchain
 upgrades are plan-gated.
 
 ## Running the dev-check harness
