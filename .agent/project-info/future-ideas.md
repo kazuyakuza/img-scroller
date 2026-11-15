@@ -77,6 +77,17 @@ Behavior as given by the user (2026-11-12):
 
 **Open details (PENDING user details):** none supplied — the user asked to record the idea only. This record is a commit point only and changes no wave's scope.
 
+## Idea 8 — Close the app after a successful "Open with..." launch (optional via a future settings checkbox)
+
+**Status:** Parked idea — NOT scheduled into any wave (Wave 6.2 fix-wave scope at `.agent/todos/20261113/20261113-todo-2-DONE.md` is unaffected; the "Open with..." feature is confirmed WORKING on the 0.6.2 exe). Date recorded: 2026-11-13, reporter: user. Recorded per the user's explicit instruction ("register this, without following the critical workflow").
+
+Behavior as given by the user (2026-11-13):
+
+- When an "Open with..." selection successfully opens the current file in the chosen program, the application CLOSES itself.
+- The user suggests implementing this later, TOGETHER with the future config/settings place: a CHECKBOX in the (future) configuration to enable/disable this close-after-launch behavior.
+
+**Open details (PENDING user details):** the exact close semantics (immediate close vs a short delay; what happens if the launched program fails to start — presumably stay open; interaction with the session last-viewed memory on close) and the settings-UI placement are OPEN and NOT decided here. This record is a commit point only and changes no wave's scope.
+
 ## Recording rule
 
 An idea enters scope only when the user schedules it into a future TODO wave via the Critical Workflow ([`../../.kilo/commands/critical-workflow.md`](../../.kilo/commands/critical-workflow.md)). Until then it stays parked in this file and has no effect on the requirements source of truth ([brief.md](brief.md)).
