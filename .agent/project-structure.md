@@ -29,6 +29,7 @@
 - .agent/ - agent context: project-info/, todos/, rules/workflow indexes and the structure map
 - .kilo/ - Kilo Code integration: agents/, rules/, commands/ and plans/
 - .opencode/ - opencode integration: agents/, commands/ and opencode.json
+- packaging/ - distribution-shipped artifacts: img-scroller.toml (the application config file, TOML-style, header comments only in v1 — the v1 binary does not read it; the Wave-7 packaging step copies it verbatim next to the exe)
 - docs/ - Documentation files
 - scripts/ - container harness scripts: dev-checks and Windows x64 cross-build (POSIX sh)
 

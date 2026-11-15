@@ -1,0 +1,11 @@
+# Images Scroller - application configuration file.
+#
+# This file is installed next to the Images Scroller executable and is
+# the application's settings location. Settings arrive in a future
+# version; the current version does not read this file, so changes made
+# here have no effect yet.
+#
+# Future setting keys will be documented here when they are introduced.
+#
+# Note: the per-folder last-viewed image memory is session-only (kept in
+# RAM) and is intentionally never stored in this file.
