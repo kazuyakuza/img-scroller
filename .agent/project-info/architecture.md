@@ -110,7 +110,7 @@ Landed in Wave 1 (Task 1) and exercised in Task 5: dev checks ended `ALL CHECKS 
 ## Project Paths
 
 - All source code must live in `src/` (project structure rule; folder map: [`.agent/project-structure.md`](../project-structure.md)).
-- Cargo project at the repository root: `Cargo.toml` (package `img-scroller` 0.6.1, edition 2024) plus the tracked `Cargo.lock` — exists since Wave 1.
+- Cargo project at the repository root: `Cargo.toml` (package `img-scroller` 0.6.2, edition 2024) plus the tracked `Cargo.lock` — exists since Wave 1.
 - Repository layout: application code in `src/` (the `app` shell with its `arrow_direction`/`button_hint`/`central_surface`/`empty_folder_view`/`empty_state_view`/`fit_button`/`floating_controls`/`folder_navigation`/`fullscreen`/`fullscreen_button`/`keyboard_intake`/`open_with_button`/`pan`/`pill_style`/`zoom`/`zoom_alias`/`zoom_button` child modules, `app_display`, `folder_listing` (+ `folder_listing/tests` + `folder_listing/collation_tests`), `last_viewed_images`, `name_collation`, `open_with_listing` (+ `open_with_listing/tests`), `pan` (+ `pan/pan_tests`), `sibling_folder_listing` (+ its `tests`/`neighbor_tests`/`collation_tests` child modules), `image_loading`, `scaling` (+ `scaling/fit_factor_tests`), `zoom`, plus the `platform/` facade incl. `windows_open_with`), harness in `Dockerfile`/`docker-compose.yml`/`scripts/`, guides in `docs/`, agent scaffolding in `.agent/`/`.kilo/`/`.opencode/`.
 - Module layout: decided and implemented — see `## Module Layout (Implemented)`.
 
