@@ -4,9 +4,14 @@
 - Branch: `fix/wave-6-2-open-with-launch`. HEAD at verification start: `0378d6b`; plan commit `9c8db64`.
 - Version: 0.6.2. Harness: Alpine VM `alpine-vm` MCP; `vm_status` called immediately before every VM command; exit codes authoritative.
 
-## VERDICT: STOPPED — two pinned Step-5 sweep expectations missed (S3, S5); no fix attempted (STOP-only per plan §1 item 3)
+## VERDICT: VERIFIED — S3 and S5 adjudicated as explained deltas (Planner, 2026-11-13), not working-tree drift
 
-All actionable verification work (Steps 0–4, 6) passed. Two READ-ONLY sweep pins in Step 5 did not match the plan's pinned expectation. Both deltas are pinned-expectation inaccuracies (no working-tree drift): S3 is a documentation-only module-doc-comment expansion landed by the wave's own `e8c3f0b` commit; S5 is the expected `Cargo.lock` version-line change landed by the wave's own `a048567` version bump, which the plan's "exactly 6 paths" pin omitted from the diff scope. Exact deltas are recorded below for the caller's decision.
+All actionable verification work (Steps 0–4, 6) passed. Two READ-ONLY sweep pins in Step 5 did not match the plan's pinned expectation; both were adjudicated by the Planner on 2026-11-13 as explained deltas, not working-tree drift:
+
+- **S3 — ACCEPTED:** the `src/platform/launch_log.rs` doc-comment-only change (12→17 `//!` lines) is the Task-1 4.4 module-docs commit `e8c3f0b` (`docs: wave6.2 diagnostic module docs`), landed before the verification plan was written; the pin's expected-empty baseline was stale. Zero executable change; the sweep's intent (no SOURCE drift after `0378d6b`) is satisfied.
+- **S5 — ACCEPTED:** the `Cargo.lock` single-line change (0.6.1→0.6.2) is the wave's own Step-3 version bump `a048567`, inside the `b458897..HEAD` range by construction; the plan's correct formulation (S4: `Cargo.lock` unchanged SINCE `a048567` = EMPTY) already PASSED. The "exactly 6 paths" pin omitted the lock line by wording error.
+
+Overall Task-3 verification verdict: **VERIFIED**.
 
 ---
 
