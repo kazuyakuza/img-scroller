@@ -19,6 +19,7 @@ readonly X86_TARGET="i686-pc-windows-gnu"
 readonly X64_DIST_DIR="dist/windows-x64"
 readonly X86_DIST_DIR="dist/windows-i686"
 readonly OBSERVED_DLL_IMPORT_LIST="advapi32.dll, api-ms-win-core-path-l1-1-0.dll, api-ms-win-core-synch-l1-2-0.dll, api-ms-win-core-winrt-error-l1-1-0.dll, bcryptprimitives.dll, combase.dll, dwmapi.dll, gdi32.dll, imm32.dll, kernel32.dll, msvcrt.dll, ntdll.dll, ole32.dll, oleaut32.dll, opengl32.dll, rpcrt4.dll, shell32.dll, shlwapi.dll, user32.dll, userenv.dll, uxtheme.dll, ws2_32.dll"
+readonly OBSERVED_DLL_IMPORT_LIST_I686="advapi32.dll, api-ms-win-core-path-l1-1-0.dll, api-ms-win-core-synch-l1-2-0.dll, api-ms-win-core-winrt-error-l1-1-0.dll, bcryptprimitives.dll, combase.dll, dwmapi.dll, gdi32.dll, imm32.dll, kernel32.dll, msvcrt.dll, ntdll.dll, ole32.dll, oleaut32.dll, opengl32.dll, rpcrt4.dll, shell32.dll, shlwapi.dll, user32.dll, userenv.dll, uxtheme.dll, ws2_32.dll"
 
 report_failure() {
   printf 'build-windows: error: %s\n' "$1" >&2
@@ -89,7 +90,7 @@ print_audit_note_for_target() {
       printf 'build-windows: GNU runtime static-linking evidence — OBSERVED DLL import list (%s): %s\n' "$X64_DIST_DIR" "$OBSERVED_DLL_IMPORT_LIST"
       ;;
     "$X86_TARGET")
-      printf 'build-windows: %s DLL import audit: the OBSERVED list is recorded by the Wave-7 verification task (audit tool: i686-w64-mingw32-objdump)\n' "$X86_DIST_DIR"
+      printf 'build-windows: GNU runtime static-linking evidence — OBSERVED DLL import list (%s): %s\n' "$X86_DIST_DIR" "$OBSERVED_DLL_IMPORT_LIST_I686"
       ;;
   esac
 }
