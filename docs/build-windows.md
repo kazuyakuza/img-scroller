@@ -5,6 +5,20 @@ The release `.exe` for Windows x64 AND x86 is cross-compiled **inside the contai
 Wave 7). This page covers both architectures, the portable zip packaging, and the
 NSIS wizard-installer build (Wave 8).
 
+## Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Invocation](#invocation)
+3. [Expected output path](#expected-output-path)
+4. [Overwrite / rebuild behavior](#overwrite--rebuild-behavior)
+5. [Typed failure table](#typed-failure-table)
+6. [Toolchain / target notes](#toolchain--target-notes)
+7. [Static-linking / import audit (retained scope)](#static-linking--import-audit-retained-scope)
+8. [Portable zip packaging](#portable-zip-packaging)
+9. [Windows installer packaging (NSIS)](#windows-installer-packaging-nsis)
+10. [Validation stance](#validation-stance)
+11. [Lockfile policy](#lockfile-policy)
+
 ## Prerequisites
 
 - The container image is built once (includes both MinGW-w64 linkers — x64 and i686 — both windows-gnu targets, `zip`/`unzip` for the packaging, and `nsis` (`makensis`) for the installer build) — see [`build.md`](build.md).

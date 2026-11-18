@@ -10,6 +10,13 @@ Project-info rules for AI agents (full rules: [instructions.md](instructions.md)
 - **On-demand reads**: `architecture.md`, `tech.md`, and `product.md` are read when a task directly impacts them.
 - All project-info rules live in [instructions.md](instructions.md).
 
+## Contents
+
+1. [Current Work Focus](#current-work-focus)
+2. [Recent Changes](#recent-changes)
+3. [Current Project State](#current-project-state)
+4. [Immediate Next Steps](#immediate-next-steps)
+
 ## Current Work Focus
 
 Dated 2026-11-17. **PLANNING SESSION — Wave 8 SCHEDULED (NOT processed): the user's 2026-11-17 nine-point request was encoded as the Wave-8 TODO `.agent/todos/20261117/20261117-todo-1.md` (committed `69a8e85`) — executable wizard installer (destination page + file-association selection page over the 17 supported types + shortcuts + uninstaller; technology/build mechanism deferred to the wave's architector step), GitHub Releases publishing (FINAL task; `gh` auth verified first — STOP-and-ask if agent-side publishing is impossible), README TOC + long-doc indexes, hotkeys verify-then-complete, the window-title path feature (the user's exact algorithm encoded: visible image's path updated on navigation → full path if it fits → else complete name+extension, last-chars if the name is too long → then the containing folder → the drive with `...` between → more parent folders as space allows → not-maximized = name only → fullscreen = a top-center name+extension popup for 3 s on every navigation), verification, docs, releases; version bump expected 1.1.0; branch `feat/wave-8-wizard-installer`.** **The Wave-7 (1.0.0) OPERATOR-RUN gate was CLOSED 2026-11-17 (the user's partial-run report: items 1–5 and 9 PASS; items 6–7 — the cmd-helper registration + the Settings default — consciously DEFERRED to Wave 8 by the user, where the helper script may be replaced by the wizard installer's association page; details in the Recent-Changes entry + the TODO mark). Future-ideas gained **Ideas 9 (in-app About section), 10 (in-app per-type association link/unlink), 11 (GitHub update checker + in-app updater), 12 (screenshot automation — kittest PNG exports + a Windows capture script)** (commit `22b4976`; Ideas 9–11 in `69a8e85`). Point 7 of the request (close the app after a successful "Open with..." launch) stays PARKED as Idea 8 per the user's own conditional (it was already recorded 2026-11-13). NEXT SESSION: process Wave 8 in a NEW chat.

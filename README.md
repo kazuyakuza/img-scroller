@@ -1,6 +1,23 @@
 # Images Scroller
 *The app name is **Images Scroller** (final). The repository directory name `img-scroller` remains unchanged — it is the repository name only, not the app name.*
 
+## Contents
+
+1. [Overview](#overview)
+2. [Problem Statement](#problem-statement)
+3. [v1 Features](#v1-features)
+4. [Technology Stack](#technology-stack)
+5. [Distribution and Installation](#distribution-and-installation)
+   - [Install (the destination folder is your choice)](#install-the-destination-folder-is-your-choice)
+   - [Make Images Scroller the default image viewer (optional)](#make-images-scroller-the-default-image-viewer-optional)
+6. [Project Status](#project-status)
+7. [Build and Run](#build-and-run)
+   - [Container dev checks (no host Rust/Cargo)](#container-dev-checks-no-host-rustcargo)
+   - [Windows release cross-builds (x64 and x86)](#windows-release-cross-builds-x64-and-x86)
+   - [Portable zip packaging](#portable-zip-packaging)
+8. [Note for AI Agents](#note-for-ai-agents)
+9. [License](#license)
+
 ## Overview
 
 Images Scroller is a Windows desktop image viewer built in Rust. It recreates the behavior of the classic Windows "gallery"-era image viewer: open one image and navigate horizontally across the sibling images in the same folder, and vertically across the sibling folders under the same parent folder. Both axes are driven by arrow keys and by on-screen UI buttons. Opening any image — from Explorer, a file manager, or the in-app open dialog — immediately enables this navigation in its location, with no folder pre-registration or setup of any kind.
