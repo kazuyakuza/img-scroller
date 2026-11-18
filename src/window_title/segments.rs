@@ -41,7 +41,7 @@ fn title_display_path(path: &Path) -> String {
 
 fn split_display_path(display: &str) -> Vec<String> {
     display
-        .split(|character| matches!(character, '\\' | '/'))
+        .split(['\\', '/'])
         .filter(|segment| !segment.is_empty())
         .map(str::to_owned)
         .collect()

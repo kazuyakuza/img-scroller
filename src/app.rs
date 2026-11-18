@@ -160,8 +160,8 @@ mod keyboard_intake;
 mod open_with_button;
 mod pan;
 mod pill_style;
-mod zoom;
 mod window_title;
+mod zoom;
 mod zoom_alias;
 mod zoom_button;
 

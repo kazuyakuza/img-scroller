@@ -82,7 +82,9 @@ impl ImagesScrollerApp {
     }
 
     pub(super) fn fullscreen_name_popup_is_visible(&self) -> bool {
-        self.window_title_state.fullscreen_name_popup_expires_at.is_some()
+        self.window_title_state
+            .fullscreen_name_popup_expires_at
+            .is_some()
     }
 
     fn apply_window_title(&mut self, screen_context: &egui::Context, title: String) {
@@ -106,7 +108,8 @@ impl ImagesScrollerApp {
         self.window_title_state.fullscreen_name_popup_expires_at =
             Some(now + FULLSCREEN_NAME_POPUP_VISIBLE_SECONDS);
         screen_context.request_repaint_after(Duration::from_secs_f64(
-            FULLSCREEN_NAME_POPUP_VISIBLE_SECONDS + FULLSCREEN_NAME_POPUP_EXPIRY_WAKE_MARGIN_SECONDS,
+            FULLSCREEN_NAME_POPUP_VISIBLE_SECONDS
+                + FULLSCREEN_NAME_POPUP_EXPIRY_WAKE_MARGIN_SECONDS,
         ));
     }
 
@@ -139,7 +142,7 @@ fn title_recomposition_is_due(path_changed: bool, maximized_changed: bool) -> bo
 
 fn measure_text_width(screen_context: &egui::Context, text: &str) -> f32 {
     screen_context
-        .fonts(|fonts| {
+        .fonts_mut(|fonts| {
             fonts.layout_no_wrap(
                 text.to_owned(),
                 egui::FontId::default(),

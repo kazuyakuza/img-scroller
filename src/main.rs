@@ -14,8 +14,8 @@ mod pan;
 mod platform;
 mod scaling;
 mod sibling_folder_listing;
-mod zoom;
 mod window_title;
+mod zoom;
 
 use std::path::PathBuf;
 
