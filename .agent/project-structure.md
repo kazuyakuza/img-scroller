@@ -29,9 +29,9 @@
 - .agent/ - agent context: project-info/, todos/, rules/workflow indexes and the structure map
 - .kilo/ - Kilo Code integration: agents/, rules/, commands/ and plans/
 - .opencode/ - opencode integration: agents/, commands/ and opencode.json
-- packaging/ - distribution-shipped artifacts: img-scroller.toml (the application config file, TOML-style, header comments only in v1 — the v1 binary does not read it), register-default-viewer.cmd (the default-viewer registration helper — a Windows batch script that registers the app HKCU-only: the ProgID, per-extension OpenWithProgids, Capabilities FileAssociations and RegisteredApplications entries for the 17 whitelisted extensions, then opens the Settings Default apps page; --unregister removes exactly those entries) and DEFAULT-VIEWER-GUIDE.txt (the packaged user guidance for the helper); the Wave-7 packaging step copies all three verbatim next to the exe
+- packaging/ - distribution-shipped artifacts: img-scroller.toml (the application config file, TOML-style, header comments only in v1 — the v1 binary does not read it), register-default-viewer.cmd (the default-viewer registration helper — a Windows batch script that registers the app HKCU-only: the ProgID, per-extension OpenWithProgids, Capabilities FileAssociations and RegisteredApplications entries for the 17 whitelisted extensions, then opens the Settings Default apps page; --unregister removes exactly those entries) and DEFAULT-VIEWER-GUIDE.txt (the packaged user guidance for the helper); the Wave-7 packaging step copies all three verbatim next to the exe; nsis/installer.nsi (the Wave-8 NSIS wizard-installer source: MUI2 destination page + a custom nsDialogs association-selection page over the 17 whitelisted extensions writing the Wave-7 HKCU helper registry surface for the user-selected types only, Start Menu shortcut, uninstaller + HKCU Add/Remove entry; compiled container-side by scripts/build-installer.sh into dist/ImagesScroller-<version>-windows-installer.exe)
 - docs/ - Documentation files
-- scripts/ - container harness scripts: dev-checks, Windows x64/x86 release cross-build, and portable zip packaging (POSIX sh)
+- scripts/ - container harness scripts: dev-checks, Windows x64/x86 release cross-build, portable zip packaging, and the Windows wizard-installer NSIS cross-build (POSIX sh)
 
 # Other files (repository root)
 
