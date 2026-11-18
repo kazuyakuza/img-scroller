@@ -9,6 +9,14 @@ use super::{ImagesScrollerApp, empty_folder_view};
 use crate::app_display::ImagePainting;
 
 impl ImagesScrollerApp {
+    /// Pill layout: the floating pill plus the central surface -- the image paint when one is open, else the empty-folder message.
+    pub(super) fn show_navigation_layout(&mut self, ui: &mut egui::Ui) {
+        super::floating_controls::show_floating_pill(self, ui);
+        egui::CentralPanel::default().show(ui, |central_ui| {
+            self.show_navigation_central_surface(central_ui);
+        });
+    }
+
     /// The chrome navigation surface: the image paint when open, otherwise the
     /// centered empty-folder message.
     pub(super) fn show_navigation_central_surface(&mut self, central_ui: &mut egui::Ui) {

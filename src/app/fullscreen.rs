@@ -3,10 +3,13 @@
 //! fullscreen-only central surface. OFF restores all controls, image central.
 //! Wave-4.1 Task 3 addition: fullscreen exits via F11 OR ESC; nothing else changes.
 //! Wave-4.2 Task 4 addition: every toggle disarms the ESC-close popup.
+//! Wave-8 Task 4 addition: toggling fullscreen OFF disarms the top-center name
+//! popup, which renders only in the fullscreen layout.
 
 use eframe::egui;
 
 use super::ImagesScrollerApp;
+use super::window_title;
 
 /// F11: the de-facto Windows fullscreen toggle (spec §7 user-approved choice;
 /// one of the two ON exits -- F11 toggles both ways and ESC exits ON, since
@@ -29,6 +32,9 @@ impl ImagesScrollerApp {
     pub(super) fn toggle_fullscreen_and_send_command(&mut self, screen_context: &egui::Context) {
         let fullscreen_after_toggle = self.toggle_fullscreen();
         self.disarm_esc_close_popup();
+        if !self.fullscreen_on {
+            self.disarm_fullscreen_name_popup();
+        }
         screen_context
             .send_viewport_cmd(egui::ViewportCommand::Fullscreen(fullscreen_after_toggle));
     }
@@ -47,6 +53,7 @@ impl ImagesScrollerApp {
         egui::CentralPanel::default().show(ui, |central_ui| {
             self.show_central_image_while_open(central_ui);
         });
+        window_title::show_fullscreen_name_popup(self, ui.ctx());
     }
 
     /// Pure flip seam: exactly one flag inversion per trigger, the post-toggle

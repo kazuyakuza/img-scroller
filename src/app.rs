@@ -40,6 +40,8 @@ pub struct ImagesScrollerApp {
     /// Open-with display list for the current file (Wave-6 Task 3); refreshed on every
     /// successful open and on the popup-opening click.
     open_with_programs: Vec<RegisteredProgram>,
+    /// Session window-title + fullscreen-name-popup state (managed by the `window_title` child module).
+    window_title_state: window_title::WindowTitleState,
 }
 
 use folder_navigation::NavigationDirection;
@@ -64,6 +66,7 @@ impl ImagesScrollerApp {
             esc_close_popup_expires_at: None,
             pan_offset: egui::Vec2::ZERO,
             open_with_programs: Vec::new(),
+            window_title_state: window_title::WindowTitleState::initial(),
         }
     }
 
@@ -112,14 +115,6 @@ impl ImagesScrollerApp {
         self.opened_image_path.is_some()
     }
 
-    /// Pill layout: the floating pill plus the central surface -- the image paint when one is open, else the empty-folder message.
-    fn show_navigation_layout(&mut self, ui: &mut egui::Ui) {
-        floating_controls::show_floating_pill(self, ui);
-        egui::CentralPanel::default().show(ui, |central_ui| {
-            self.show_navigation_central_surface(central_ui);
-        });
-    }
-
     /// Frame layout dispatch: fullscreen ON runs ONLY the central surface; OFF
     /// runs the standard chrome layouts (pill + central surface, or the centered
     /// Open button in the fresh empty state).
@@ -145,6 +140,7 @@ impl ImagesScrollerApp {
 impl eframe::App for ImagesScrollerApp {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         self.read_and_dispatch_keystrokes(ui.ctx());
+        self.update_window_title_and_popups(ui.ctx());
         self.show_chrome_or_fullscreen_layout(frame, ui);
     }
 }
@@ -165,6 +161,7 @@ mod open_with_button;
 mod pan;
 mod pill_style;
 mod zoom;
+mod window_title;
 mod zoom_alias;
 mod zoom_button;
 
