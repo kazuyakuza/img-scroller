@@ -1,3 +1,9 @@
+; Images Scroller Windows wizard installer (NSIS 3, MUI2 pages + nsDialogs association page).
+; Compiled container-side by scripts/build-installer.sh, which injects every define used below.
+; Artifact: dist/ImagesScroller-<version>-windows-installer.exe.
+; Page order: Welcome, destination Directory, association selection, install, finish.
+; Registry scope: per-user HKCU only (the Wave-7 helper surface); UserChoice is NEVER written.
+
 OutFile "${INSTALLER_OUTFILE}"
 Name "Images Scroller ${PRODUCT_VERSION}"
 InstallDir "$LOCALAPPDATA\Programs\Images Scroller"
