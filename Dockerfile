@@ -13,7 +13,8 @@ RUN rustup component add rustfmt clippy
 # i686-w64-mingw32-gcc is the linker backend for i686-pc-windows-gnu;
 # i686-w64-mingw32-objdump backs the x86 artifact's import audit.
 # zip + unzip back the Wave-7 portable packaging script and its zip listing checks.
-RUN apt-get update && apt-get install -y --no-install-recommends gcc-mingw-w64-x86-64 gcc-mingw-w64-i686 zip unzip && rm -rf /var/lib/apt/lists/*
+# nsis (makensis) cross-builds the Windows wizard installer from Linux (Wave 8).
+RUN apt-get update && apt-get install -y --no-install-recommends gcc-mingw-w64-x86-64 gcc-mingw-w64-i686 zip unzip nsis && rm -rf /var/lib/apt/lists/*
 
 # Windows x64 cross-compilation target on the same default toolchain.
 RUN rustup target add x86_64-pc-windows-gnu

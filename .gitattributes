@@ -2,3 +2,4 @@
 packaging/*.toml text eol=lf
 packaging/*.txt text eol=lf
 packaging/*.cmd text eol=crlf
+packaging/nsis/*.nsi text eol=lf
