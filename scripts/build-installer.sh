@@ -25,6 +25,11 @@ report_failure() {
   exit 1
 }
 
+discard_part_and_fail() {
+  rm -f "$out_part"
+  report_failure "$1"
+}
+
 assert_current_directory() {
   if [ "$(pwd)" != "$PROJECT_DIR" ]; then
     report_failure "wrong working directory: $(pwd); expected: $PROJECT_DIR (run through docker compose)"
@@ -59,21 +64,18 @@ compile_installer() {
   version4="${package_version}.0"
   out_part="dist/ImagesScroller-${package_version}-windows-installer.exe.part"
   out_final="dist/ImagesScroller-${package_version}-windows-installer.exe"
-  makensis -V2 -DPRODUCT_VERSION="${package_version}" -DPRODUCT_VERSION_4="${version4}" -DINSTALLER_OUTFILE="/img-scroller/${out_part}" -DEXE_PAYLOAD="/img-scroller/${X64_PAYLOAD}" -DCONFIG_PAYLOAD="/img-scroller/${CONFIG_PAYLOAD}" -DLICENSE_PAYLOAD="/img-scroller/${LICENSE_PAYLOAD}" "$INSTALLER_SOURCE"
+  makensis -V2 -DPRODUCT_VERSION="${package_version}" -DPRODUCT_VERSION_4="${version4}" -DINSTALLER_OUTFILE="${PROJECT_DIR}/${out_part}" -DEXE_PAYLOAD="${PROJECT_DIR}/${X64_PAYLOAD}" -DCONFIG_PAYLOAD="${PROJECT_DIR}/${CONFIG_PAYLOAD}" -DLICENSE_PAYLOAD="${PROJECT_DIR}/${LICENSE_PAYLOAD}" "$INSTALLER_SOURCE"
   makensis_status=$?
   if [ "$makensis_status" -ne 0 ]; then
-    rm -f "$out_part"
-    report_failure "makensis compile failed (exit $makensis_status); see the makensis diagnostics above"
+    discard_part_and_fail "makensis compile failed (exit $makensis_status); see the makensis diagnostics above"
   fi
   if [ ! -s "$out_part" ]; then
-    rm -f "$out_part"
-    report_failure "installer artifact missing or empty after compile: $out_part"
+    discard_part_and_fail "installer artifact missing or empty after compile: $out_part"
   fi
   mv "$out_part" "$out_final"
   move_status=$?
   if [ "$move_status" -ne 0 ]; then
-    rm -f "$out_part"
-    report_failure "install of installer artifact failed: $out_part -> $out_final"
+    discard_part_and_fail "install of installer artifact failed: $out_part -> $out_final"
   fi
   printf 'build-installer: artifact: %s\n' "$out_final"
 }

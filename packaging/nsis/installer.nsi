@@ -55,7 +55,7 @@ VIAddVersionKey "ProductVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKCU "${APP_KEY}\Capabilities" "ApplicationName" "${REG_APP_NAME}"
   WriteRegStr HKCU "${APP_KEY}\Capabilities" "ApplicationIcon" '"$INSTDIR\img-scroller.exe",0'
   WriteRegStr HKCU "${APP_KEY}\Capabilities" "ApplicationDescription" "Classic gallery-style image viewer: open one image and scroll through the sibling images and sibling folders with the arrow keys."
-  WriteRegStr HKCU "Software\RegisteredApplications" "${REG_APP_NAME}" "Software\Images Scroller\Capabilities"
+  WriteRegStr HKCU "Software\RegisteredApplications" "${REG_APP_NAME}" "${APP_KEY}\Capabilities"
 !macroend
 
 Var Dialog
