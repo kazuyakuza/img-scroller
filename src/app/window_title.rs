@@ -4,6 +4,15 @@
 //! measure closure, sends `ViewportCommand::Title` ONLY when the computed
 //! string changed, and arms/expires the 3-second top-center fullscreen name
 //! popup (the `esc_close_confirm` wake precedent).
+//!
+//! Popup text (D10 as superseded): while fullscreen is ON the popup RE-ARMS on
+//! every navigation and always shows the CURRENTLY visible image's name+ext --
+//! `arm_fullscreen_name_popup` rewrites the cached text and resets the 3-s
+//! deadline -- matching the TODO's "on every visible-image change" rule; the
+//! plan's "stable for the full 3 s" clause was adjudicated superseded by the
+//! Planner. Mechanism prose is owned by Task 6 docs; see
+//! `.kilo/plans/20261118-wave8-task4-window-title-frontend-spec.md` and the
+//! matching implementation plan.
 
 use std::path::PathBuf;
 use std::time::Duration;

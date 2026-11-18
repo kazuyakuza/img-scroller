@@ -1,3 +1,8 @@
+//! Wave-8 Task-4 title-composition matrix: the not-maximized name rule, the
+//! maximized full-path / containing-folder + drive-`...` + parent-walk-up chain,
+//! verbatim & UNC path handling, and the pinned constants -- all driven through
+//! an injected fixed-width measure closure so the logic stays container-testable.
+
 use std::path::Path;
 
 use super::{

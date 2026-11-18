@@ -16,6 +16,8 @@ pub(super) struct PathSegments {
     pub(super) file_name: String,
 }
 
+/// Partition the shell-parseable display path into its drive / folder-chain /
+/// file-name roles; an empty path yields `None` drive, no folders, `...` name.
 pub(super) fn path_segments(path: &Path) -> PathSegments {
     let display_path = title_display_path(path);
     let mut segments = split_display_path(&display_path);

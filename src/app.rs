@@ -140,6 +140,8 @@ impl ImagesScrollerApp {
 impl eframe::App for ImagesScrollerApp {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         self.read_and_dispatch_keystrokes(ui.ctx());
+        // Recompose AFTER keystrokes so this frame's navigation path is already
+        // stored, and BEFORE layout so a changed title sends its command this frame.
         self.update_window_title_and_popups(ui.ctx());
         self.show_chrome_or_fullscreen_layout(frame, ui);
     }

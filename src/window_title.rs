@@ -26,6 +26,12 @@ pub(crate) struct TitleComposition<'m> {
     pub(crate) measure: &'m mut dyn FnMut(&str) -> f32,
 }
 
+/// Compose the title by the Task-4 priority ladder. Maximized: the whole full
+/// path if it fits, else the name+ext (last-chars-truncated to fit) grown by
+/// FIRST the containing folder, SECOND the drive with a `...` gap between the
+/// drive and the visible folders, then parent folders walked up while each still
+/// fits. Not-maximized: the name+ext alone. Width is measured through the
+/// injected `measure` closure; `path == None` yields the base app title.
 pub(crate) fn compose_window_title(request: TitleComposition<'_>) -> String {
     let Some(path) = request.path else {
         return APP_WINDOW_TITLE.to_owned();
@@ -56,6 +62,8 @@ pub(crate) fn compose_window_title(request: TitleComposition<'_>) -> String {
     composer.candidate()
 }
 
+/// The name+extension form (the last path segment) -- the single source shared
+/// by the title composition, the not-maximized rule, and the fullscreen popup.
 pub(crate) fn file_name_with_extension(path: &Path) -> String {
     path_segments(path).file_name
 }
