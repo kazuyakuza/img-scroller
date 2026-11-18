@@ -88,6 +88,40 @@ Behavior as given by the user (2026-11-13):
 
 **Open details (PENDING user details):** the exact close semantics (immediate close vs a short delay; what happens if the launched program fails to start — presumably stay open; interaction with the session last-viewed memory on close) and the settings-UI placement are OPEN and NOT decided here. This record is a commit point only and changes no wave's scope.
 
+## Idea 9 — In-app "About" section
+
+**Status:** Parked idea — NOT scheduled into any wave (the Wave-8 scope at `.agent/todos/20261117/20261117-todo-1.md` is unaffected). Date recorded: 2026-11-17, reporter: user.
+
+Behavior as given by the user (2026-11-17):
+
+- Somewhere in the app, include an "About" section that shows things like the GitHub repository URL, the application version number, the author, etc.
+
+**Open details (PENDING user details):** the exact placement (menu entry, pill button, dialog), the exact content fields, and the styling are OPEN and NOT decided here. This record is a commit point only and changes no wave's scope.
+
+## Idea 10 — In-app per-type association link/unlink
+
+**Status:** Parked idea — NOT scheduled into any wave (the Wave-8 scope at `.agent/todos/20261117/20261117-todo-1.md` is unaffected). Date recorded: 2026-11-17, reporter: user. Related binding facts: the Wave-7 helper registry mechanism (`packaging/register-default-viewer.cmd` — HKCU-only, OpenWithProgids + Capabilities/RegisteredApplications, never writes the hash-protected `UserChoice`) and the Wave-8 installer's association-selection page are the installed-side counterparts; the in-app version would be the runtime-side one.
+
+Behavior as given by the user (2026-11-17):
+
+- The app should include an option where the user can LINK/UNLINK image file types to the app — i.e. set or unset `img-scroller.exe` as the default app for that file type. The user chooses types while installing the app (the Wave-8 installer's association page), then can change them later in a section of the app.
+
+**Open details (PENDING user details):** the UI placement, the exact mechanism (whether it reuses the Wave-7 helper registry surface at runtime), and the Windows constraint handling (the per-type DEFAULT is user-mediated in Settings on Windows 10/11 — the hash-protected `UserChoice` key must not be written programmatically; the in-app option would register/unregister the app into the choice lists and open Settings for the final choice) are OPEN and NOT decided here. This record is a commit point only and changes no wave's scope.
+
+## Idea 11 — GitHub update checker + in-app updater
+
+**Status:** Parked idea — NOT scheduled into any wave (the Wave-8 scope at `.agent/todos/20261117/20261117-todo-1.md` is unaffected; the Wave-8 Task-7 GitHub Releases publishing is the release side this idea would consume). Date recorded: 2026-11-17, reporter: user.
+
+Behavior as given by the user (2026-11-17):
+
+- Every time the app opens, it verifies whether a new release exists on GitHub.
+- If a new release exists, show a pop-up asking to update or not.
+- If the user chooses update, download the new release installer in the background.
+- When the download finishes, a new pop-up asks "update now or later".
+- If the user chooses "now", the application closes and the downloaded installer executes.
+
+**Open details (PENDING user details):** the release-check mechanism (GitHub API endpoint/queries), the network-failure and offline behavior, the privacy consideration (a network call on every launch), the per-architecture installer URL resolution, and any authenticity/safety checks on the downloaded installer are OPEN and NOT decided here. This record is a commit point only and changes no wave's scope.
+
 ## Recording rule
 
 An idea enters scope only when the user schedules it into a future TODO wave via the Critical Workflow ([`../../.kilo/commands/critical-workflow.md`](../../.kilo/commands/critical-workflow.md)). Until then it stays parked in this file and has no effect on the requirements source of truth ([brief.md](brief.md)).
