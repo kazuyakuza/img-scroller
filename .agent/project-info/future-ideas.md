@@ -122,6 +122,18 @@ Behavior as given by the user (2026-11-17):
 
 **Open details (PENDING user details):** the release-check mechanism (GitHub API endpoint/queries), the network-failure and offline behavior, the privacy consideration (a network call on every launch), the per-architecture installer URL resolution, and any authenticity/safety checks on the downloaded installer are OPEN and NOT decided here. This record is a commit point only and changes no wave's scope.
 
+## Idea 12 — Screenshot automation
+
+**Status:** Parked idea — NOT scheduled into any wave (the Wave-8 scope at `.agent/todos/20261117/20261117-todo-1.md` is unaffected). Date recorded: 2026-11-17, reporter: user (originating from the user's 2026-11-17 chat question "is there a way to automatize screenshots of the app?"; the Planner's answer was recorded and the user chose to park it).
+
+The two viable paths recorded by the Planner (2026-11-17):
+
+- **Agent-side (fully automatable in the container):** egui's official `kittest` snapshot-testing harness renders the real egui UI offscreen (software renderer) inside `cargo test` and can save PNG screenshots of UI states (the pill, the open-with menu, the empty state, the zoomed paint) — automatable inside the existing dev-checks container, no operator needed. Limit: it captures the app's widget surface, NOT the OS window frame (no title bar / maximize chrome).
+- **Real-window screenshots (operator-assisted but scriptable):** a small PowerShell capture script on the real Windows machine (System.Drawing `PrintWindow`/`CopyFromScreen` bound to the "Images Scroller" window by title), optionally with a dev-only CLI flag that drives the app into deterministic states (fullscreen, zoomed, menu open) so captures are reproducible.
+- (Considered, not recommended: in-app GL frame readback — eframe/glow has no built-in screenshot API; reading back the GL framebuffer is nontrivial.)
+
+**Open details (PENDING user details):** the goal (README/docs screenshots, test snapshots, or both), which UI states, where the PNGs land (committed vs gitignored), and whether a dev-only CLI state flag is acceptable are OPEN and NOT decided here. This record is a commit point only and changes no wave's scope.
+
 ## Recording rule
 
 An idea enters scope only when the user schedules it into a future TODO wave via the Critical Workflow ([`../../.kilo/commands/critical-workflow.md`](../../.kilo/commands/critical-workflow.md)). Until then it stays parked in this file and has no effect on the requirements source of truth ([brief.md](brief.md)).
