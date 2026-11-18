@@ -135,6 +135,12 @@ The 2026-11-12 operator chat corrections supersede any contradicting sentence of
 
 8. **Navigation order follows the system name order** (refines `## Sorting Order`'s alphanumeric rule for non-ASCII names; the exact mechanism was decided in the Wave-5.1 architector step): BOTH navigation axes (sibling images in a folder; sibling folders under the same parent) order entry names by the names' expected Unicode/system order — the order the Windows system (e.g. the file manager) shows for those names, including non-ASCII/Japanese names; the first-image rule and the last-viewed revisit priority read from the same order.
 
+## Addendum — Operator Additions (2026-11-17, BINDING)
+
+The 2026-11-17 operator chat additions supersede any contradicting sentence of this brief wherever it appears; everything not contradicted below stays byte-identical. Source: [`.agent/todos/20261117/20261117-todo-1.md`](../todos/20261117/20261117-todo-1.md) (Wave 8).
+
+9. **Distribution model gains the executable wizard installer** (supersedes/extends `## Distribution and Default App Registration`'s zip-style model; the exact mechanism was decided in the Wave-8 architector step; source: the user's 2026-11-17 request): the primary distribution artifact is an executable **wizard installer** — the user picks the install destination folder in the wizard, and a file-association selection page lets the user choose WHICH supported image types the app is offered for (e.g. only `.png`; none preselected); the installer registers only the user-selected types for the user's Windows account (the Wave-7 HKCU helper registry surface) and NEVER writes the hash-protected `UserChoice` key — the final per-type default stays user-mediated in Windows Settings, which the installer may open for confirmation; an uninstaller removes what the install created. The releases are published in the GitHub **Releases** section of the project. The target platform stays Windows 10/11 (the installer embeds the x64 build; the zip model stays retained as the portable alternative, including the x86 zip).
+
 <!-- DO NOT DELETE NEXT SECTION -->
 
 ## Important Note for AI Agents

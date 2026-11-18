@@ -104,7 +104,7 @@ Produces ONE flat zip per architecture from the built exes plus the tracked `pac
     dist/ImagesScroller-<version>-windows-x64.zip
     dist/ImagesScroller-<version>-windows-x86.zip
 
-- The version is read dynamically from `Cargo.toml` (at execution: 1.0.0).
+- The version is read dynamically from `Cargo.toml` (at execution: 1.1.0).
 - FLAT layout: each zip contains EXACTLY 4 entries at its root — `img-scroller.exe`,
   `img-scroller.toml`, `register-default-viewer.cmd`, `DEFAULT-VIEWER-GUIDE.txt` — no subfolders,
   no directory entries.

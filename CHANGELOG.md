@@ -19,6 +19,20 @@ This project uses Semantic Versioning (SemVer).
 
 ### Security
 
+## [1.1.0] - 2026-11-18
+
+### Added
+
+- Installs Images Scroller with an executable Windows wizard installer (ImagesScroller-1.1.0-windows-installer.exe, published in the GitHub Releases section): the wizard asks for the destination folder — defaulting to your per-user Programs folder under `%LOCALAPPDATA%` — installs the executable, the config file, and the license, and creates a Start Menu shortcut, all without administrator rights because everything installs for your Windows account only.
+- Lets you choose which image file types to offer Images Scroller for on a dedicated file-association wizard page — one checkbox for each of the 17 supported types, none preselected — registering only the types you pick for your Windows account (the "Open with" lists and the Windows Settings "Default apps" visibility, which opens automatically after the install when at least one type was selected); Windows itself always makes the final per-type default choice, and the installer never writes it for you.
+- Ships an uninstaller (reachable from Windows' "Installed apps" / Add-or-remove-programs list) that removes the installed files, the Start Menu shortcut, and exactly the associations the install created.
+- Shows the path of the currently visible image in the window title, updated on every navigation: the full path when it fits, otherwise the file name with its extension (its last characters only when the name itself is too long) grown by the containing folder, then the drive — with `...` between the drive and the visible folder chain — and more parent folders while space allows; while the window is not maximized the title shows only the file name, and while fullscreen is on a popup at the top center shows the visible image's name for 3 seconds on every image change.
+- Publishes the releases in the GitHub Releases section: this 1.1.0 release carries the wizard installer for 64-bit Windows plus the portable zip packages for 64-bit and 32-bit Windows.
+
+### Changed
+
+- Keeps the portable zip packages alongside the wizard installer: each zip still contains exactly the four flat files (the executable, the config file, the register-default-viewer.cmd helper, and DEFAULT-VIEWER-GUIDE.txt), and the 32-bit zip remains the only distribution for 32-bit Windows (the installer embeds the 64-bit executable only).
+
 ## [1.0.0] - 2026-11-15
 
 ### Added
