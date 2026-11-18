@@ -54,8 +54,7 @@ impl ImagesScrollerApp {
             .input(|input_state| input_state.viewport().outer_rect.map(|rect| rect.width()));
         let is_maximized = maximized_flag.unwrap_or(false);
         let now = screen_context.input(|input_state| input_state.time);
-        self.expire_fullscreen_name_popup_if_due(now);
-        self.request_fullscreen_name_popup_wake(screen_context, now);
+        self.refresh_fullscreen_name_popup_expiry(screen_context, now);
         let path_changed = self.window_title_state.last_title_image_path.as_ref()
             != self.opened_image_path.as_ref();
         let maximized_changed = self.window_title_state.last_maximized_state != Some(is_maximized);
@@ -113,25 +112,16 @@ impl ImagesScrollerApp {
         ));
     }
 
-    fn expire_fullscreen_name_popup_if_due(&mut self, now: f64) {
+    fn refresh_fullscreen_name_popup_expiry(&mut self, screen_context: &egui::Context, now: f64) {
         let Some(deadline) = self.window_title_state.fullscreen_name_popup_expires_at else {
             return;
         };
         if now >= deadline {
             self.window_title_state.fullscreen_name_popup_expires_at = None;
-        }
-    }
-
-    fn request_fullscreen_name_popup_wake(&self, screen_context: &egui::Context, now: f64) {
-        let Some(deadline) = self.window_title_state.fullscreen_name_popup_expires_at else {
-            return;
-        };
-        let remaining_seconds = deadline - now;
-        if remaining_seconds <= 0.0 {
             return;
         }
         screen_context.request_repaint_after(Duration::from_secs_f64(
-            remaining_seconds + FULLSCREEN_NAME_POPUP_EXPIRY_WAKE_MARGIN_SECONDS,
+            deadline - now + FULLSCREEN_NAME_POPUP_EXPIRY_WAKE_MARGIN_SECONDS,
         ));
     }
 }

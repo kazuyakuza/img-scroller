@@ -30,21 +30,15 @@ pub(crate) fn compose_window_title(request: TitleComposition<'_>) -> String {
     let Some(path) = request.path else {
         return APP_WINDOW_TITLE.to_owned();
     };
-    let TitleComposition {
-        available_width,
-        is_maximized,
-        measure,
-        ..
-    } = request;
     let segments = path_segments(path);
     let mut fitter = WidthFitter {
-        max_width: available_width,
-        measure,
+        max_width: request.available_width,
+        measure: request.measure,
     };
-    let mut composer = ChainComposer::new(&segments, &mut fitter);
-    if !is_maximized {
-        return composer.fitter.fit_or_truncate_last(&segments.file_name);
+    if !request.is_maximized {
+        return fitter.fit_or_truncate_last(&segments.file_name);
     }
+    let mut composer = ChainComposer::new(&segments, &mut fitter);
     let full_chain = composer.full_chain();
     if composer.fitter.fits(&full_chain) {
         return full_chain;
@@ -80,9 +74,6 @@ impl WidthFitter<'_> {
         if self.fits(text) {
             return text.to_owned();
         }
-        if self.ellipsis_does_not_fit() {
-            return TITLE_ELLIPSIS.to_owned();
-        }
         for (start_index, _) in text.char_indices() {
             let candidate = format!("{TITLE_ELLIPSIS}{}", &text[start_index..]);
             if self.fits(&candidate) {
@@ -90,10 +81,6 @@ impl WidthFitter<'_> {
             }
         }
         TITLE_ELLIPSIS.to_owned()
-    }
-
-    fn ellipsis_does_not_fit(&mut self) -> bool {
-        (self.measure)(TITLE_ELLIPSIS) > self.max_width
     }
 }
 

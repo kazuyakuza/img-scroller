@@ -52,7 +52,7 @@ fn extract_drive_segment(segments: &mut Vec<String>, is_unc: bool) -> Option<Str
         let server = segments.remove(0);
         let share = segments.remove(0);
         return Some(format!(
-            "{PATH_SEGMENT_SEPARATOR}{PATH_SEGMENT_SEPARATOR}{server}{PATH_SEGMENT_SEPARATOR}{share}"
+            "{UNC_PATH_MARKER}{server}{PATH_SEGMENT_SEPARATOR}{share}"
         ));
     }
     if is_local_drive_segment(&segments[0]) {
