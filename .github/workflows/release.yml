@@ -44,10 +44,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          set +e
+          stderr="$(gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" 2>&1 >/dev/null)"
+          exit_code=$?
+          set -e
+          if [ "$exit_code" -eq 0 ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
+          elif printf '%s\n' "$stderr" | grep -qiE 'release not found|not found|HTTP 404|404 Not Found'; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            printf '%s\n' "$stderr" >&2
+            exit 1
           fi
 
       - name: Point the compose mount at the checkout
