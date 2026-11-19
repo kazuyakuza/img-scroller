@@ -44,6 +44,10 @@
 - The gate `gh release view "v$VERSION"` sets `exists=true|false`; when `true`, every build/release step is skipped and the job succeeds with the `release: skip:` notice — repeated pushes to `main` never duplicate a release.
 - ANY step failure fails the job and creates NO release; the failure is visible in the Actions tab, and the scripts' own typed-failure discipline (`build-windows: error:` etc.) passes through unchanged.
 
+### 1.5 Review-fix note (step 4.3)
+
+The 4.3 code review found one issue: the idempotency gate swallowed unexpected `gh` errors — any non-zero exit from `gh release view` (auth failures, network errors, etc.) was treated as "release not found", violating plan §2 D5's fail-visibly requirement. Fixed at commit `80d7324` (`ci: make release idempotency gate fail on unexpected gh errors`): the gate now distinguishes "release not found" from real errors and aborts on the latter. The YAML parse validation re-passed after the fix. Review artifact: `.kilo/plans/20261118-wave8-task7-release-review-fix.md`.
+
 ---
 
 ## 2. Post-Push Release Verification (PENDING — recorded after workflow Step 5)
