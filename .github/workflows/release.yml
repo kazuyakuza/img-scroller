@@ -76,6 +76,10 @@ jobs:
           docker compose run --rm rust sh scripts/build-installer.sh
           docker compose run --rm rust sh scripts/package-windows.sh
 
+      - name: Give the workspace user the built artifacts
+        if: steps.existing.outputs.exists == 'false'
+        run: sudo chown -R "$(id -u):$(id -g)" dist
+
       - name: Extract the release notes from the changelog
         if: steps.existing.outputs.exists == 'false'
         run: |
