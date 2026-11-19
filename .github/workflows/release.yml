@@ -1,0 +1,102 @@
+# Images Scroller release automation (Wave 8 Task 7).
+# On every push to main: runs the container dev checks, cross-builds the Windows
+# artifacts through the same compose harness used locally, and publishes a
+# GitHub Release tagged v<version> (version read from Cargo.toml) with the
+# wizard installer and both portable zips attached and the matching CHANGELOG
+# section as the release notes. The release is idempotent per version: if
+# v<version> already exists the job skips building and publishing.
+# Publishing is a GitHub-API action (gh + the workflow token) — NOT a git push.
+
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Read the package version
+        id: version
+        run: |
+          VERSION="$(tr -d '\r' < Cargo.toml | sed -n 's/^version = "\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)"$/\1/p' | head -n 1)"
+          if [ -z "$VERSION" ]; then
+            echo "release: error: cannot extract the package version from Cargo.toml" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether the release already exists
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Point the compose mount at the checkout
+        if: steps.existing.outputs.exists == 'false'
+        run: sudo ln -sfn "$GITHUB_WORKSPACE" /img-scroller
+
+      - name: Build the container image
+        if: steps.existing.outputs.exists == 'false'
+        run: docker compose build
+
+      - name: Run the dev checks in the container
+        if: steps.existing.outputs.exists == 'false'
+        run: docker compose run --rm rust sh scripts/dev-checks.sh
+
+      - name: Build the Windows release artifacts in the container
+        if: steps.existing.outputs.exists == 'false'
+        run: |
+          docker compose run --rm rust sh scripts/build-windows.sh
+          docker compose run --rm rust sh scripts/build-installer.sh
+          docker compose run --rm rust sh scripts/package-windows.sh
+
+      - name: Extract the release notes from the changelog
+        if: steps.existing.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          awk -v heading="## [$VERSION]" '
+            index($0, heading) == 1 { printing = 1; print; next }
+            printing && /^## / { exit }
+            printing { print }
+          ' CHANGELOG.md > "dist/release-notes-v$VERSION.md"
+          if [ ! -s "dist/release-notes-v$VERSION.md" ]; then
+            echo "release: error: no CHANGELOG entry found for version $VERSION" >&2
+            exit 1
+          fi
+
+      - name: Create the release
+        if: steps.existing.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          gh release create "v$VERSION" \
+            --title "Images Scroller $VERSION" \
+            --notes-file "dist/release-notes-v$VERSION.md" \
+            --target "$GITHUB_SHA" \
+            "dist/ImagesScroller-$VERSION-windows-installer.exe" \
+            "dist/ImagesScroller-$VERSION-windows-x64.zip" \
+            "dist/ImagesScroller-$VERSION-windows-x86.zip"
+
+      - name: Notice the skipped release
+        if: steps.existing.outputs.exists == 'true'
+        run: echo "release: skip: v${{ steps.version.outputs.version }} already exists; no new release"

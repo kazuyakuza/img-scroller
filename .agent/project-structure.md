@@ -28,6 +28,7 @@
 
 # Other folders
 
+- .github/ - CI: the GitHub Actions release workflow (workflows/release.yml) — on every push to main it runs the container dev checks and the build chain through the same compose harness on a GitHub-hosted runner and publishes the tagged v<version> GitHub Release (Wave 8 Task 7)
 - .agent/ - agent context: project-info/, todos/, rules/workflow indexes and the structure map
 - .kilo/ - Kilo Code integration: agents/, rules/, commands/ and plans/
 - .opencode/ - opencode integration: agents/, commands/ and opencode.json
