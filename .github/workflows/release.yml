@@ -106,4 +106,5 @@ jobs:
 
       - name: Notice the skipped release
         if: steps.existing.outputs.exists == 'true'
-        run: echo "release: skip: v${{ steps.version.outputs.version }} already exists; no new release"
+        run: |
+          echo "release: skip: v${{ steps.version.outputs.version }} already exists; no new release"
